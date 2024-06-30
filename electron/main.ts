@@ -1,4 +1,12 @@
-import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  nativeImage,
+  Notification,
+  shell,
+  Tray,
+} from "electron";
 import path from "node:path";
 
 // The built directory structure
@@ -14,6 +22,8 @@ process.env.DIST = path.join(__dirname, "../dist");
 process.env.VITE_PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, "../public");
+
+const isMacOS = process.platform === "darwin";
 
 let settingsWindow: BrowserWindow | null;
 let monitoredAppsWindow: BrowserWindow | null;
@@ -132,18 +142,32 @@ function createTray() {
       },
     },
     { type: "separator" },
-    { label: "Check for Updates", type: "normal", click: () => {} },
+    {
+      label: "Check for Updates",
+      type: "normal",
+      click: () => {
+        const notification = new Notification({
+          title: "Not implemented yet!",
+        });
+        notification.show();
+      },
+    },
     { type: "separator" },
     {
-      label: "Quit",
+      label: isMacOS ? "Quit" : "Exit",
       type: "normal",
       click: () => {
         app.quit();
       },
     },
   ]);
-  tray.setToolTip("This is my application.");
+  tray.setToolTip("Wakatime");
   tray.setContextMenu(contextMenu);
+  tray.addListener("click", () => {
+    tray?.popUpContextMenu();
+  });
 }
 
-app.whenReady().then(createTray);
+app.whenReady().then(() => {
+  createTray();
+});
