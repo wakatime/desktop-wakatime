@@ -1,5 +1,5 @@
 function App() {
-  return <>Electron App</>;
+  return <p>Electron App</p>;
 }
 
 export default App;
