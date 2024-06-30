@@ -10,6 +10,7 @@ import {
 } from "electron";
 import path from "node:path";
 import { getAppSettings, setAppSettings } from "./settings";
+import { getAvailableApps } from "./helpers";
 
 // The built directory structure
 //
@@ -179,8 +180,13 @@ app.on("window-all-closed", () => {});
 
 app.on("activate", () => {});
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createTray();
+  const availableApps = await getAvailableApps();
+  console.log(
+    "Available apps to track",
+    availableApps.map((app) => app.name),
+  );
 });
 
 ipcMain.on("get-app-settings", (event) => {
