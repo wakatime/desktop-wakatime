@@ -50,8 +50,9 @@ function createSettingsWindow() {
     maximizable: false,
     resizable: false,
     width: 512,
-    height: 280,
+    height: 320,
     show: false,
+    autoHideMenuBar: true,
   });
 
   // Test active push message to Renderer-process.
@@ -170,7 +171,9 @@ function createTray() {
 }
 
 // Hide app from macOS doc
-app.dock.hide();
+if (isMacOS) {
+  app.dock.hide();
+}
 
 app.on("window-all-closed", () => {});
 
