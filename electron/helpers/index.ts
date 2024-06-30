@@ -58,12 +58,16 @@ export async function checkIfAppInstalled(appData: AppData) {
 }
 
 export async function getAvailableApps() {
-  const apps: AppData[] = [];
-  for await (const app of allApps) {
-    const isInstalled = await checkIfAppInstalled(app);
-    if (isInstalled) {
-      apps.push(app);
-    }
-  }
+  const apps = (
+    await Promise.all(
+      allApps.map(async (app) => {
+        const isInstalled = await checkIfAppInstalled(app);
+        if (isInstalled) {
+          return app;
+        }
+        return null;
+      }),
+    )
+  ).filter(Boolean) as AppData[];
   return apps;
 }

@@ -140,6 +140,15 @@ export const MonitoredApp = {
       bundleId: "com.apple.SafariTechnologyPreview",
     },
   },
+  microsoftEdge: {
+    name: "Microsoft Edge",
+    windows: {
+      registryPaths: [
+        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe",
+        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe",
+      ],
+    },
+  },
   slack: {
     name: "Slack",
     mac: {
@@ -147,7 +156,9 @@ export const MonitoredApp = {
     },
     windows: {
       registryPaths: [
-        "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
+        "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
+        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
+        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
       ],
     },
   },
@@ -227,6 +238,7 @@ export const browserApps: AppData[] = [
   MonitoredApp.firefox,
   MonitoredApp.safari,
   MonitoredApp.safaripreview,
+  MonitoredApp.microsoftEdge,
 ];
 
 export const defaultEnabledApps: AppData[] = [
