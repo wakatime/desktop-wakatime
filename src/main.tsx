@@ -1,12 +1,30 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+import SettingsPage from "./windows/Settings";
+import MonitoredAppsPage from "./windows/MonitoredApps";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <div>Home</div>,
+  },
+  {
+    path: "/settings",
+    Component: SettingsPage,
+  },
+  {
+    path: "/monitored-apps",
+    Component: MonitoredAppsPage,
+  },
+]);
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>
 );
 
 // Use contextBridge

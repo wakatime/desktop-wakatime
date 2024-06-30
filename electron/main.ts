@@ -15,7 +15,8 @@ process.env.VITE_PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, "../public");
 
-let win: BrowserWindow | null;
+let settingsWindow: BrowserWindow | null;
+let monitoredAppsWindow: BrowserWindow | null;
 let tray: Tray | null = null;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -25,51 +26,80 @@ const windowIcon = nativeImage.createFromPath(
   path.join(process.env.VITE_PUBLIC, "app-icon.png")
 );
 
-function createWindow() {
-  win = new BrowserWindow({
+function createSettingsWindow() {
+  settingsWindow = new BrowserWindow({
+    title: "Settings",
     icon: windowIcon,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    skipTaskbar: true,
+    minimizable: false,
+    maximizable: false,
+    resizable: false,
+    width: 512,
+    height: 620,
   });
 
   // Test active push message to Renderer-process.
-  win.webContents.on("did-finish-load", () => {
+  settingsWindow.webContents.on("did-finish-load", () => {
     // win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
 
   if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL);
+    settingsWindow.loadURL(VITE_DEV_SERVER_URL + "settings");
   } else {
     // win.loadFile('dist/index.html')
-    win.loadFile(path.join(process.env.DIST, "index.html"));
+    settingsWindow.loadFile(path.join(process.env.DIST, "index.html"));
   }
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
 }
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-    win = null;
-  }
-});
+function createMonitoredAppsWindow() {
+  monitoredAppsWindow = new BrowserWindow({
+    title: "Monitored Apps",
+    icon: windowIcon,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+    },
+    skipTaskbar: true,
+    minimizable: false,
+    fullscreenable: false,
+    width: 512,
+    height: 620,
+    minWidth: 320,
+    minHeight: 320,
+  });
 
-app.on("activate", () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+  // Test active push message to Renderer-process.
+  monitoredAppsWindow.webContents.on("did-finish-load", () => {
+    // win?.webContents.send("main-process-message", new Date().toLocaleString());
+  });
+
+  if (VITE_DEV_SERVER_URL) {
+    monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
+  } else {
+    // win.loadFile('dist/index.html')
+    monitoredAppsWindow.loadFile(path.join(process.env.DIST, "index.html"));
   }
-});
+
+  monitoredAppsWindow.on("closed", () => {
+    monitoredAppsWindow = null;
+  });
+}
+
+app.on("window-all-closed", () => {});
+
+app.on("activate", () => {});
 
 const trayIcon = nativeImage.createFromPath(
   path.join(process.env.VITE_PUBLIC, "tray-icon.png")
 );
-app.whenReady().then(() => {
-  createWindow();
 
+function createTray() {
   tray = new Tray(trayIcon);
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -79,8 +109,28 @@ app.whenReady().then(() => {
         shell.openExternal("https://wakatime.com/dashboard");
       },
     },
-    { label: "Settings", type: "normal", click: () => {} },
-    { label: "Monitored Apps", type: "normal", click: () => {} },
+    {
+      label: "Settings",
+      type: "normal",
+      click: () => {
+        if (settingsWindow) {
+          settingsWindow.focus();
+        } else {
+          createSettingsWindow();
+        }
+      },
+    },
+    {
+      label: "Monitored Apps",
+      type: "normal",
+      click: () => {
+        if (monitoredAppsWindow) {
+          monitoredAppsWindow.focus();
+        } else {
+          createMonitoredAppsWindow();
+        }
+      },
+    },
     { type: "separator" },
     { label: "Check for Updates", type: "normal", click: () => {} },
     { type: "separator" },
@@ -94,4 +144,6 @@ app.whenReady().then(() => {
   ]);
   tray.setToolTip("This is my application.");
   tray.setContextMenu(contextMenu);
-});
+}
+
+app.whenReady().then(createTray);
