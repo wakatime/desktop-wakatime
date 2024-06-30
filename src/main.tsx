@@ -1,33 +1,16 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./index.css";
-
-import SettingsPage from "./pages/Settings";
-import MonitoredAppsPage from "./pages/MonitoredApps";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <div>Home</div>,
-  },
-  {
-    path: "/settings",
-    Component: SettingsPage,
-  },
-  {
-    path: "/monitored-apps",
-    Component: MonitoredAppsPage,
-  },
-]);
+import App from "./app";
+import { useAppSettings } from "./stores/app-settings";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>
+    <App />
+  </StrictMode>,
 );
 
 // Use contextBridge
-// window.ipcRenderer.on('main-process-message', (_event, message) => {
-//   console.log(message)
-// })
+window.ipcRenderer.on("app-settings-change", (_event, appSettings) => {
+  useAppSettings.setState({ appSettings });
+});

@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   on(...args: Parameters<typeof ipcRenderer.on>) {
     const [channel, listener] = args;
     return ipcRenderer.on(channel, (event, ...args) =>
-      listener(event, ...args)
+      listener(event, ...args),
     );
   },
   off(...args: Parameters<typeof ipcRenderer.off>) {
@@ -20,12 +20,15 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);
   },
-  store: {
-    get(key: string) {
-      return ipcRenderer.sendSync("electron-store-get", key);
+  settings: {
+    get() {
+      return ipcRenderer.sendSync("get-app-settings");
     },
-    set(key: string, val: TimeRanges) {
-      ipcRenderer.send("electron-store-set", key, val);
+    set(settings: string) {
+      ipcRenderer.send("set-app-settings", settings);
     },
+  },
+  getAppVersion() {
+    return ipcRenderer.sendSync("get-app-version");
   },
 });

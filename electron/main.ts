@@ -9,6 +9,7 @@ import {
   Tray,
 } from "electron";
 import path from "node:path";
+import { getAppSettings, setAppSettings } from "./settings";
 
 // The built directory structure
 //
@@ -26,19 +27,15 @@ process.env.VITE_PUBLIC = app.isPackaged
 
 const isMacOS = process.platform === "darwin";
 
-let settingsWindow: BrowserWindow | null;
-let monitoredAppsWindow: BrowserWindow | null;
+let settingsWindow: BrowserWindow | null = null;
+let monitoredAppsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
-import Store from "electron-store";
-
-const store = new Store();
-
 const windowIcon = nativeImage.createFromPath(
-  path.join(process.env.VITE_PUBLIC, "app-icon.png")
+  path.join(process.env.VITE_PUBLIC, "app-icon.png"),
 );
 
 function createSettingsWindow() {
@@ -48,30 +45,34 @@ function createSettingsWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    // skipTaskbar: true,
+    skipTaskbar: true,
     minimizable: false,
     maximizable: false,
     resizable: false,
     width: 512,
-    height: 620,
+    height: 280,
+    show: false,
   });
 
   // Test active push message to Renderer-process.
   settingsWindow.webContents.on("did-finish-load", () => {
-    // win?.webContents.send("main-process-message", new Date().toLocaleString());
+    const appSettings = getAppSettings();
+    settingsWindow?.webContents.send("app-settings-change", appSettings);
   });
 
   if (VITE_DEV_SERVER_URL) {
     settingsWindow.loadURL(VITE_DEV_SERVER_URL + "settings");
   } else {
     // win.loadFile('dist/index.html')
-    settingsWindow.loadFile(path.join(process.env.DIST, "index.html"));
+    settingsWindow.loadFile(path.join(process.env.DIST!, "index.html"));
   }
-
-  settingsWindow.webContents.openDevTools();
 
   settingsWindow.on("closed", () => {
     settingsWindow = null;
+  });
+
+  settingsWindow.once("ready-to-show", () => {
+    settingsWindow?.show();
   });
 }
 
@@ -82,7 +83,7 @@ function createMonitoredAppsWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    // skipTaskbar: true,
+    skipTaskbar: true,
     minimizable: false,
     fullscreenable: false,
     width: 512,
@@ -92,41 +93,24 @@ function createMonitoredAppsWindow() {
   });
 
   // Test active push message to Renderer-process.
-  monitoredAppsWindow.webContents.on("did-finish-load", () => {
-    // win?.webContents.send("main-process-message", new Date().toLocaleString());
-  });
+  monitoredAppsWindow.webContents.on("did-finish-load", () => {});
 
   if (VITE_DEV_SERVER_URL) {
     monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
   } else {
     // win.loadFile('dist/index.html')
-    monitoredAppsWindow.loadFile(path.join(process.env.DIST, "index.html"));
+    monitoredAppsWindow.loadFile(path.join(process.env.DIST!, "index.html"));
   }
-
-  monitoredAppsWindow.webContents.openDevTools();
 
   monitoredAppsWindow.on("closed", () => {
     monitoredAppsWindow = null;
   });
 }
 
-app.on("window-all-closed", () => {});
-
-app.on("activate", () => {});
-
-const trayIcon = nativeImage.createFromPath(
-  path.join(process.env.VITE_PUBLIC, "tray-icon.png")
-);
-
-ipcMain.on("electron-store-get", async (event, val) => {
-  event.returnValue = store.get(val);
-});
-
-ipcMain.on("electron-store-set", async (_, key, val) => {
-  store.set(key, val);
-});
-
 function createTray() {
+  const trayIcon = nativeImage.createFromPath(
+    path.join(process.env.VITE_PUBLIC!, "trayIconTemplate.png"),
+  );
   tray = new Tray(trayIcon);
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -185,4 +169,26 @@ function createTray() {
   });
 }
 
-app.whenReady().then(createTray);
+// Hide app from macOS doc
+app.dock.hide();
+
+app.on("window-all-closed", () => {});
+
+app.on("activate", () => {});
+
+app.whenReady().then(() => {
+  createTray();
+});
+
+ipcMain.on("get-app-settings", (event) => {
+  const settings = getAppSettings();
+  event.returnValue = settings;
+});
+
+ipcMain.on("set-app-settings", (_, value) => {
+  setAppSettings(value);
+});
+
+ipcMain.on("get-app-version", (event) => {
+  event.returnValue = app.getVersion();
+});
