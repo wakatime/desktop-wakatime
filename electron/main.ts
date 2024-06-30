@@ -1,6 +1,7 @@
 import {
   app,
   BrowserWindow,
+  ipcMain,
   Menu,
   nativeImage,
   Notification,
@@ -32,6 +33,10 @@ let tray: Tray | null = null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
+import Store from "electron-store";
+
+const store = new Store();
+
 const windowIcon = nativeImage.createFromPath(
   path.join(process.env.VITE_PUBLIC, "app-icon.png")
 );
@@ -43,7 +48,7 @@ function createSettingsWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    skipTaskbar: true,
+    // skipTaskbar: true,
     minimizable: false,
     maximizable: false,
     resizable: false,
@@ -63,6 +68,8 @@ function createSettingsWindow() {
     settingsWindow.loadFile(path.join(process.env.DIST, "index.html"));
   }
 
+  settingsWindow.webContents.openDevTools();
+
   settingsWindow.on("closed", () => {
     settingsWindow = null;
   });
@@ -75,7 +82,7 @@ function createMonitoredAppsWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    skipTaskbar: true,
+    // skipTaskbar: true,
     minimizable: false,
     fullscreenable: false,
     width: 512,
@@ -96,6 +103,8 @@ function createMonitoredAppsWindow() {
     monitoredAppsWindow.loadFile(path.join(process.env.DIST, "index.html"));
   }
 
+  monitoredAppsWindow.webContents.openDevTools();
+
   monitoredAppsWindow.on("closed", () => {
     monitoredAppsWindow = null;
   });
@@ -108,6 +117,14 @@ app.on("activate", () => {});
 const trayIcon = nativeImage.createFromPath(
   path.join(process.env.VITE_PUBLIC, "tray-icon.png")
 );
+
+ipcMain.on("electron-store-get", async (event, val) => {
+  event.returnValue = store.get(val);
+});
+
+ipcMain.on("electron-store-set", async (_, key, val) => {
+  store.set(key, val);
+});
 
 function createTray() {
   tray = new Tray(trayIcon);
@@ -168,6 +185,4 @@ function createTray() {
   });
 }
 
-app.whenReady().then(() => {
-  createTray();
-});
+app.whenReady().then(createTray);

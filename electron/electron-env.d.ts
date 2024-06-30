@@ -15,13 +15,18 @@ declare namespace NodeJS {
      * │
      * ```
      */
-    DIST: string
+    DIST: string;
     /** /dist/ or /public/ */
-    VITE_PUBLIC: string
+    VITE_PUBLIC: string;
   }
 }
 
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
-  ipcRenderer: import('electron').IpcRenderer
+  ipcRenderer: import("electron").IpcRenderer & {
+    store: {
+      get: (key: string) => unknown;
+      set: (key: string, val: unknown) => void;
+    };
+  };
 }
