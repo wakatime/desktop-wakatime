@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import { useAppSettings } from "../stores/app-settings";
 import { AppSettings } from "../validators/app-settings";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
+import { Checkbox } from "~/components/ui/checkbox";
 
-export default function SettingsPage() {
+export function Component() {
   const { appSettings, setAppSettings } = useAppSettings();
   const [version, setVersion] = useState("");
 
@@ -20,13 +23,11 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col space-y-6 bg-white p-4 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+    <div className="flex flex-1 flex-col space-y-6 p-4">
       <div>
-        <fieldset className="flex flex-col gap-1">
-          <label htmlFor="wakatime-api-key" className="text-sm font-medium">
-            Wakatime API Key:
-          </label>
-          <input
+        <fieldset className="flex flex-col gap-2">
+          <Label htmlFor="wakatime-api-key">Wakatime API Key:</Label>
+          <Input
             id="wakatime-api-key"
             defaultValue={appSettings.apiKey ?? ""}
             onChange={(e) =>
@@ -35,52 +36,47 @@ export default function SettingsPage() {
                 apiKey: e.target.value || null,
               })
             }
-            className="h-8 rounded-md border border-slate-200 bg-transparent px-2 text-sm dark:border-zinc-700"
           />
         </fieldset>
       </div>
       <div className="space-y-2">
-        <fieldset className="flex items-start gap-2">
-          <input
-            type="checkbox"
+        <fieldset className="flex gap-2">
+          <Checkbox
             id="launch-at-login"
             checked={appSettings.launchAtLogin === true}
-            onChange={(e) => {
+            onCheckedChange={(checked) => {
               setAppSettings({
                 ...appSettings,
-                launchAtLogin: e.target.checked,
+                launchAtLogin: checked === true,
               });
             }}
             className="mt-1"
           />
-          <label htmlFor="launch-at-login" className="text-sm font-medium">
+          <Label htmlFor="launch-at-login" className="my-0.5 leading-5">
             Launch at login
-          </label>
+          </Label>
         </fieldset>
-        <fieldset className="flex items-start gap-2">
-          <input
-            type="checkbox"
+        <fieldset className="flex gap-2">
+          <Checkbox
             id="enable-logging"
             checked={appSettings.enableLogging === true}
-            onChange={(e) => {
+            onCheckedChange={(checked) => {
               setAppSettings({
                 ...appSettings,
-                enableLogging: e.target.checked,
+                enableLogging: checked === true,
               });
             }}
             className="mt-1"
           />
-          <label htmlFor="enable-logging" className="text-sm font-medium">
+          <Label htmlFor="enable-logging" className="my-0.5 leading-5">
             Enable logging to{" "}
             <code>C://ProgramData/wakatime/desktop-wakatime.log</code>
-          </label>
+          </Label>
         </fieldset>
       </div>
       <div className="flex-1"></div>
       <div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Version: {version}
-        </p>
+        <p className="text-muted-foreground text-sm">Version: {version}</p>
       </div>
     </div>
   );

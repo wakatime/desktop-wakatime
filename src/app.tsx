@@ -1,15 +1,13 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import SettingsPage from "./pages/Settings";
-import MonitoredAppsPage from "./pages/MonitoredApps";
 
 const router = createBrowserRouter([
   {
     path: "/settings",
-    Component: SettingsPage,
+    lazy: () => import("./pages/Settings"),
   },
   {
     path: "/monitored-apps",
-    Component: MonitoredAppsPage,
+    lazy: () => import("./pages/MonitoredApps"),
   },
 ]);
 

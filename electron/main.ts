@@ -4,13 +4,15 @@ import {
   ipcMain,
   Menu,
   nativeImage,
+  net,
   Notification,
+  protocol,
   shell,
   Tray,
 } from "electron";
 import path from "node:path";
 import { getAppSettings, setAppSettings } from "./settings";
-import { getAvailableApps } from "./helpers";
+import { getInstalledAppsMac } from "./installed-apps/mac";
 
 // The built directory structure
 //
@@ -84,18 +86,22 @@ function createMonitoredAppsWindow() {
     icon: windowIcon,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      webSecurity: false,
     },
     skipTaskbar: true,
     minimizable: false,
     fullscreenable: false,
-    width: 512,
+    width: 444,
     height: 620,
     minWidth: 320,
     minHeight: 320,
   });
 
   // Test active push message to Renderer-process.
-  monitoredAppsWindow.webContents.on("did-finish-load", () => {});
+  monitoredAppsWindow.webContents.on("did-finish-load", async () => {
+    const apps = await getInstalledAppsMac();
+    monitoredAppsWindow?.webContents.send("installed-apps", apps);
+  });
 
   if (VITE_DEV_SERVER_URL) {
     monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
@@ -180,13 +186,29 @@ app.on("window-all-closed", () => {});
 
 app.on("activate", () => {});
 
-app.whenReady().then(async () => {
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "media",
+    privileges: {
+      secure: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+      stream: true,
+    },
+  },
+]);
+
+app.whenReady().then(() => {
+  /**
+   * If a request is made over the media protocol, you can hook it here.
+   * In my case, I'm creating a new request by switching to the file protocol to call a local file.
+   */
+  protocol.handle("media", (req) => {
+    const pathToMedia = new URL(req.url).pathname;
+    return net.fetch(`file://${pathToMedia}`);
+  });
+
   createTray();
-  const availableApps = await getAvailableApps();
-  console.log(
-    "Available apps to track",
-    availableApps.map((app) => app.name),
-  );
 });
 
 ipcMain.on("get-app-settings", (event) => {

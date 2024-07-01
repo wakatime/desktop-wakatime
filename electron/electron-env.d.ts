@@ -33,3 +33,10 @@ interface Window {
     getAppVersion: () => string;
   };
 }
+
+declare module "iconutil" {
+  export function toIconset(
+    path: string,
+    callback: (error: unknown, icons: Record<string, Buffer>) => void,
+  ): void;
+}
