@@ -12,7 +12,7 @@ import {
 } from "electron";
 import path from "node:path";
 import { getAppSettings, setAppSettings } from "./settings";
-import { getInstalledAppsMac } from "./installed-apps/mac";
+import { getAvailableApps } from "./helpers";
 
 // The built directory structure
 //
@@ -99,7 +99,7 @@ function createMonitoredAppsWindow() {
 
   // Test active push message to Renderer-process.
   monitoredAppsWindow.webContents.on("did-finish-load", async () => {
-    const apps = await getInstalledAppsMac();
+    const apps = await getAvailableApps();
     monitoredAppsWindow?.webContents.send("installed-apps", apps);
   });
 

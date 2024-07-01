@@ -2,7 +2,7 @@ import { exec, spawnSync } from "child_process";
 import plist from "plist";
 import fs from "node:fs";
 import path from "node:path";
-import type { AppDataMac } from "../../src/types/app-data";
+import type { AppDataMac } from "~/types/app-data";
 import iconutil from "iconutil";
 
 export async function getInstalledAppsMac(
@@ -12,7 +12,7 @@ export async function getInstalledAppsMac(
   const appsFileInfo = await getAppsFileInfo(directoryContents);
   const appDatas = appsFileInfo
     .map((appFileInfo) => getAppData(appFileInfo))
-    .filter((app) => app.appName);
+    .filter((app) => app.uniqueId);
   const appsWithIcon = await Promise.all(
     appDatas.map<Promise<AppDataMac>>(async (appData) => {
       let appIcon: string | null = null;
