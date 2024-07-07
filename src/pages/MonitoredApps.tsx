@@ -2,6 +2,7 @@ import { Fragment, useLayoutEffect } from "react";
 import { useInstalledApps } from "../stores/installed-apps";
 import { Switch } from "~/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 export function Component() {
   const apps = useInstalledApps((state) => state.apps);
@@ -15,18 +16,11 @@ export function Component() {
     <div>
       {apps.map((app, i) => {
         return (
-          <Fragment key={app.uniqueId}>
+          <Fragment key={app.appIdentifier}>
             <div className="flex h-14 items-center gap-4 px-4">
-              {/* <Avatar className="h-10 w-10 rounded-md">
-                {app.appIcon && (
-                  <AvatarImage
-                    src={
-                      "data:image/png;base64," + app.appIcon.toString("base64")
-                    }
-                    className="bg"
-                  />
-                )}
-                <AvatarFallback className="text-muted-foreground rounded-md">
+              <Avatar className="h-8 w-8 rounded-none bg-transparent">
+                {app.appIcon && <AvatarImage src={app.appIcon} className="" />}
+                <AvatarFallback className="rounded-md text-muted-foreground">
                   <svg
                     width="20px"
                     height="20px"
@@ -43,14 +37,14 @@ export function Component() {
                     />
                   </svg>
                 </AvatarFallback>
-              </Avatar> */}
-              {app.appIcon && <img src={app.appIcon} className="h-10 w-10" />}
+              </Avatar>
+              {/* {app.appIcon && <img src={app.appIcon} className="h-10 w-10" />} */}
               <p className="flex-1 truncate">{app.appName}</p>
               <Switch />
             </div>
             {i < apps.length - 1 && (
-              <div className="pl-[4.5rem]">
-                <hr className="bg-border h-px" />
+              <div className="pl-[4rem]">
+                <hr className="h-px bg-border" />
               </div>
             )}
           </Fragment>

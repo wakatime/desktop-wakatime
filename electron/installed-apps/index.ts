@@ -1,13 +1,9 @@
-import { AppData } from "~/types/app-data";
-import { getInstalledAppsMac } from "./mac";
-import { getInstalledAppsWindows } from "./windows";
+import { getInstalledApps as getInstalledAppsWindows } from "./windows";
 
-export async function getInstalledApps(): Promise<AppData[]> {
-  if (process.platform === "darwin") {
-    return getInstalledAppsMac();
-  }
+export async function getInstalledApps(): Promise<Record<string, string>[]> {
   if (process.platform === "win32") {
     return getInstalledAppsWindows();
   }
+
   return [];
 }

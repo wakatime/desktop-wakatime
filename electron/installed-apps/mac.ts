@@ -2,19 +2,19 @@ import { exec, spawnSync } from "child_process";
 import plist from "plist";
 import fs from "node:fs";
 import path from "node:path";
-import type { AppDataMac } from "~/types/app-data";
 import iconutil from "iconutil";
+import { AppData } from "~/types/app-data";
 
 export async function getInstalledAppsMac(
   directory = "/Applications",
-): Promise<AppDataMac[]> {
+): Promise<AppData[]> {
   const directoryContents = await getDirectoryContents(directory);
   const appsFileInfo = await getAppsFileInfo(directoryContents);
   const appDatas = appsFileInfo
     .map((appFileInfo) => getAppData(appFileInfo))
     .filter((app) => app.uniqueId);
   const appsWithIcon = await Promise.all(
-    appDatas.map<Promise<AppDataMac>>(async (appData) => {
+    appDatas.map<Promise<AppData>>(async (appData) => {
       let appIcon: string | null = null;
       try {
         appIcon = await getAppIcon(appData["_FILE_PATH"]!);
@@ -91,7 +91,7 @@ export function getAppData(singleAppFileInfo: string[]) {
   };
 
   const getAppInfoData = (appArr: string[]) => {
-    const appData: AppDataMac = {
+    const appData: AppData = {
       uniqueId: "",
       type: "mac",
     };
@@ -111,7 +111,6 @@ export function getAppData(singleAppFileInfo: string[]) {
         appData.appInstallDate = appKeyVal.value;
       }
       if (appKeyVal.key === "kMDItemCFBundleIdentifier") {
-        appData.uniqueId = appKeyVal.value;
         appData.appIdentifier = appKeyVal.value;
       }
       if (appKeyVal.key === "kMDItemAppStoreCategory") {

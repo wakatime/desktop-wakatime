@@ -1,237 +1,203 @@
-export type AppData = {
-  name: string;
+export type MonitoredAppInfo = {
   mac?: {
     bundleId: string;
   };
   windows?: {
-    registryPaths: string[];
+    exePath?: string;
+    DisplayName?: string;
   };
 };
 
 export const MonitoredApp = {
   arcbrowser: {
-    name: "Arc",
     mac: {
       bundleId: "company.thebrowser.Browser",
     },
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\arc.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\arc.exe",
-      ],
+      exePath: "arc.exe",
+      DisplayName: "Arc",
     },
   },
   brave: {
-    name: "Brave",
     mac: {
       bundleId: "com.brave.Browser",
     },
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\brave.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\brave.exe",
-      ],
+      exePath: "brave.exe",
+      DisplayName: "Brave",
     },
   },
   canva: {
-    name: "Canva",
     mac: {
       bundleId: "com.canva.CanvaDesktop",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Canva.exe",
+      DisplayName: "Canva",
     },
   },
   chrome: {
-    name: "Chrome",
     mac: {
       bundleId: "com.google.Chrome",
     },
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe",
-      ],
+      exePath: "chrome.exe",
+      DisplayName: "Google Chrome",
     },
   },
   figma: {
-    name: "Figma",
     mac: {
       bundleId: "com.figma.Desktop",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Figma.exe",
+      DisplayName: "Figma",
     },
   },
   firefox: {
-    name: "Firefox",
     mac: {
       bundleId: "org.mozilla.firefox",
     },
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\firefox.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\firefox.exe",
-      ],
+      exePath: "firefox.exe",
+      DisplayName: "Mozilla Firefox",
     },
   },
   imessage: {
-    name: "Messages",
     mac: {
       bundleId: "com.apple.MobileSMS",
     },
   },
   iterm2: {
-    name: "iTerm2",
     mac: {
       bundleId: "com.googlecode.iterm2",
     },
   },
   powershell: {
-    name: "PowerShell",
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\PowerShell.exe",
-      ],
+      exePath: "PowerShell.exe",
+      DisplayName: "Windows Powershell",
     },
   },
   linear: {
-    name: "Linear",
     mac: {
       bundleId: "com.linear",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Linear.exe",
+      DisplayName: "Linear",
     },
   },
   notes: {
-    name: "Notes",
     mac: {
       bundleId: "com.apple.Notes",
     },
   },
   notion: {
-    name: "Notion",
     mac: {
       bundleId: "notion.id",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Notion.exe",
+      DisplayName: "Notion",
     },
   },
   postman: {
-    name: "Postman",
     mac: {
       bundleId: "com.postmanlabs.mac",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Postman.exe",
+      DisplayName: "Postman",
     },
   },
   safari: {
-    name: "Safari",
     mac: {
       bundleId: "com.apple.Safari",
     },
   },
   safaripreview: {
-    name: "Safari Preview",
     mac: {
       bundleId: "com.apple.SafariTechnologyPreview",
     },
   },
   microsoftEdge: {
-    name: "Microsoft Edge",
     windows: {
-      registryPaths: [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe",
-      ],
+      exePath: "msedge.exe",
+      DisplayName: "Microsoft Edge",
     },
   },
   slack: {
-    name: "Slack",
     mac: {
       bundleId: "com.tinyspeck.slackmacgap",
     },
     windows: {
-      registryPaths: [
-        "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
-        "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Slack.exe",
-      ],
+      exePath: "Slack.exe",
+      DisplayName: "Slack",
     },
   },
   tableplus: {
-    name: "TablePlus",
     mac: {
       bundleId: "com.tinyapp.TablePlus",
     },
     windows: {
-      registryPaths: [],
+      exePath: "TablePlus.exe",
+      DisplayName: "TablePlus",
     },
   },
   macTerminal: {
-    name: "Terminal",
     mac: {
       bundleId: "com.apple.Terminal",
     },
   },
   windowsTerminal: {
-    name: "Terminal",
     windows: {
-      registryPaths: [],
+      exePath: "terminal.exe",
+      DisplayName: "Terminal",
     },
   },
   warp: {
-    name: "Wrap",
     mac: {
       bundleId: "dev.warp.Warp-Stable",
     },
-    windows: {
-      registryPaths: [],
-    },
   },
   wecom: {
-    name: "WeCom",
     mac: {
       bundleId: "com.tencent.WeWorkMac",
     },
-    windows: {
-      registryPaths: [],
-    },
   },
   whatsapp: {
-    name: "WhatsApp",
     mac: {
       bundleId: "net.whatsapp.WhatsApp",
     },
     windows: {
-      registryPaths: [],
+      DisplayName: "WhatsApp",
     },
   },
   xcode: {
-    name: "xCode",
     mac: {
       bundleId: "com.apple.dt.Xcode",
     },
   },
   zoom: {
-    name: "Zoom",
     mac: {
       bundleId: "us.zoom.xos",
     },
     windows: {
-      registryPaths: [],
+      exePath: "Zoom.exe",
+      DisplayName: "Zoom",
     },
   },
-} as const satisfies Record<string, AppData>;
+} as const satisfies Record<string, MonitoredAppInfo>;
 
-export const allApps: AppData[] = Object.values(MonitoredApp);
+export const allApps: MonitoredAppInfo[] = Object.values(MonitoredApp);
 
-export const electronApps: AppData[] = [MonitoredApp.figma, MonitoredApp.slack];
+export const electronApps: MonitoredAppInfo[] = [
+  MonitoredApp.figma,
+  MonitoredApp.slack,
+];
 
-export const browserApps: AppData[] = [
+export const browserApps: MonitoredAppInfo[] = [
   MonitoredApp.arcbrowser,
   MonitoredApp.brave,
   MonitoredApp.chrome,
@@ -241,7 +207,7 @@ export const browserApps: AppData[] = [
   MonitoredApp.microsoftEdge,
 ];
 
-export const defaultEnabledApps: AppData[] = [
+export const defaultEnabledApps: MonitoredAppInfo[] = [
   MonitoredApp.canva,
   MonitoredApp.figma,
   MonitoredApp.linear,

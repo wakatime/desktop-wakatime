@@ -4,7 +4,6 @@ import {
   ipcMain,
   Menu,
   nativeImage,
-  net,
   Notification,
   protocol,
   shell,
@@ -27,6 +26,9 @@ process.env.DIST = path.join(__dirname, "../dist");
 process.env.VITE_PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, "../public");
+process.env.ELECTRON_DIR = app.isPackaged
+  ? __dirname
+  : path.join(__dirname, "../electron");
 
 const isMacOS = process.platform === "darwin";
 
@@ -88,13 +90,14 @@ function createMonitoredAppsWindow() {
       preload: path.join(__dirname, "preload.js"),
       webSecurity: false,
     },
-    skipTaskbar: true,
+    // skipTaskbar: true,
     minimizable: false,
     fullscreenable: false,
     width: 444,
     height: 620,
     minWidth: 320,
     minHeight: 320,
+    autoHideMenuBar: true,
   });
 
   // Test active push message to Renderer-process.
@@ -199,16 +202,8 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 app.whenReady().then(() => {
-  /**
-   * If a request is made over the media protocol, you can hook it here.
-   * In my case, I'm creating a new request by switching to the file protocol to call a local file.
-   */
-  protocol.handle("media", (req) => {
-    const pathToMedia = new URL(req.url).pathname;
-    return net.fetch(`file://${pathToMedia}`);
-  });
-
   createTray();
+  createMonitoredAppsWindow();
 });
 
 ipcMain.on("get-app-settings", (event) => {
