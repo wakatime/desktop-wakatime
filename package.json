@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@miniben90/x-win": "^1.10.0",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -52,7 +53,8 @@
     "typescript": "^5.4.3",
     "vite": "^5.2.7",
     "vite-plugin-electron": "^0.28.4",
-    "vite-plugin-electron-renderer": "^0.14.5"
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vite-plugin-native": "^2.2.1"
   },
   "main": "dist-electron/main.js"
 }

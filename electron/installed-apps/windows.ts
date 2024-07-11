@@ -1,4 +1,4 @@
-import { MonitoredAppInfo } from "electron/watchers";
+import { MonitoredAppInfo } from "../watchers";
 import path from "node:path";
 import fs from "node:fs";
 import Winreg from "winreg";

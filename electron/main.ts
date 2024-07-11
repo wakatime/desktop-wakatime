@@ -12,6 +12,11 @@ import {
 import path from "node:path";
 import { getAppSettings, setAppSettings } from "./settings";
 import { getAvailableApps } from "./helpers";
+import {
+  subscribeActiveWindow,
+  unsubscribeAllActiveWindow,
+  WindowInfo,
+} from "@miniben90/x-win";
 
 // The built directory structure
 //
@@ -201,9 +206,25 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
+function activeWindowChange(window: WindowInfo) {
+  console.log({
+    id: window.id,
+    info: window.info,
+    title: window.title,
+    os: window.os,
+    url: window.url,
+    usage: window.usage,
+    position: window.position,
+  });
+}
+
 app.whenReady().then(() => {
   createTray();
-  createMonitoredAppsWindow();
+  subscribeActiveWindow(activeWindowChange);
+});
+
+app.on("quit", () => {
+  unsubscribeAllActiveWindow();
 });
 
 ipcMain.on("get-app-settings", (event) => {
