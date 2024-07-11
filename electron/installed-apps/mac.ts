@@ -3,31 +3,26 @@ import plist from "plist";
 import fs from "node:fs";
 import path from "node:path";
 import iconutil from "iconutil";
-import { AppData } from "~/types/app-data";
 
-export async function getInstalledAppsMac(
-  directory = "/Applications",
-): Promise<AppData[]> {
+export async function getInstalledApps(directory = "/Applications") {
   const directoryContents = await getDirectoryContents(directory);
   const appsFileInfo = await getAppsFileInfo(directoryContents);
-  const appDatas = appsFileInfo
-    .map((appFileInfo) => getAppData(appFileInfo))
-    .filter((app) => app.uniqueId);
-  const appsWithIcon = await Promise.all(
-    appDatas.map<Promise<AppData>>(async (appData) => {
-      let appIcon: string | null = null;
-      try {
-        appIcon = await getAppIcon(appData["_FILE_PATH"]!);
-      } catch (error) {
-        /* empty */
-      }
-      return {
-        ...appData,
-        appIcon,
-      };
-    }),
-  );
-  return appsWithIcon;
+  return appsFileInfo.map((appFileInfo) => getAppData(appFileInfo));
+  // const appsWithIcon = await Promise.all(
+  //   appDatas.map<Promise<AppData>>(async (appData) => {
+  //     let appIcon: string | null = null;
+  //     try {
+  //       appIcon = await getAppIcon(appData["_FILE_PATH"]!);
+  //     } catch (error) {
+  //       /* empty */
+  //     }
+  //     return {
+  //       ...appData,
+  //       appIcon,
+  //     };
+  //   }),
+  // );
+  // return appsWithIcon;
 }
 
 export function getDirectoryContents(directory: string) {
@@ -91,41 +86,38 @@ export function getAppData(singleAppFileInfo: string[]) {
   };
 
   const getAppInfoData = (appArr: string[]) => {
-    const appData: AppData = {
-      uniqueId: "",
-      type: "mac",
-    };
+    const appData: Record<string, string> = {};
 
     appArr.filter(Boolean).forEach((o) => {
       const appKeyVal = getKeyVal(o);
       if (appKeyVal.value) {
         appData[appKeyVal.key] = appKeyVal.value;
       }
-      if (appKeyVal.key === "kMDItemDisplayName") {
-        appData.appName = appKeyVal.value.replace(".app", "");
-      }
-      if (appKeyVal.key === "kMDItemVersion") {
-        appData.appVersion = appKeyVal.value;
-      }
-      if (appKeyVal.key === "kMDItemDateAdded") {
-        appData.appInstallDate = appKeyVal.value;
-      }
-      if (appKeyVal.key === "kMDItemCFBundleIdentifier") {
-        appData.appIdentifier = appKeyVal.value;
-      }
-      if (appKeyVal.key === "kMDItemAppStoreCategory") {
-        appData.appCategory = appKeyVal.value;
-      }
-      if (appKeyVal.key === "kMDItemAppStoreCategoryType") {
-        appData.appCategoryType = appKeyVal.value;
-      }
+      // if (appKeyVal.key === "kMDItemDisplayName") {
+      //   appData.appName = appKeyVal.value.replace(".app", "");
+      // }
+      // if (appKeyVal.key === "kMDItemVersion") {
+      //   appData.appVersion = appKeyVal.value;
+      // }
+      // if (appKeyVal.key === "kMDItemDateAdded") {
+      //   appData.appInstallDate = appKeyVal.value;
+      // }
+      // if (appKeyVal.key === "kMDItemCFBundleIdentifier") {
+      //   appData.appIdentifier = appKeyVal.value;
+      // }
+      // if (appKeyVal.key === "kMDItemAppStoreCategory") {
+      //   appData.appCategory = appKeyVal.value;
+      // }
+      // if (appKeyVal.key === "kMDItemAppStoreCategoryType") {
+      //   appData.appCategoryType = appKeyVal.value;
+      // }
     });
     return appData;
   };
   return getAppInfoData(singleAppFileInfo);
 }
 
-export async function getAppIcon(appPath: string) {
+export async function getAppIconMac(appPath: string) {
   let icnsPath: string | null = null;
 
   const getFirstIcnsFileFromResourcesDir = () => {

@@ -4,12 +4,12 @@ import fs from "node:fs";
 import Winreg from "winreg";
 import { AppData } from "~/types/app-data";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const iconExtractor = require("icon-extractor");
-
-iconExtractor.emitter.setMaxListeners(50);
-
 export async function getIconFromExePath(path: string, context: string) {
+  if (process.platform !== "win32") {
+    return;
+  }
+
+  const iconExtractor = await import("icon-extractor");
   return new Promise<string>((resolve, reject) => {
     function onIcon(data: { Context: string; Base64ImageData: string }) {
       if (data.Context === context) {
@@ -32,7 +32,10 @@ export async function getIconFromExePath(path: string, context: string) {
   });
 }
 
-export async function getAppIcon(appData: AppData, app?: MonitoredAppInfo) {
+export async function getAppIconWindows(
+  appData: AppData,
+  app?: MonitoredAppInfo,
+) {
   let exeFilePath = appData["DisplayIcon"]?.replace(",0", "").trim();
   if (
     (!exeFilePath || !exeFilePath?.endsWith(".exe")) &&

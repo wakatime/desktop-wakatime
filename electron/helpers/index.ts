@@ -1,7 +1,8 @@
 import { allApps } from "../watchers";
 import { getInstalledApps } from "../installed-apps";
-import { getAppIcon } from "../installed-apps/windows";
+import { getAppIconWindows } from "../installed-apps/windows";
 import { AppData } from "~/types/app-data";
+import { getAppIconMac } from "../installed-apps/mac";
 
 export async function getAvailableApps() {
   const installedApps = await getInstalledApps();
@@ -21,8 +22,26 @@ export async function getAvailableApps() {
             return null;
           }
 
-          const appIcon = await getAppIcon(record, app);
+          const appIcon = await getAppIconWindows(record, app);
           const appName = record["DisplayName"];
+
+          return { ...record, appIcon, appName };
+        }
+
+        if (process.platform === "darwin" && app.mac?.bundleId) {
+          const record = installedApps.find(
+            (ia) =>
+              ia["kMDItemCFBundleIdentifier"] &&
+              app.mac?.bundleId &&
+              ia["kMDItemCFBundleIdentifier"] === app.mac.bundleId,
+          );
+
+          if (!record) {
+            return null;
+          }
+
+          const appIcon = await getAppIconMac(record["_FILE_PATH"]!);
+          const appName = record["kMDItemDisplayName"].replace(".app", "");
 
           return { ...record, appIcon, appName };
         }

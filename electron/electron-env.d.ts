@@ -40,3 +40,5 @@ declare module "iconutil" {
     callback: (error: unknown, icons: Record<string, Buffer>) => void,
   ): void;
 }
+
+declare module "icon-extractor";
