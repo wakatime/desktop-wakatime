@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import Winreg from "winreg";
+import { extractIcon } from "@inithink/exe-icon-extractor";
 
 export async function getPath(
   appData: Record<string, string>,
@@ -23,32 +24,13 @@ export async function getPath(
   return path.join(installLocation, fileName);
 }
 
-export async function getIconFromWindows(path: string) {
+export function getIconFromWindows(path: string) {
   if (process.platform !== "win32") {
-    return;
+    return null;
   }
 
-  const iconExtractor = await import("icon-extractor");
-  return new Promise<string>((resolve, reject) => {
-    function onIcon(data: { Context: string; Base64ImageData: string }) {
-      if (data.Context === path) {
-        iconExtractor.emitter.off("icon", onIcon);
-        iconExtractor.emitter.off("error", onError);
-        resolve("data:image/png;base64," + data.Base64ImageData);
-      }
-    }
-
-    function onError(error: unknown) {
-      iconExtractor.emitter.off("icon", onIcon);
-      iconExtractor.emitter.off("error", onError);
-      reject(error);
-    }
-
-    iconExtractor.emitter.on("icon", onIcon);
-    iconExtractor.emitter.on("error", onError);
-
-    iconExtractor.getIcon(path, path);
-  });
+  const buffer = extractIcon(path, "large");
+  return "data:image/png;base64," + buffer.toString("base64");
 }
 
 export async function getApp(reg: Winreg.Registry) {
@@ -105,8 +87,13 @@ export async function getInstalledApps() {
     }),
   ];
 
-  const apps = (await Promise.all(registries.map((reg) => getApps(reg))))
-    .flatMap((apps) => apps)
-    .filter((app) => app["DisplayName"]);
-  return apps;
+  const apps: Record<string, string>[] = [];
+
+  // const apps = (await Promise.all(registries.map((reg) => getApps(reg))));
+  for (const registry of registries) {
+    const newApps = await getApps(registry);
+    apps.push(...newApps);
+  }
+
+  return apps.filter((app) => app["DisplayName"]);
 }

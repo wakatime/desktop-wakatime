@@ -14,7 +14,7 @@ export default defineConfig({
         vite: {
           build: {
             rollupOptions: {
-              external: ["@miniben90/x-win"],
+              external: ["@miniben90/x-win", "@inithink/exe-icon-extractor"],
             },
           },
         },

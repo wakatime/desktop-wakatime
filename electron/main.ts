@@ -5,7 +5,6 @@ import {
   Menu,
   nativeImage,
   Notification,
-  protocol,
   shell,
   Tray,
 } from "electron";
@@ -124,6 +123,10 @@ function createMonitoredAppsWindow() {
     monitoredAppsWindow.loadFile(path.join(process.env.DIST!, "index.html"));
   }
 
+  if (!app.isPackaged) {
+    monitoredAppsWindow.webContents.openDevTools({ mode: "detach" });
+  }
+
   monitoredAppsWindow.on("closed", () => {
     monitoredAppsWindow = null;
   });
@@ -200,27 +203,10 @@ app.on("window-all-closed", () => {});
 
 app.on("activate", () => {});
 
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: "media",
-    privileges: {
-      secure: true,
-      supportFetchAPI: true,
-      bypassCSP: true,
-      stream: true,
-    },
-  },
-]);
-
 function activeWindowChange(window: WindowInfo) {
   console.log({
-    id: window.id,
-    info: window.info,
-    title: window.title,
-    os: window.os,
-    url: window.url,
-    usage: window.usage,
-    position: window.position,
+    time: new Date().toISOString(),
+    app: window.info.name,
   });
 }
 
@@ -230,7 +216,6 @@ app.whenReady().then(() => {
 });
 
 app.on("quit", () => {
-  console.log("QUIT");
   unsubscribeAllActiveWindow();
 });
 
@@ -244,8 +229,13 @@ ipcMain.on(SET_APP_SETTINGS_IPC_KEY, (_, value) => {
 });
 
 ipcMain.on(GET_INSTALLED_APPS_IPC_KEY, async (event) => {
-  const apps = await getAvailableApps();
-  event.returnValue = apps;
+  try {
+    const apps = await getAvailableApps();
+    event.returnValue = apps;
+  } catch (error) {
+    console.error(error);
+    event.returnValue = [];
+  }
 });
 
 ipcMain.on(GET_APP_VERSION_IPC_KEY, (event) => {

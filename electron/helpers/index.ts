@@ -6,6 +6,7 @@ import { getAppIconMac } from "../installed-apps/mac";
 
 export async function getAvailableApps() {
   const installedApps = await getInstalledApps();
+  console.log(installedApps);
 
   return (
     await Promise.all(
@@ -21,13 +22,19 @@ export async function getAvailableApps() {
           if (!record) {
             return null;
           }
-          const path = await getPath(record);
-          if (!path) {
+          const name = record["DisplayName"];
+          const path = await getPath(record, app.windows.exePath);
+          if (!path || !name) {
             return null;
           }
 
-          const icon = await getIconFromWindows(path);
-          const name = record["DisplayName"];
+          let icon: string | null = null;
+
+          try {
+            icon = getIconFromWindows(path);
+          } catch (error) {
+            /* empty */
+          }
 
           return { icon, name, path };
         }
@@ -43,12 +50,12 @@ export async function getAvailableApps() {
           if (!record) {
             return null;
           }
+          const name = record["kMDItemDisplayName"]?.replace(".app", "");
           const path = record["_FILE_PATH"];
-          if (!path) {
+          if (!path || !name) {
             return;
           }
           const icon = await getAppIconMac(path);
-          const name = record["kMDItemDisplayName"].replace(".app", "");
 
           return { path, icon, name };
         }

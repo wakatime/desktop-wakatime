@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@inithink/exe-icon-extractor": "^1.0.5",
     "@miniben90/x-win": "^1.10.0",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
@@ -18,7 +19,6 @@
     "@tanstack/react-query": "^5.51.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "icon-extractor": "^1.0.3",
     "iconutil": "^1.0.2",
     "lucide-react": "^0.399.0",
     "plist": "^3.1.0",

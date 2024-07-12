@@ -1,5 +1,8 @@
 import { app } from "electron";
-import { AppSettings, appSettingsSchema } from "../src/validators/app-settings";
+import {
+  type AppSettings,
+  appSettingsSchema,
+} from "../src/validators/app-settings";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -8,17 +11,21 @@ export function getAppSettingsFilePath() {
   return path.join(userDataPath, "wakatime-settings.json");
 }
 
+export const initialAppSettings: AppSettings = {
+  apiKey: null,
+  launchAtLogin: true,
+  monitoredApps: [],
+  enableLogging: true,
+};
+
 export function getAppSettings(): AppSettings {
-  const settingsPath = getAppSettingsFilePath();
   try {
+    const settingsPath = getAppSettingsFilePath();
     const data = fs.readFileSync(settingsPath, { encoding: "utf-8" });
     return appSettingsSchema.parse(JSON.parse(data));
   } catch (error) {
     console.error("Error while getting settings", error);
-    return {
-      apiKey: null,
-      launchAtLogin: true,
-    };
+    return initialAppSettings;
   }
 }
 
