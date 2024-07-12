@@ -1,7 +1,7 @@
 import { allApps } from "../watchers";
 import { getInstalledApps } from "../installed-apps";
 import { getIconFromWindows, getPath } from "../installed-apps/windows";
-import { AppInfo } from "~/types/app-data";
+import { AppInfo } from "~/types/app-info";
 import { getAppIconMac } from "../installed-apps/mac";
 
 export async function getAvailableApps() {

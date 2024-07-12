@@ -1,23 +1,92 @@
-import { Fragment, useLayoutEffect } from "react";
-import { useInstalledApps } from "../stores/installed-apps";
+import { Fragment, useCallback, useLayoutEffect, useMemo } from "react";
 import { Switch } from "~/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { useAppSettings } from "~/stores/app-settings";
+import { Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AppSettings } from "~/validators/app-settings";
+import { AppInfo } from "~/types/app-info";
 
 export function Component() {
-  const monitoredApps = useAppSettings(
-    (state) => state.appSettings.monitoredApps ?? [],
+  const utils = useQueryClient();
+  const appSettingsQuery = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: () => window.ipcRenderer.settings.get(),
+  });
+  const installedAppsQuery = useQuery({
+    queryKey: ["installed-apps"],
+    queryFn: () => window.ipcRenderer.getInstalledApps(),
+  });
+  const setAppSettingsMut = useMutation({
+    mutationFn: async (appSettings: AppSettings) => {
+      utils.setQueryData(["app-settings"], appSettings);
+      await window.ipcRenderer.settings.set(appSettings);
+    },
+    onSettled: () => {
+      utils.invalidateQueries({
+        queryKey: ["app-settings"],
+      });
+    },
+  });
+
+  const monitoredApps = useMemo(
+    () => appSettingsQuery.data?.monitoredApps ?? [],
+    [appSettingsQuery.data?.monitoredApps],
   );
-  const monitorApp = useAppSettings((state) => state.monitorApp);
-  const apps = useInstalledApps((state) => state.apps);
+
+  const onMonitorAppChange = useCallback(
+    (app: AppInfo, monitor: boolean) => {
+      if (!appSettingsQuery.isSuccess) {
+        return;
+      }
+      let monitoredApps = appSettingsQuery.data.monitoredApps ?? [];
+      if (monitor && (!monitoredApps || !monitoredApps.includes(app.path))) {
+        monitoredApps = [...monitoredApps, app.path];
+      } else if (
+        !monitor &&
+        monitoredApps &&
+        monitoredApps.includes(app.path)
+      ) {
+        monitoredApps = monitoredApps.filter((item) => item !== app.path);
+      }
+      setAppSettingsMut.mutate({
+        ...appSettingsQuery.data,
+        monitoredApps,
+      });
+    },
+    [appSettingsQuery.data, appSettingsQuery.isSuccess, setAppSettingsMut],
+  );
 
   useLayoutEffect(() => {
     window.document.title = "Monitored Apps";
   }, []);
 
+  if (installedAppsQuery.isPending || appSettingsQuery.isPending) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (installedAppsQuery.isError) {
+    return (
+      <div className="p-4 text-muted-foreground">
+        <p>{installedAppsQuery.error.message}</p>
+      </div>
+    );
+  }
+
+  if (appSettingsQuery.isError) {
+    return (
+      <div className="p-4 text-muted-foreground">
+        <p>{appSettingsQuery.error.message}</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {apps.map((app, i) => {
+      {installedAppsQuery.data.map((app, i) => {
         return (
           <Fragment key={app.path}>
             <div className="flex h-14 items-center gap-4 px-4">
@@ -45,11 +114,11 @@ export function Component() {
               <Switch
                 checked={monitoredApps.includes(app.path)}
                 onCheckedChange={(value) => {
-                  monitorApp(app, value === true);
+                  onMonitorAppChange(app, value === true);
                 }}
               />
             </div>
-            {i < apps.length - 1 && (
+            {i < installedAppsQuery.data.length - 1 && (
               <div className="pl-[4rem]">
                 <hr className="h-px bg-border" />
               </div>

@@ -17,6 +17,12 @@ import {
   unsubscribeAllActiveWindow,
   WindowInfo,
 } from "@miniben90/x-win";
+import {
+  GET_APP_SETTINGS_IPC_KEY,
+  GET_APP_VERSION_IPC_KEY,
+  GET_INSTALLED_APPS_IPC_KEY,
+  SET_APP_SETTINGS_IPC_KEY,
+} from "./keys";
 
 // The built directory structure
 //
@@ -66,10 +72,10 @@ function createSettingsWindow() {
   });
 
   // Test active push message to Renderer-process.
-  settingsWindow.webContents.on("did-finish-load", () => {
-    const appSettings = getAppSettings();
-    settingsWindow?.webContents.send("app-settings", appSettings);
-  });
+  // settingsWindow.webContents.on("did-finish-load", () => {
+  //   const appSettings = getAppSettings();
+  //   settingsWindow?.webContents.send("app-settings", appSettings);
+  // });
 
   if (VITE_DEV_SERVER_URL) {
     settingsWindow.loadURL(VITE_DEV_SERVER_URL + "settings");
@@ -106,12 +112,10 @@ function createMonitoredAppsWindow() {
   });
 
   // Test active push message to Renderer-process.
-  monitoredAppsWindow.webContents.on("did-finish-load", async () => {
-    const apps = await getAvailableApps();
-    const appSettings = getAppSettings();
-    monitoredAppsWindow?.webContents.send("installed-apps", apps);
-    monitoredAppsWindow?.webContents.send("app-settings", appSettings);
-  });
+  // monitoredAppsWindow.webContents.on("did-finish-load", async () => {
+  //   const apps = await getAvailableApps();
+  //   const appSettings = getAppSettings();
+  // });
 
   if (VITE_DEV_SERVER_URL) {
     monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
@@ -226,18 +230,24 @@ app.whenReady().then(() => {
 });
 
 app.on("quit", () => {
+  console.log("QUIT");
   unsubscribeAllActiveWindow();
 });
 
-ipcMain.on("get-app-settings", (event) => {
+ipcMain.on(GET_APP_SETTINGS_IPC_KEY, (event) => {
   const settings = getAppSettings();
   event.returnValue = settings;
 });
 
-ipcMain.on("set-app-settings", (_, value) => {
+ipcMain.on(SET_APP_SETTINGS_IPC_KEY, (_, value) => {
   setAppSettings(value);
 });
 
-ipcMain.on("get-app-version", (event) => {
+ipcMain.on(GET_INSTALLED_APPS_IPC_KEY, async (event) => {
+  const apps = await getAvailableApps();
+  event.returnValue = apps;
+});
+
+ipcMain.on(GET_APP_VERSION_IPC_KEY, (event) => {
   event.returnValue = app.getVersion();
 });

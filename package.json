@@ -15,6 +15,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
+    "@tanstack/react-query": "^5.51.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "icon-extractor": "^1.0.3",
@@ -28,8 +29,7 @@
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^3.1.0",
     "winreg": "^1.2.5",
-    "zod": "^3.23.8",
-    "zustand": "^4.5.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",

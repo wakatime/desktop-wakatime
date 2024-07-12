@@ -1,26 +1,60 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect } from "react";
 import { useDebounceCallback } from "usehooks-ts";
-import { useAppSettings } from "../stores/app-settings";
 import { AppSettings } from "../validators/app-settings";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Checkbox } from "~/components/ui/checkbox";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 export function Component() {
-  const { appSettings, setAppSettings } = useAppSettings();
-  const [version, setVersion] = useState("");
+  const utils = useQueryClient();
+  const appSettingsQuery = useQuery({
+    queryKey: ["app-settings"],
+    queryFn: () => window.ipcRenderer.settings.get(),
+  });
+  const setAppSettingsMut = useMutation({
+    mutationFn: async (appSettings: AppSettings) => {
+      utils.setQueryData(["app-settings"], appSettings);
+      await window.ipcRenderer.settings.set(appSettings);
+    },
+    onSettled: () => {
+      utils.invalidateQueries({
+        queryKey: ["app-settings"],
+      });
+    },
+  });
+  const appVersionQuery = useQuery({
+    queryKey: ["app-version"],
+    queryFn: () => window.ipcRenderer.getAppVersion(),
+  });
 
   const debouncedSetAppSettings = useDebounceCallback(
     (setSettings: AppSettings) => {
-      setAppSettings(setSettings);
+      setAppSettingsMut.mutate(setSettings);
     },
     200,
   );
 
-  useEffect(() => {
-    setVersion(window.ipcRenderer.getAppVersion());
+  useLayoutEffect(() => {
     window.document.title = "Settings";
   }, []);
+
+  if (appSettingsQuery.isPending) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (appSettingsQuery.isError) {
+    return (
+      <div className="p-4 text-muted-foreground">
+        <p>{appSettingsQuery.error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col space-y-6 p-4">
@@ -29,10 +63,10 @@ export function Component() {
           <Label htmlFor="wakatime-api-key">Wakatime API Key:</Label>
           <Input
             id="wakatime-api-key"
-            defaultValue={appSettings.apiKey ?? ""}
+            defaultValue={appSettingsQuery.data.apiKey ?? ""}
             onChange={(e) =>
               debouncedSetAppSettings({
-                ...appSettings,
+                ...appSettingsQuery.data,
                 apiKey: e.target.value || null,
               })
             }
@@ -43,10 +77,10 @@ export function Component() {
         <fieldset className="flex gap-2">
           <Checkbox
             id="launch-at-login"
-            checked={appSettings.launchAtLogin === true}
+            checked={appSettingsQuery.data.launchAtLogin === true}
             onCheckedChange={(checked) => {
-              setAppSettings({
-                ...appSettings,
+              setAppSettingsMut.mutate({
+                ...appSettingsQuery.data,
                 launchAtLogin: checked === true,
               });
             }}
@@ -56,13 +90,13 @@ export function Component() {
             Launch at login
           </Label>
         </fieldset>
-        <fieldset className="flex gap-2">
+        {/* <fieldset className="flex gap-2">
           <Checkbox
             id="enable-logging"
-            checked={appSettings.enableLogging === true}
+            checked={appSettingsQuery.data.enableLogging === true}
             onCheckedChange={(checked) => {
-              setAppSettings({
-                ...appSettings,
+              setAppSettingsMut.mutate({
+                ...appSettingsQuery.data,
                 enableLogging: checked === true,
               });
             }}
@@ -72,11 +106,18 @@ export function Component() {
             Enable logging to{" "}
             <code>C://ProgramData/wakatime/desktop-wakatime.log</code>
           </Label>
-        </fieldset>
+        </fieldset> */}
       </div>
       <div className="flex-1"></div>
       <div>
-        <p className="text-muted-foreground text-sm">Version: {version}</p>
+        <p className="text-sm text-muted-foreground">
+          Version:{" "}
+          {appVersionQuery.isPending
+            ? "Loading..."
+            : appVersionQuery.isError
+              ? appVersionQuery.error.message
+              : appVersionQuery.data}
+        </p>
       </div>
     </div>
   );
