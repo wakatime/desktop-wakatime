@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // Use contextBridge
-window.ipcRenderer.on("app-settings-change", (_event, appSettings) => {
+window.ipcRenderer.on("app-settings", (_event, appSettings) => {
   useAppSettings.setState({ appSettings });
 });
 

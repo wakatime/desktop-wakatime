@@ -68,7 +68,7 @@ function createSettingsWindow() {
   // Test active push message to Renderer-process.
   settingsWindow.webContents.on("did-finish-load", () => {
     const appSettings = getAppSettings();
-    settingsWindow?.webContents.send("app-settings-change", appSettings);
+    settingsWindow?.webContents.send("app-settings", appSettings);
   });
 
   if (VITE_DEV_SERVER_URL) {
@@ -95,7 +95,7 @@ function createMonitoredAppsWindow() {
       preload: path.join(__dirname, "preload.js"),
       webSecurity: false,
     },
-    // skipTaskbar: true,
+    skipTaskbar: true,
     minimizable: false,
     fullscreenable: false,
     width: 444,
@@ -108,7 +108,9 @@ function createMonitoredAppsWindow() {
   // Test active push message to Renderer-process.
   monitoredAppsWindow.webContents.on("did-finish-load", async () => {
     const apps = await getAvailableApps();
+    const appSettings = getAppSettings();
     monitoredAppsWindow?.webContents.send("installed-apps", apps);
+    monitoredAppsWindow?.webContents.send("app-settings", appSettings);
   });
 
   if (VITE_DEV_SERVER_URL) {

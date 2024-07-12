@@ -2,8 +2,13 @@ import { Fragment, useLayoutEffect } from "react";
 import { useInstalledApps } from "../stores/installed-apps";
 import { Switch } from "~/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { useAppSettings } from "~/stores/app-settings";
 
 export function Component() {
+  const monitoredApps = useAppSettings(
+    (state) => state.appSettings.monitoredApps ?? [],
+  );
+  const monitorApp = useAppSettings((state) => state.monitorApp);
   const apps = useInstalledApps((state) => state.apps);
 
   useLayoutEffect(() => {
@@ -37,7 +42,12 @@ export function Component() {
                 </AvatarFallback>
               </Avatar>
               <p className="flex-1 truncate">{app.name}</p>
-              <Switch />
+              <Switch
+                checked={monitoredApps.includes(app.path)}
+                onCheckedChange={(value) => {
+                  monitorApp(app, value === true);
+                }}
+              />
             </div>
             {i < apps.length - 1 && (
               <div className="pl-[4rem]">
