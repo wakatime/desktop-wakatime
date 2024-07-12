@@ -1,7 +1,7 @@
 import { allApps } from "../watchers";
 import { getInstalledApps } from "../installed-apps";
-import { getAppIconWindows } from "../installed-apps/windows";
-import { AppData } from "~/types/app-data";
+import { getIconFromWindows, getPath } from "../installed-apps/windows";
+import { AppInfo } from "~/types/app-data";
 import { getAppIconMac } from "../installed-apps/mac";
 
 export async function getAvailableApps() {
@@ -9,7 +9,7 @@ export async function getAvailableApps() {
 
   return (
     await Promise.all(
-      allApps.map<Promise<AppData | null | undefined>>(async (app) => {
+      allApps.map<Promise<AppInfo | null | undefined>>(async (app) => {
         if (process.platform === "win32" && app.windows?.DisplayName) {
           const record = installedApps.find(
             (ia) =>
@@ -21,11 +21,15 @@ export async function getAvailableApps() {
           if (!record) {
             return null;
           }
+          const path = await getPath(record);
+          if (!path) {
+            return null;
+          }
 
-          const appIcon = await getAppIconWindows(record, app);
-          const appName = record["DisplayName"];
+          const icon = await getIconFromWindows(path);
+          const name = record["DisplayName"];
 
-          return { ...record, appIcon, appName };
+          return { icon, name, path };
         }
 
         if (process.platform === "darwin" && app.mac?.bundleId) {
@@ -39,15 +43,18 @@ export async function getAvailableApps() {
           if (!record) {
             return null;
           }
+          const path = record["_FILE_PATH"];
+          if (!path) {
+            return;
+          }
+          const icon = await getAppIconMac(path);
+          const name = record["kMDItemDisplayName"].replace(".app", "");
 
-          const appIcon = await getAppIconMac(record["_FILE_PATH"]!);
-          const appName = record["kMDItemDisplayName"].replace(".app", "");
-
-          return { ...record, appIcon, appName };
+          return { path, icon, name };
         }
 
         return null;
       }),
     )
-  ).filter(Boolean) as AppData[];
+  ).filter(Boolean) as AppInfo[];
 }

@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { AppData } from "../types/app-data";
+import { AppInfo } from "../types/app-data";
 
 interface IntalledAppsState {
-  apps: AppData[];
-  setApps: (apps: AppData[]) => void;
+  apps: AppInfo[];
+  setApps: (apps: AppInfo[]) => void;
 }
 
 export const useInstalledApps = create<IntalledAppsState>((set) => ({

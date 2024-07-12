@@ -1,10 +1,29 @@
-import { MonitoredAppInfo } from "../watchers";
 import path from "node:path";
 import fs from "node:fs";
 import Winreg from "winreg";
-import { AppData } from "~/types/app-data";
 
-export async function getIconFromExePath(path: string, context: string) {
+export async function getPath(
+  appData: Record<string, string>,
+  fileName?: string,
+) {
+  const installLocation = appData["InstallLocation"];
+  if (!installLocation) {
+    return null;
+  }
+
+  if (!fileName) {
+    const files = await fs.readdirSync(installLocation);
+    fileName = files.find((file) => file.endsWith(".exe"));
+  }
+
+  if (!fileName) {
+    return null;
+  }
+
+  return path.join(installLocation, fileName);
+}
+
+export async function getIconFromWindows(path: string) {
   if (process.platform !== "win32") {
     return;
   }
@@ -12,7 +31,7 @@ export async function getIconFromExePath(path: string, context: string) {
   const iconExtractor = await import("icon-extractor");
   return new Promise<string>((resolve, reject) => {
     function onIcon(data: { Context: string; Base64ImageData: string }) {
-      if (data.Context === context) {
+      if (data.Context === path) {
         iconExtractor.emitter.off("icon", onIcon);
         iconExtractor.emitter.off("error", onError);
         resolve("data:image/png;base64," + data.Base64ImageData);
@@ -28,43 +47,8 @@ export async function getIconFromExePath(path: string, context: string) {
     iconExtractor.emitter.on("icon", onIcon);
     iconExtractor.emitter.on("error", onError);
 
-    iconExtractor.getIcon(context, path);
+    iconExtractor.getIcon(path, path);
   });
-}
-
-export async function getAppIconWindows(
-  appData: AppData,
-  app?: MonitoredAppInfo,
-) {
-  let exeFilePath = appData["DisplayIcon"]?.replace(",0", "").trim();
-  if (
-    (!exeFilePath || !exeFilePath?.endsWith(".exe")) &&
-    appData["InstallLocation"]
-  ) {
-    let file = app?.windows?.exePath;
-    if (!file) {
-      const files = await fs.readdirSync(appData["InstallLocation"]);
-      file = files.find((file) => file.endsWith(".exe"));
-    }
-    if (file) {
-      exeFilePath = path.join(appData["InstallLocation"], file);
-    }
-  }
-
-  if (exeFilePath) {
-    const exists = await fs.existsSync(exeFilePath);
-    if (exists) {
-      try {
-        const icon = await getIconFromExePath(exeFilePath, exeFilePath);
-        if (typeof icon === "string") {
-          exeFilePath = icon;
-        }
-      } catch (error) {
-        console.error("Failed to load icon", error);
-      }
-    }
-  }
-  return exeFilePath;
 }
 
 export async function getApp(reg: Winreg.Registry) {
