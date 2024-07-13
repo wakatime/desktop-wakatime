@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "iconutil": "^1.0.2",
     "lucide-react": "^0.399.0",
+    "node-global-key-listener": "^0.3.0",
     "plist": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

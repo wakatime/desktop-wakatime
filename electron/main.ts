@@ -22,6 +22,12 @@ import {
   GET_INSTALLED_APPS_IPC_KEY,
   SET_APP_SETTINGS_IPC_KEY,
 } from "./keys";
+import {
+  GlobalKeyboardListener,
+  IGlobalKeyDownMap,
+  IGlobalKeyEvent,
+} from "node-global-key-listener";
+const gkl = new GlobalKeyboardListener();
 
 // The built directory structure
 //
@@ -210,13 +216,22 @@ function activeWindowChange(window: WindowInfo) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function onKeyEvent(e: IGlobalKeyEvent, _down: IGlobalKeyDownMap) {
+  console.log(
+    `${e.name} ${e.state == "DOWN" ? "DOWN" : "UP  "} [${e.rawKey?._nameRaw}]`,
+  );
+}
+
 app.whenReady().then(() => {
   createTray();
   subscribeActiveWindow(activeWindowChange);
+  gkl.addListener(onKeyEvent);
 });
 
 app.on("quit", () => {
   unsubscribeAllActiveWindow();
+  gkl.removeListener(onKeyEvent);
 });
 
 ipcMain.on(GET_APP_SETTINGS_IPC_KEY, (event) => {
