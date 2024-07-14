@@ -30,8 +30,8 @@ export function getAppSettings(): AppSettings {
 }
 
 export function setAppSettings(settings: AppSettings) {
-  const settingsPath = getAppSettingsFilePath();
   try {
+    const settingsPath = getAppSettingsFilePath();
     const verifiedAppSettings = appSettingsSchema.parse(settings);
     fs.writeFileSync(settingsPath, JSON.stringify(verifiedAppSettings));
   } catch (error) {

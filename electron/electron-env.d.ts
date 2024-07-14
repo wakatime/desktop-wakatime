@@ -31,7 +31,7 @@ interface Window {
       ) => void;
     };
     getAppVersion: () => string;
-    getInstalledApps: () => import("../src/types/app-info").AppInfo[];
+    getInstalledApps: () => import("../src/types/app-info").AppData[];
   };
 }
 

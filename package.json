@@ -19,6 +19,7 @@
     "@tanstack/react-query": "^5.51.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "electron-store": "^10.0.0",
     "iconutil": "^1.0.2",
     "lucide-react": "^0.399.0",
     "node-global-key-listener": "^0.3.0",

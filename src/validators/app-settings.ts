@@ -4,7 +4,7 @@ export const appSettingsSchema = z.object({
   apiKey: z.string().nullish(),
   launchAtLogin: z.boolean().nullish(),
   enableLogging: z.boolean().nullish(),
-  monitoredApps: z.array(z.string()).nullish(),
+  monitoredApps: z.array(z.string()).nullish().default([]),
 });
 
 export type AppSettings = z.infer<typeof appSettingsSchema>;
@@ -13,4 +13,5 @@ export const initAppSettings: AppSettings = {
   apiKey: null,
   launchAtLogin: true,
   enableLogging: false,
+  monitoredApps: [],
 };

@@ -1,7 +1,7 @@
 import { allApps } from "../watchers";
 import { getInstalledApps } from "../installed-apps";
 import { getIconFromWindows, getPath } from "../installed-apps/windows";
-import { AppInfo } from "~/types/app-info";
+import { AppData } from "~/types/app-info";
 import { getAppIconMac } from "../installed-apps/mac";
 
 export async function getAvailableApps() {
@@ -10,7 +10,7 @@ export async function getAvailableApps() {
 
   return (
     await Promise.all(
-      allApps.map<Promise<AppInfo | null | undefined>>(async (app) => {
+      allApps.map<Promise<AppData | null | undefined>>(async (app) => {
         if (process.platform === "win32" && app.windows?.DisplayName) {
           const record = installedApps.find(
             (ia) =>
@@ -63,5 +63,5 @@ export async function getAvailableApps() {
         return null;
       }),
     )
-  ).filter(Boolean) as AppInfo[];
+  ).filter(Boolean) as AppData[];
 }

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { ImageIcon, Loader2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppSettings } from "~/validators/app-settings";
-import { AppInfo } from "~/types/app-info";
+import { AppData } from "~/types/app-info";
 
 export function Component() {
   const utils = useQueryClient();
@@ -34,7 +34,7 @@ export function Component() {
   );
 
   const onMonitorAppChange = useCallback(
-    (app: AppInfo, monitor: boolean) => {
+    (app: AppData, monitor: boolean) => {
       if (!appSettingsQuery.isSuccess) {
         return;
       }

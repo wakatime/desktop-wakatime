@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import path from "node:path";
 import electron from "vite-plugin-electron/simple";
 import react from "@vitejs/plugin-react";
+import renderer from "vite-plugin-electron-renderer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -20,6 +21,7 @@ export default defineConfig({
                 "node-global-key-listener",
               ],
             },
+            minify: false,
           },
         },
       },
@@ -32,6 +34,13 @@ export default defineConfig({
       // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
       // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
       renderer: {},
+    }),
+    renderer({
+      resolve: {
+        "electron-store": {
+          type: "esm",
+        },
+      },
     }),
   ],
   resolve: {
