@@ -9,25 +9,15 @@ import {
   Tray,
 } from "electron";
 import path from "node:path";
-import { getAppSettings, setAppSettings } from "./settings";
+import { getAppSettings, setAppSettings } from "./helpers/settings";
 import { getAvailableApps } from "./helpers";
-import {
-  subscribeActiveWindow,
-  unsubscribeAllActiveWindow,
-  WindowInfo,
-} from "@miniben90/x-win";
 import {
   GET_APP_SETTINGS_IPC_KEY,
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
   SET_APP_SETTINGS_IPC_KEY,
 } from "./keys";
-import {
-  GlobalKeyboardListener,
-  IGlobalKeyDownMap,
-  IGlobalKeyEvent,
-} from "node-global-key-listener";
-const gkl = new GlobalKeyboardListener();
+import { watcher } from "./watchers/watcher";
 
 // The built directory structure
 //
@@ -209,29 +199,14 @@ app.on("window-all-closed", () => {});
 
 app.on("activate", () => {});
 
-function activeWindowChange(window: WindowInfo) {
-  console.log({
-    time: new Date().toISOString(),
-    app: window.info.name,
-  });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function onKeyEvent(e: IGlobalKeyEvent, _down: IGlobalKeyDownMap) {
-  console.log(
-    `${e.name} ${e.state == "DOWN" ? "DOWN" : "UP  "} [${e.rawKey?._nameRaw}]`,
-  );
-}
-
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createTray();
-  subscribeActiveWindow(activeWindowChange);
-  gkl.addListener(onKeyEvent);
+  await getAvailableApps();
+  watcher.start();
 });
 
 app.on("quit", () => {
-  unsubscribeAllActiveWindow();
-  gkl.removeListener(onKeyEvent);
+  watcher.stop();
 });
 
 ipcMain.on(GET_APP_SETTINGS_IPC_KEY, (event) => {

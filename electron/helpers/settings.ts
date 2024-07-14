@@ -2,7 +2,7 @@ import { app } from "electron";
 import {
   type AppSettings,
   appSettingsSchema,
-} from "../src/validators/app-settings";
+} from "../../src/validators/app-settings";
 import path from "node:path";
 import fs from "node:fs";
 

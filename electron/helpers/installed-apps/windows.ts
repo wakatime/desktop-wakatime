@@ -2,14 +2,20 @@ import path from "node:path";
 import fs from "node:fs";
 import Winreg from "winreg";
 import { extractIcon } from "@inithink/exe-icon-extractor";
+import { store } from "../../store";
 
-export async function getPath(
+export async function getFilePath(
   appData: Record<string, string>,
   fileName?: string,
 ) {
   const installLocation = appData["InstallLocation"];
   if (!installLocation) {
     return null;
+  }
+
+  const cachedFilePath = store.get(`${installLocation}-filepath`);
+  if (typeof cachedFilePath === "string") {
+    return cachedFilePath;
   }
 
   if (!fileName) {
@@ -21,16 +27,25 @@ export async function getPath(
     return null;
   }
 
-  return path.join(installLocation, fileName);
+  const filepath = path.join(installLocation, fileName);
+  store.set(`${installLocation}-filepath`, filepath);
+  return filepath;
 }
 
-export function getIconFromWindows(path: string) {
+export function getIconFromWindows(filePath: string) {
   if (process.platform !== "win32") {
     return null;
   }
 
-  const buffer = extractIcon(path, "large");
-  return "data:image/png;base64," + buffer.toString("base64");
+  const cachedIcon = store.get(`${filePath}-icon`);
+  if (typeof cachedIcon === "string") {
+    return cachedIcon;
+  }
+
+  const buffer = extractIcon(filePath, "large");
+  const icon = "data:image/png;base64," + buffer.toString("base64");
+  store.set(`${filePath}-icon`, icon);
+  return icon;
 }
 
 export async function getApp(reg: Winreg.Registry) {

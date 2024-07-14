@@ -8,21 +8,6 @@ export async function getInstalledApps(directory = "/Applications") {
   const directoryContents = await getDirectoryContents(directory);
   const appsFileInfo = await getAppsFileInfo(directoryContents);
   return appsFileInfo.map((appFileInfo) => getAppData(appFileInfo));
-  // const appsWithIcon = await Promise.all(
-  //   appDatas.map<Promise<AppData>>(async (appData) => {
-  //     let appIcon: string | null = null;
-  //     try {
-  //       appIcon = await getAppIcon(appData["_FILE_PATH"]!);
-  //     } catch (error) {
-  //       /* empty */
-  //     }
-  //     return {
-  //       ...appData,
-  //       appIcon,
-  //     };
-  //   }),
-  // );
-  // return appsWithIcon;
 }
 
 export function getDirectoryContents(directory: string) {

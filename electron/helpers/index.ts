@@ -1,16 +1,14 @@
 import { allApps } from "../watchers";
-import { getInstalledApps } from "../installed-apps";
-import { getIconFromWindows, getPath } from "../installed-apps/windows";
-import { AppData } from "~/types/app-info";
-import { getAppIconMac } from "../installed-apps/mac";
+import { getInstalledApps } from "./installed-apps";
+import { getIconFromWindows, getFilePath } from "./installed-apps/windows";
+import { getAppIconMac } from "./installed-apps/mac";
 
 export async function getAvailableApps() {
   const installedApps = await getInstalledApps();
-  console.log(installedApps);
 
   return (
     await Promise.all(
-      allApps.map<Promise<AppData | null | undefined>>(async (app) => {
+      allApps.map(async (app) => {
         if (process.platform === "win32" && app.windows?.DisplayName) {
           const record = installedApps.find(
             (ia) =>
@@ -23,20 +21,20 @@ export async function getAvailableApps() {
             return null;
           }
           const name = record["DisplayName"];
-          const path = await getPath(record, app.windows.exePath);
-          if (!path || !name) {
+          const filePath = await getFilePath(record, app.windows.exePath);
+          if (!filePath || !name) {
             return null;
           }
 
           let icon: string | null = null;
 
           try {
-            icon = getIconFromWindows(path);
+            icon = getIconFromWindows(filePath);
           } catch (error) {
             /* empty */
           }
 
-          return { icon, name, path };
+          return { icon, name, path: filePath };
         }
 
         if (process.platform === "darwin" && app.mac?.bundleId) {
@@ -63,5 +61,5 @@ export async function getAvailableApps() {
         return null;
       }),
     )
-  ).filter(Boolean) as AppData[];
+  ).filter((app) => !!app);
 }
