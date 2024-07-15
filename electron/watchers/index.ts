@@ -132,7 +132,7 @@ export const MonitoredApp = {
       bundleId: "com.tinyspeck.slackmacgap",
     },
     windows: {
-      exePath: "Slack.exe",
+      exePath: "slack.exe",
       DisplayName: "Slack",
     },
   },

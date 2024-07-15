@@ -8,14 +8,17 @@ import {
 import { GlobalKeyboardListener } from "node-global-key-listener";
 
 import { SettingsManager } from "../helpers/settings-manager";
+import { Wakatime } from "./wakatime";
 
 export class Watcher {
+  wakatime: Wakatime;
   activeWindow: WindowInfo;
   private activeWindowSubscription: number | null;
   private gkl: GlobalKeyboardListener;
   private isWatchingForKeyboardEvents = false;
 
-  constructor() {
+  constructor(wakatime: Wakatime) {
+    this.wakatime = wakatime;
     this.activeWindow = activeWindow();
     this.activeWindowSubscription = null;
     this.gkl = new GlobalKeyboardListener();
@@ -26,16 +29,10 @@ export class Watcher {
       return;
     }
 
-    // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
     try {
+      // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
       const window = activeWindow();
-
-      console.log({
-        name: window.info.name,
-        title: window.title,
-        url: window.url,
-        key: event.rawKey?.name,
-      });
+      this.wakatime.sendHeartbeat(window);
     } catch (error) {
       console.error(error);
     }
@@ -52,6 +49,7 @@ export class Watcher {
   }
 
   start() {
+    console.log("Started Watching...");
     this.activeWindowSubscription = subscribeActiveWindow(
       (windowInfo: WindowInfo) => {
         if (this.isWatchingForKeyboardEvents) {
@@ -74,5 +72,6 @@ export class Watcher {
     if (this.activeWindowSubscription !== null) {
       unsubscribeActiveWindow(this.activeWindowSubscription);
     }
+    console.log("Stopped watching");
   }
 }

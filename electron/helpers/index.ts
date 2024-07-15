@@ -1,13 +1,21 @@
+import { store } from "electron/store";
+
 import type { AppData } from "~/types/app-info";
 import { allApps } from "../watchers";
 import { getInstalledApps } from "./installed-apps";
 import { getAppIconMac } from "./installed-apps/mac";
 import { getFilePath, getIconFromWindows } from "./installed-apps/windows";
 
+const APPS_KEY = "apps";
 export async function getAvailableApps(): Promise<AppData[]> {
+  const cachedApps = store.get<AppData[]>(APPS_KEY);
+  if (cachedApps) {
+    return cachedApps;
+  }
+
   const installedApps = await getInstalledApps();
 
-  return (
+  const apps = (
     await Promise.all(
       allApps.map(async (app) => {
         if (process.platform === "win32" && app.windows?.DisplayName) {
@@ -62,5 +70,8 @@ export async function getAvailableApps(): Promise<AppData[]> {
         return null;
       }),
     )
-  ).filter((app) => !!app) as AppData[];
+  ).filter((app) => !!app);
+
+  store.set(APPS_KEY, apps);
+  return apps;
 }

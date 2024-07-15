@@ -4,8 +4,9 @@ import {
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
   GET_SETTINGS_IPC_KEY,
+  RESET_SETTINGS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
-} from "./keys";
+} from "./utils/constants";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -33,6 +34,9 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     },
     set(settings: string) {
       ipcRenderer.send(SET_SETTINGS_IPC_KEY, settings);
+    },
+    reset() {
+      ipcRenderer.send(RESET_SETTINGS_IPC_KEY);
     },
   },
   getInstalledApps() {

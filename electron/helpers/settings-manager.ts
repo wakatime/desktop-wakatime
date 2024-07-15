@@ -21,7 +21,6 @@ export abstract class SettingsManager {
   }
 
   static get(): Settings {
-    console.log({ settigns: settingsSchema.parse({}) });
     const filePath = this.getFilePath();
     const data = fs.readFileSync(filePath, { encoding: "utf-8" });
     const settings = settingsSchema.parse(JSON.parse(data));

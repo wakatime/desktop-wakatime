@@ -16,8 +16,10 @@ import {
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
   GET_SETTINGS_IPC_KEY,
+  RESET_SETTINGS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
-} from "./keys";
+} from "./utils/constants";
+import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
 
 // The built directory structure
@@ -204,7 +206,8 @@ app.on("activate", () => {});
 app.whenReady().then(async () => {
   createTray();
   await getAvailableApps();
-  watcher = new Watcher();
+  const wakatime = new Wakatime();
+  watcher = new Watcher(wakatime);
   watcher.start();
 });
 
@@ -216,8 +219,12 @@ ipcMain.on(GET_SETTINGS_IPC_KEY, (event) => {
   event.returnValue = SettingsManager.get();
 });
 
-ipcMain.on(SET_SETTINGS_IPC_KEY, (_, value) => {
-  SettingsManager.set(value);
+ipcMain.on(SET_SETTINGS_IPC_KEY, (event, value) => {
+  event.returnValue = SettingsManager.set(value);
+});
+
+ipcMain.on(RESET_SETTINGS_IPC_KEY, (event) => {
+  event.returnValue = SettingsManager.reset();
 });
 
 ipcMain.on(GET_INSTALLED_APPS_IPC_KEY, async (event) => {

@@ -9,18 +9,31 @@ export async function getFilePath(
   appData: Record<string, string>,
   fileName?: string,
 ) {
-  const installLocation = appData["InstallLocation"];
+  let installLocation = appData["InstallLocation"];
   if (!installLocation) {
     return null;
   }
 
-  const cachedFilePath = store.get(`${installLocation}-filepath`);
-  if (typeof cachedFilePath === "string") {
-    return cachedFilePath;
+  let files = fs.readdirSync(installLocation);
+
+  // Some electron app has two exe file. One in the root install location and one in the app-{some-version-number} directory. eg.
+  // 1: [install-location]/{fileName}.exe
+  // 2: [install-location]/app-{some-version-number}/{fileName}.exe
+  // And in window info they use second location as path
+  const appFolder = files
+    // sorting it to get the folder which has the latest version if there are many folders with `app-` name.
+    .sort((a, b) => b.localeCompare(a))
+    .find((file) => file.startsWith("app-"));
+  if (appFolder) {
+    const newLocation = path.join(installLocation, appFolder);
+    const appFolderFiles = fs.readdirSync(newLocation);
+    if (appFolderFiles.find((file) => file.endsWith(".exe"))) {
+      installLocation = newLocation;
+      files = appFolderFiles;
+    }
   }
 
   if (!fileName) {
-    const files = await fs.readdirSync(installLocation);
     fileName = files.find((file) => file.endsWith(".exe"));
   }
 
@@ -28,9 +41,8 @@ export async function getFilePath(
     return null;
   }
 
-  const filepath = path.join(installLocation, fileName);
-  store.set(`${installLocation}-filepath`, filepath);
-  return filepath;
+  const filePath = path.join(installLocation, fileName);
+  return filePath;
 }
 
 export function getIconFromWindows(filePath: string) {
@@ -108,8 +120,8 @@ export async function getInstalledApps() {
   // const apps = (await Promise.all(registries.map((reg) => getApps(reg))));
   for (const registry of registries) {
     const newApps = await getApps(registry);
-    apps.push(...newApps);
+    apps.push(...newApps.filter((app) => app["DisplayName"]));
   }
 
-  return apps.filter((app) => app["DisplayName"]);
+  return apps;
 }

@@ -29,6 +29,7 @@ interface Window {
       set: (
         settings: Partial<import("./helpers/settings-manager").Settings>,
       ) => import("./helpers/settings-manager").Settings;
+      reset: () => import("./helpers/settings-manager").Settings;
     };
     getAppVersion: () => string;
     getInstalledApps: () => import("../src/types/app-info").AppData[];
