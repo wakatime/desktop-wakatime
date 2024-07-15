@@ -2,6 +2,7 @@ import {
   subscribeActiveWindow,
   unsubscribeActiveWindow,
   WindowInfo,
+  activeWindow,
 } from "@miniben90/x-win";
 import { getAppSettings } from "../helpers/settings";
 
@@ -9,61 +10,65 @@ import {
   GlobalKeyboardListener,
   type IGlobalKeyListener,
 } from "node-global-key-listener";
-import { AppData } from "~/types/app-info";
 
 export class Watcher {
-  activeApp: AppData | null;
+  activeWindow: WindowInfo;
   private activeWindowSubscription: number | null;
   private gkl: GlobalKeyboardListener;
+  private isWatchingForKeyboardEvents = false;
 
   constructor() {
-    this.activeApp = null;
+    this.activeWindow = activeWindow();
     this.activeWindowSubscription = null;
     this.gkl = new GlobalKeyboardListener();
   }
 
   private globalKeyListener: IGlobalKeyListener = (event) => {
-    if (event.state === "DOWN") {
-      console.log(this.activeApp?.name, event.rawKey);
+    if (event.state !== "DOWN") {
+      return;
+    }
+
+    // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
+    try {
+      const window = activeWindow();
+
+      console.log({
+        name: window.info.name,
+        title: window.title,
+        url: window.url,
+        key: event.rawKey?.name,
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  private watch(app: AppData) {
-    console.log(`Watch ${app.name}`);
+  private watchKeyboardEvents() {
+    this.isWatchingForKeyboardEvents = true;
     this.gkl.addListener(this.globalKeyListener);
   }
 
-  private unwatch(app: AppData) {
-    console.log(`Unwatch ${app.name}`);
+  private unwatchKeyboardEvents() {
+    this.isWatchingForKeyboardEvents = false;
     this.gkl.removeListener(this.globalKeyListener);
   }
 
   start() {
     this.activeWindowSubscription = subscribeActiveWindow(
       (windowInfo: WindowInfo) => {
-        if (windowInfo.info.path === this.activeApp?.path) {
-          return;
+        if (this.isWatchingForKeyboardEvents) {
+          this.unwatchKeyboardEvents();
         }
 
-        console.log(
-          `App changed from ${this.activeApp?.name ?? "nil"} to ${windowInfo.info.name}`,
-        );
-        if (this.activeApp) {
-          this.unwatch(this.activeApp);
-        }
-
-        this.activeApp = {
-          name: windowInfo.info.name,
-          path: windowInfo.info.path,
-        };
+        this.activeWindow = windowInfo;
 
         const appSettings = getAppSettings();
         const isMonitored =
           appSettings.monitoredApps &&
-          appSettings.monitoredApps.includes(this.activeApp.path);
+          appSettings.monitoredApps.includes(this.activeWindow.info.path);
 
         if (isMonitored) {
-          this.watch(this.activeApp);
+          this.watchKeyboardEvents();
         }
       },
     );
