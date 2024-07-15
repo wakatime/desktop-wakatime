@@ -78,5 +78,3 @@ export class Watcher {
     }
   }
 }
-
-export const watcher = new Watcher();

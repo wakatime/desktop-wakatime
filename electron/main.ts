@@ -16,8 +16,8 @@ import {
   GET_INSTALLED_APPS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
 } from "./keys";
-import { watcher } from "./watchers/watcher";
 import { SettingsManager } from "./helpers/settings-manager";
+import { Watcher } from "./watchers/watcher";
 
 // The built directory structure
 //
@@ -41,6 +41,7 @@ const isMacOS = process.platform === "darwin";
 let settingsWindow: BrowserWindow | null = null;
 let monitoredAppsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
+let watcher: Watcher | null = null;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -202,11 +203,12 @@ app.on("activate", () => {});
 app.whenReady().then(async () => {
   createTray();
   await getAvailableApps();
+  watcher = new Watcher();
   watcher.start();
 });
 
 app.on("quit", () => {
-  watcher.stop();
+  watcher?.stop();
 });
 
 ipcMain.on(GET_SETTINGS_IPC_KEY, (event) => {
