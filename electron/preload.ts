@@ -1,8 +1,9 @@
-import { ipcRenderer, contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
+
 import {
-  GET_SETTINGS_IPC_KEY,
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
+  GET_SETTINGS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
 } from "./keys";
 

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { Switch } from "~/components/ui/switch";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { ImageIcon, Loader2 } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Switch } from "~/components/ui/switch";
 import { AppData } from "~/types/app-info";
 import { useApps, useSettings, useSettingsMutation } from "~/utils/queries";
 

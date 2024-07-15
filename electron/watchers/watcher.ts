@@ -1,15 +1,13 @@
+import type { IGlobalKeyListener } from "node-global-key-listener";
 import {
+  activeWindow,
   subscribeActiveWindow,
   unsubscribeActiveWindow,
   WindowInfo,
-  activeWindow,
 } from "@miniben90/x-win";
-import { SettingsManager } from "../helpers/settings-manager";
+import { GlobalKeyboardListener } from "node-global-key-listener";
 
-import {
-  GlobalKeyboardListener,
-  type IGlobalKeyListener,
-} from "node-global-key-listener";
+import { SettingsManager } from "../helpers/settings-manager";
 
 export class Watcher {
   activeWindow: WindowInfo;

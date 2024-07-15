@@ -1,6 +1,6 @@
-import { getInstalledApps as getInstalledAppsWindows } from "./windows";
-import { getInstalledApps as getInstalledAppsMac } from "./mac";
 import { store } from "../../store";
+import { getInstalledApps as getInstalledAppsMac } from "./mac";
+import { getInstalledApps as getInstalledAppsWindows } from "./windows";
 
 export async function getInstalledApps(): Promise<Record<string, string>[]> {
   const cachedApps = store.get("installed-apps");

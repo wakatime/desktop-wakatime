@@ -1,6 +1,6 @@
-import { app } from "electron";
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
+import { app } from "electron";
 import { z } from "zod";
 
 export const settingsSchema = z.object({

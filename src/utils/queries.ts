@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import type { Settings } from "../../electron/helpers/settings-manager";
 
 export const useSettings = () => {

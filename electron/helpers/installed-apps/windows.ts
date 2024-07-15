@@ -1,7 +1,8 @@
-import path from "node:path";
 import fs from "node:fs";
-import Winreg from "winreg";
+import path from "node:path";
 import { extractIcon } from "@inithink/exe-icon-extractor";
+import Winreg from "winreg";
+
 import { store } from "../../store";
 
 export async function getFilePath(

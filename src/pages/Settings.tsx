@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { useDebounceCallback } from "usehooks-ts";
-import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
-import { Checkbox } from "~/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
+import { useDebounceCallback } from "usehooks-ts";
+
 import type { Settings } from "../../electron/helpers/settings-manager";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   useAppVersion,
   useSettings,

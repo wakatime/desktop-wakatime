@@ -1,3 +1,4 @@
+import path from "node:path";
 import {
   app,
   BrowserWindow,
@@ -8,15 +9,15 @@ import {
   shell,
   Tray,
 } from "electron";
-import path from "node:path";
+
 import { getAvailableApps } from "./helpers";
+import { SettingsManager } from "./helpers/settings-manager";
 import {
-  GET_SETTINGS_IPC_KEY,
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
+  GET_SETTINGS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
 } from "./keys";
-import { SettingsManager } from "./helpers/settings-manager";
 import { Watcher } from "./watchers/watcher";
 
 // The built directory structure

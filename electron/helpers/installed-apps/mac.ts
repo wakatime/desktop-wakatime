@@ -1,8 +1,8 @@
 import { exec, spawnSync } from "child_process";
-import plist from "plist";
 import fs from "node:fs";
 import path from "node:path";
 import iconutil from "iconutil";
+import plist from "plist";
 
 export async function getInstalledApps(directory = "/Applications") {
   const directoryContents = await getDirectoryContents(directory);
