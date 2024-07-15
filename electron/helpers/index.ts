@@ -1,6 +1,5 @@
-import { store } from "electron/store";
-
 import type { AppData } from "~/types/app-info";
+import { store } from "../store";
 import { allApps } from "../watchers";
 import { getInstalledApps } from "./installed-apps";
 import { getAppIconMac } from "./installed-apps/mac";
