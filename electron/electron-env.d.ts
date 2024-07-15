@@ -32,7 +32,7 @@ interface Window {
       reset: () => import("./helpers/settings-manager").Settings;
     };
     getAppVersion: () => string;
-    getInstalledApps: () => import("../src/types/app-info").AppData[];
+    getInstalledApps: () => import("./helpers/apps-manager").AppData[];
   };
 }
 

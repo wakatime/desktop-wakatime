@@ -15,13 +15,9 @@ export class Store {
     this.records[key] = value;
   }
 
-  get<T = unknown>(key: string, defaultValue?: T) {
-    let value = this.records[key];
-    if (value === undefined && defaultValue !== undefined) {
-      this.records[key] = defaultValue;
-      value = defaultValue;
-    }
-    return value as T;
+  get<T = unknown>(key: string) {
+    let value = this.records[key] as T | undefined;
+    return value;
   }
 
   clear() {

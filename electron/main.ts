@@ -10,11 +10,11 @@ import {
   Tray,
 } from "electron";
 
-import { getAvailableApps } from "./helpers";
+import { AppsManager } from "./helpers/apps-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import {
   GET_APP_VERSION_IPC_KEY,
-  GET_INSTALLED_APPS_IPC_KEY,
+  GET_INSTALLED_APPS_IPC_KEY as GET_APPS_IPC_KEY,
   GET_SETTINGS_IPC_KEY,
   RESET_SETTINGS_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
@@ -205,7 +205,7 @@ app.on("activate", () => {});
 
 app.whenReady().then(async () => {
   createTray();
-  await getAvailableApps();
+  await AppsManager.load();
   const wakatime = new Wakatime();
   watcher = new Watcher(wakatime);
   watcher.start();
@@ -227,14 +227,8 @@ ipcMain.on(RESET_SETTINGS_IPC_KEY, (event) => {
   event.returnValue = SettingsManager.reset();
 });
 
-ipcMain.on(GET_INSTALLED_APPS_IPC_KEY, async (event) => {
-  try {
-    const apps = await getAvailableApps();
-    event.returnValue = apps;
-  } catch (error) {
-    console.error(error);
-    event.returnValue = [];
-  }
+ipcMain.on(GET_APPS_IPC_KEY, (event) => {
+  event.returnValue = AppsManager.getApps();
 });
 
 ipcMain.on(GET_APP_VERSION_IPC_KEY, (event) => {

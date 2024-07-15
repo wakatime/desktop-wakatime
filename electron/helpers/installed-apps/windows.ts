@@ -5,7 +5,7 @@ import Winreg from "winreg";
 
 import { store } from "../../store";
 
-export async function getFilePath(
+export function getFilePathWindows(
   appData: Record<string, string>,
   fileName?: string,
 ) {

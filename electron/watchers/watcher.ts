@@ -7,7 +7,7 @@ import {
 } from "@miniben90/x-win";
 import { GlobalKeyboardListener } from "node-global-key-listener";
 
-import { SettingsManager } from "../helpers/settings-manager";
+import { AppsManager } from "../helpers/apps-manager";
 import { Wakatime } from "./wakatime";
 
 export class Watcher {
@@ -32,7 +32,15 @@ export class Watcher {
     try {
       // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
       const window = activeWindow();
-      this.wakatime.sendHeartbeat(window);
+      const app = AppsManager.getApp(window.info.path);
+      if (!app) {
+        return;
+      }
+      this.wakatime.sendHeartbeat(app, {
+        title: window.title,
+        url: window.url,
+        processId: window.info.processId,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -57,9 +65,9 @@ export class Watcher {
         }
 
         this.activeWindow = windowInfo;
-
-        const monitoredApps = SettingsManager.get().monitoredApps;
-        const isMonitored = monitoredApps.includes(this.activeWindow.info.path);
+        const isMonitored = AppsManager.isMonitoredPath(
+          this.activeWindow.info.path,
+        );
 
         if (isMonitored) {
           this.watchKeyboardEvents();

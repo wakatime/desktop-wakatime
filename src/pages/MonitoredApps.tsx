@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { ImageIcon, Loader2 } from "lucide-react";
 
+import type { AppData } from "../../electron/helpers/apps-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Switch } from "~/components/ui/switch";
-import { AppData } from "~/types/app-info";
 import { useApps, useSettings, useSettingsMutation } from "~/utils/queries";
 
 export function Component() {
