@@ -1,66 +1,40 @@
-import { Fragment, useCallback, useLayoutEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Switch } from "~/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { ImageIcon, Loader2 } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AppSettings } from "~/validators/app-settings";
 import { AppData } from "~/types/app-info";
+import { useApps, useSettings, useSettingsMutation } from "~/utils/queries";
 
 export function Component() {
-  const utils = useQueryClient();
-  const appSettingsQuery = useQuery({
-    queryKey: ["app-settings"],
-    queryFn: () => window.ipcRenderer.settings.get(),
-  });
-  const installedAppsQuery = useQuery({
-    queryKey: ["installed-apps"],
-    queryFn: () => window.ipcRenderer.getInstalledApps(),
-  });
-  const setAppSettingsMut = useMutation({
-    mutationFn: async (appSettings: AppSettings) => {
-      utils.setQueryData(["app-settings"], appSettings);
-      await window.ipcRenderer.settings.set(appSettings);
-    },
-    onSettled: () => {
-      utils.invalidateQueries({
-        queryKey: ["app-settings"],
-      });
-    },
-  });
+  const settingsQuery = useSettings();
+  const appsQuery = useApps();
+  const setSettingsMut = useSettingsMutation();
 
   const monitoredApps = useMemo(
-    () => appSettingsQuery.data?.monitoredApps ?? [],
-    [appSettingsQuery.data?.monitoredApps],
+    () => settingsQuery.data?.monitoredApps ?? [],
+    [settingsQuery.data?.monitoredApps],
   );
 
   const onMonitorAppChange = useCallback(
     (app: AppData, monitor: boolean) => {
-      if (!appSettingsQuery.isSuccess) {
-        return;
+      if (monitor && !monitoredApps.includes(app.path)) {
+        setSettingsMut.mutate({ monitoredApps: [...monitoredApps, app.path] });
       }
-      let monitoredApps = appSettingsQuery.data.monitoredApps ?? [];
-      if (monitor && (!monitoredApps || !monitoredApps.includes(app.path))) {
-        monitoredApps = [...monitoredApps, app.path];
-      } else if (
-        !monitor &&
-        monitoredApps &&
-        monitoredApps.includes(app.path)
-      ) {
-        monitoredApps = monitoredApps.filter((item) => item !== app.path);
+
+      if (!monitor && monitoredApps.includes(app.path)) {
+        setSettingsMut.mutate({
+          monitoredApps: monitoredApps.filter((item) => item !== app.path),
+        });
       }
-      setAppSettingsMut.mutate({
-        ...appSettingsQuery.data,
-        monitoredApps,
-      });
     },
-    [appSettingsQuery.data, appSettingsQuery.isSuccess, setAppSettingsMut],
+    [monitoredApps, setSettingsMut],
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.document.title = "Monitored Apps";
   }, []);
 
-  if (installedAppsQuery.isPending || appSettingsQuery.isPending) {
+  if (appsQuery.isPending || settingsQuery.isPending) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -68,27 +42,27 @@ export function Component() {
     );
   }
 
-  if (installedAppsQuery.isError) {
+  if (appsQuery.isError) {
     return (
       <div className="p-4 text-muted-foreground">
-        <p>{installedAppsQuery.error.message}</p>
+        <p>{appsQuery.error.message}</p>
       </div>
     );
   }
 
-  if (appSettingsQuery.isError) {
+  if (settingsQuery.isError) {
     return (
       <div className="p-4 text-muted-foreground">
-        <p>{appSettingsQuery.error.message}</p>
+        <p>{settingsQuery.error.message}</p>
       </div>
     );
   }
 
   return (
-    <div>
-      {installedAppsQuery.data.map((app, i) => {
+    <div className="flex flex-col">
+      {appsQuery.data.map((app, i) => {
         return (
-          <Fragment key={app.path}>
+          <div key={app.path}>
             <div className="flex h-14 items-center gap-4 px-4">
               <Avatar className="h-8 w-8 rounded-none bg-transparent">
                 <AvatarImage src={app.icon ?? undefined} />
@@ -104,12 +78,12 @@ export function Component() {
                 }}
               />
             </div>
-            {i < installedAppsQuery.data.length - 1 && (
+            {i < appsQuery.data.length - 1 && (
               <div className="pl-[4rem]">
                 <hr className="h-px bg-border" />
               </div>
             )}
-          </Fragment>
+          </div>
         );
       })}
     </div>

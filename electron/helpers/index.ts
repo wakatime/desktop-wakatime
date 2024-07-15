@@ -1,9 +1,10 @@
-import { allApps } from "../watchers";
 import { getInstalledApps } from "./installed-apps";
 import { getIconFromWindows, getFilePath } from "./installed-apps/windows";
 import { getAppIconMac } from "./installed-apps/mac";
+import type { AppData } from "~/types/app-info";
+import { allApps } from "../watchers";
 
-export async function getAvailableApps() {
+export async function getAvailableApps(): Promise<AppData[]> {
   const installedApps = await getInstalledApps();
 
   return (
@@ -61,5 +62,5 @@ export async function getAvailableApps() {
         return null;
       }),
     )
-  ).filter((app) => !!app);
+  ).filter((app) => !!app) as AppData[];
 }

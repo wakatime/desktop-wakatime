@@ -1,46 +1,33 @@
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { useDebounceCallback } from "usehooks-ts";
-import { AppSettings } from "../validators/app-settings";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Checkbox } from "~/components/ui/checkbox";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import type { Settings } from "../../electron/helpers/settings-manager";
+import {
+  useAppVersion,
+  useSettings,
+  useSettingsMutation,
+} from "~/utils/queries";
 
 export function Component() {
-  const utils = useQueryClient();
-  const appSettingsQuery = useQuery({
-    queryKey: ["app-settings"],
-    queryFn: () => window.ipcRenderer.settings.get(),
-  });
-  const setAppSettingsMut = useMutation({
-    mutationFn: async (appSettings: AppSettings) => {
-      utils.setQueryData(["app-settings"], appSettings);
-      await window.ipcRenderer.settings.set(appSettings);
-    },
-    onSettled: () => {
-      utils.invalidateQueries({
-        queryKey: ["app-settings"],
-      });
-    },
-  });
-  const appVersionQuery = useQuery({
-    queryKey: ["app-version"],
-    queryFn: () => window.ipcRenderer.getAppVersion(),
-  });
+  const settingsQuery = useSettings();
+  const appVersionQuery = useAppVersion();
+  const setSettingsMut = useSettingsMutation();
 
   const debouncedSetAppSettings = useDebounceCallback(
-    (setSettings: AppSettings) => {
-      setAppSettingsMut.mutate(setSettings);
+    (settings: Partial<Settings>) => {
+      setSettingsMut.mutate(settings);
     },
     200,
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.document.title = "Settings";
   }, []);
 
-  if (appSettingsQuery.isPending) {
+  if (settingsQuery.isPending) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -48,10 +35,10 @@ export function Component() {
     );
   }
 
-  if (appSettingsQuery.isError) {
+  if (settingsQuery.isError) {
     return (
       <div className="p-4 text-muted-foreground">
-        <p>{appSettingsQuery.error.message}</p>
+        <p>{settingsQuery.error.message}</p>
       </div>
     );
   }
@@ -63,11 +50,10 @@ export function Component() {
           <Label htmlFor="wakatime-api-key">Wakatime API Key:</Label>
           <Input
             id="wakatime-api-key"
-            defaultValue={appSettingsQuery.data.apiKey ?? ""}
+            defaultValue={settingsQuery.data.apiKey ?? ""}
             onChange={(e) =>
               debouncedSetAppSettings({
-                ...appSettingsQuery.data,
-                apiKey: e.target.value || null,
+                apiKey: e.target.value,
               })
             }
           />
@@ -77,11 +63,10 @@ export function Component() {
         <fieldset className="flex gap-2">
           <Checkbox
             id="launch-at-login"
-            checked={appSettingsQuery.data.launchAtLogin === true}
+            checked={settingsQuery.data.launchAtLogIn}
             onCheckedChange={(checked) => {
-              setAppSettingsMut.mutate({
-                ...appSettingsQuery.data,
-                launchAtLogin: checked === true,
+              setSettingsMut.mutate({
+                launchAtLogIn: checked === true,
               });
             }}
             className="mt-1"

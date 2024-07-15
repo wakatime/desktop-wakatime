@@ -25,10 +25,10 @@ declare namespace NodeJS {
 interface Window {
   ipcRenderer: import("electron").IpcRenderer & {
     settings: {
-      get: () => import("../src/validators/app-settings").AppSettings;
+      get: () => import("./helpers/settings-manager").Settings;
       set: (
-        settings: import("../src/validators/app-settings").AppSettings,
-      ) => void;
+        settings: Partial<import("./helpers/settings-manager").Settings>,
+      ) => import("./helpers/settings-manager").Settings;
     };
     getAppVersion: () => string;
     getInstalledApps: () => import("../src/types/app-info").AppData[];

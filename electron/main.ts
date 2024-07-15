@@ -9,15 +9,15 @@ import {
   Tray,
 } from "electron";
 import path from "node:path";
-import { getAppSettings, setAppSettings } from "./helpers/settings";
 import { getAvailableApps } from "./helpers";
 import {
-  GET_APP_SETTINGS_IPC_KEY,
+  GET_SETTINGS_IPC_KEY,
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
-  SET_APP_SETTINGS_IPC_KEY,
+  SET_SETTINGS_IPC_KEY,
 } from "./keys";
 import { watcher } from "./watchers/watcher";
+import { SettingsManager } from "./helpers/settings-manager";
 
 // The built directory structure
 //
@@ -209,13 +209,12 @@ app.on("quit", () => {
   watcher.stop();
 });
 
-ipcMain.on(GET_APP_SETTINGS_IPC_KEY, (event) => {
-  const settings = getAppSettings();
-  event.returnValue = settings;
+ipcMain.on(GET_SETTINGS_IPC_KEY, (event) => {
+  event.returnValue = SettingsManager.get();
 });
 
-ipcMain.on(SET_APP_SETTINGS_IPC_KEY, (_, value) => {
-  setAppSettings(value);
+ipcMain.on(SET_SETTINGS_IPC_KEY, (_, value) => {
+  SettingsManager.set(value);
 });
 
 ipcMain.on(GET_INSTALLED_APPS_IPC_KEY, async (event) => {

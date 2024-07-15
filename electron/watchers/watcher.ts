@@ -4,7 +4,7 @@ import {
   WindowInfo,
   activeWindow,
 } from "@miniben90/x-win";
-import { getAppSettings } from "../helpers/settings";
+import { SettingsManager } from "../helpers/settings-manager";
 
 import {
   GlobalKeyboardListener,
@@ -62,10 +62,8 @@ export class Watcher {
 
         this.activeWindow = windowInfo;
 
-        const appSettings = getAppSettings();
-        const isMonitored =
-          appSettings.monitoredApps &&
-          appSettings.monitoredApps.includes(this.activeWindow.info.path);
+        const monitoredApps = SettingsManager.get().monitoredApps;
+        const isMonitored = monitoredApps.includes(this.activeWindow.info.path);
 
         if (isMonitored) {
           this.watchKeyboardEvents();

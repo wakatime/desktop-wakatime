@@ -1,9 +1,9 @@
 import { ipcRenderer, contextBridge } from "electron";
 import {
-  GET_APP_SETTINGS_IPC_KEY,
+  GET_SETTINGS_IPC_KEY,
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
-  SET_APP_SETTINGS_IPC_KEY,
+  SET_SETTINGS_IPC_KEY,
 } from "./keys";
 
 // --------- Expose some API to the Renderer process ---------
@@ -28,10 +28,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   settings: {
     get() {
-      return ipcRenderer.sendSync(GET_APP_SETTINGS_IPC_KEY);
+      return ipcRenderer.sendSync(GET_SETTINGS_IPC_KEY);
     },
     set(settings: string) {
-      ipcRenderer.send(SET_APP_SETTINGS_IPC_KEY, settings);
+      ipcRenderer.send(SET_SETTINGS_IPC_KEY, settings);
     },
   },
   getInstalledApps() {
