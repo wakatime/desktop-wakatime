@@ -11,6 +11,7 @@ import {
 } from "electron";
 
 import { AppsManager } from "./helpers/apps-manager";
+import { DependenciesManager } from "./helpers/dependencies-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import {
   GET_APP_VERSION_IPC_KEY,
@@ -204,8 +205,9 @@ app.on("window-all-closed", () => {});
 app.on("activate", () => {});
 
 app.whenReady().then(async () => {
-  createTray();
+  await DependenciesManager.installDependencies();
   await AppsManager.load();
+  createTray();
   const wakatime = new Wakatime();
   watcher = new Watcher(wakatime);
   watcher.start();

@@ -10,6 +10,7 @@
     "format": "prettier . --write"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.614.0",
     "@inithink/exe-icon-extractor": "^1.0.5",
     "@miniben90/x-win": "^1.10.0",
     "@radix-ui/react-avatar": "^1.1.0",
@@ -24,6 +25,7 @@
     "electron-store": "^10.0.0",
     "iconutil": "^1.0.2",
     "lucide-react": "^0.399.0",
+    "node-fetch": "^3.3.2",
     "node-global-key-listener": "^0.3.0",
     "plist": "^3.1.0",
     "react": "^18.2.0",
@@ -31,6 +33,7 @@
     "react-router-dom": "^6.24.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "unzipper": "^0.12.2",
     "usehooks-ts": "^3.1.0",
     "winreg": "^1.2.5",
     "zod": "^3.23.8"
@@ -41,6 +44,7 @@
     "@types/plist": "^3.0.5",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.23",
+    "@types/unzipper": "^0.10.9",
     "@types/winreg": "^1.2.36",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
