@@ -1,7 +1,14 @@
 import type { AppData } from "../helpers/apps-manager";
 import { AppsManager } from "../helpers/apps-manager";
+import { Logger } from "../helpers/logger";
 
 export class Wakatime {
+  private logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
   private shouldSendHeartbeat(app: AppData) {
     const isMonitored = AppsManager.isMonitoredApp(app);
     if (!isMonitored) {

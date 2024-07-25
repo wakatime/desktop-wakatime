@@ -11,7 +11,8 @@ import {
 } from "electron";
 
 import { AppsManager } from "./helpers/apps-manager";
-import { DependenciesManager } from "./helpers/dependencies-manager";
+import { Dependencies } from "./helpers/dependencies";
+import { Logger, LogLevel } from "./helpers/logger";
 import { SettingsManager } from "./helpers/settings-manager";
 import {
   GET_APP_VERSION_IPC_KEY,
@@ -46,6 +47,9 @@ let settingsWindow: BrowserWindow | null = null;
 let monitoredAppsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let watcher: Watcher | null = null;
+let wakatime: Wakatime;
+let dependencies: Dependencies;
+let logger: Logger;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -205,11 +209,16 @@ app.on("window-all-closed", () => {});
 app.on("activate", () => {});
 
 app.whenReady().then(async () => {
-  await DependenciesManager.installDependencies();
-  await AppsManager.load();
-  createTray();
-  const wakatime = new Wakatime();
+  logger = new Logger(LogLevel.INFO);
+  dependencies = new Dependencies(logger);
+  wakatime = new Wakatime(logger);
   watcher = new Watcher(wakatime);
+
+  await dependencies.installDependencies();
+  await AppsManager.load();
+
+  createTray();
+
   watcher.start();
 });
 
