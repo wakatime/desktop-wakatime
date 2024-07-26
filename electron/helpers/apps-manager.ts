@@ -11,7 +11,6 @@ import {
   getFilePathWindows,
   getIconFromWindows,
 } from "./installed-apps/windows";
-import { SettingsManager } from "./settings-manager";
 
 const APPS_KEY = "apps";
 
@@ -109,12 +108,10 @@ export abstract class AppsManager {
       const content = appsFileContentSchema.parse(JSON.parse(data));
       if (!isBefore(new Date(content.storedAt), subHours(new Date(), 1))) {
         store.set(APPS_KEY, content.apps);
-        console.log("APPS - CACHE HIT");
         return;
       }
     } catch (error) {}
 
-    console.log("APPS - CACHE MISS");
     const apps = await getApps();
     store.set(APPS_KEY, apps);
 
@@ -132,42 +129,8 @@ export abstract class AppsManager {
   static getApps() {
     return store.get<AppData[]>(APPS_KEY) ?? [];
   }
+
   static getApp(path: string) {
     return this.getApps().find((app) => app.path === path);
-  }
-
-  static getMonitoredApps() {
-    const apps = this.getApps();
-    const monitoredAppPaths = SettingsManager.get().monitoredApps;
-    return apps.filter((app) => monitoredAppPaths.includes(app.path));
-  }
-
-  static isMonitoredPath(path: string) {
-    return SettingsManager.get().monitoredApps.includes(path);
-  }
-
-  static isMonitoredApp(app: AppData) {
-    return this.isMonitoredPath(app.path);
-  }
-
-  static setMonitoredPath(path: string, monitor: boolean) {
-    const isMonitoredAlready = this.isMonitoredPath(path);
-    if (monitor && !isMonitoredAlready) {
-      SettingsManager.set({
-        monitoredApps: [...SettingsManager.get().monitoredApps, path],
-      });
-    }
-
-    if (!monitor && isMonitoredAlready) {
-      SettingsManager.set({
-        monitoredApps: SettingsManager.get().monitoredApps.filter(
-          (ap) => ap !== path,
-        ),
-      });
-    }
-  }
-
-  static setMonitoredApp(app: AppData, monitor: boolean) {
-    this.setMonitoredPath(app.path, monitor);
   }
 }

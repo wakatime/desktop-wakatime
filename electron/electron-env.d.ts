@@ -24,13 +24,6 @@ declare namespace NodeJS {
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
   ipcRenderer: import("electron").IpcRenderer & {
-    settings: {
-      get: () => import("./helpers/settings-manager").Settings;
-      set: (
-        settings: Partial<import("./helpers/settings-manager").Settings>,
-      ) => import("./helpers/settings-manager").Settings;
-      reset: () => import("./helpers/settings-manager").Settings;
-    };
     getSetting: (section: string, key: string, internal?: boolean) => string;
     setSetting: (
       section: string,

@@ -1,19 +1,10 @@
 import type { AppData } from "../helpers/apps-manager";
-import { AppsManager } from "../helpers/apps-manager";
-import { ConfigFile } from "../helpers/config-file";
-import { Logger } from "../helpers/logger";
+import { MonitoringManager } from "../helpers/monitoring-manager";
+import { Logging } from "../utils/logging";
 
 export class Wakatime {
-  private logger: Logger;
-  private configFile: ConfigFile;
-
-  constructor(logger: Logger, configFile: ConfigFile) {
-    this.logger = logger;
-    this.configFile = configFile;
-  }
-
   private shouldSendHeartbeat(app: AppData) {
-    const isMonitored = AppsManager.isMonitoredApp(app);
+    const isMonitored = MonitoringManager.isMonitored(app.path);
     if (!isMonitored) {
       return false;
     }
@@ -31,6 +22,6 @@ export class Wakatime {
     if (!this.shouldSendHeartbeat(app)) {
       return;
     }
-    console.log("Send Heartbeat: " + app.name);
+    Logging.instance().log(`Send Heartbeat: ${app.name}`);
   }
 }

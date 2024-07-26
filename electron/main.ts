@@ -13,15 +13,11 @@ import {
 import { AppsManager } from "./helpers/apps-manager";
 import { ConfigFile } from "./helpers/config-file";
 import { Dependencies } from "./helpers/dependencies";
-import { Logger, LogLevel } from "./helpers/logger";
-import { SettingsManager } from "./helpers/settings-manager";
 import {
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY as GET_APPS_IPC_KEY,
-  GET_SETTINGS_IPC_KEY,
-  RESET_SETTINGS_IPC_KEY,
-  SET_SETTINGS_IPC_KEY,
 } from "./utils/constants";
+import { Logging } from "./utils/logging";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
 
@@ -50,8 +46,6 @@ let tray: Tray | null = null;
 let watcher: Watcher | null = null;
 let wakatime: Wakatime;
 let dependencies: Dependencies;
-let logger: Logger;
-let configFile: ConfigFile;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -211,10 +205,13 @@ app.on("window-all-closed", () => {});
 app.on("activate", () => {});
 
 app.whenReady().then(async () => {
-  logger = new Logger(LogLevel.INFO);
-  configFile = new ConfigFile(logger);
-  dependencies = new Dependencies(logger, configFile);
-  wakatime = new Wakatime(logger, configFile);
+  // TODO: Check if properties if we should activate logging to file or not
+  Logging.instance().activateLoggingToFile();
+
+  Logging.instance().log("Starting Wakatime");
+
+  dependencies = new Dependencies();
+  wakatime = new Wakatime();
   watcher = new Watcher(wakatime);
 
   // TODO: Move them to a background task
@@ -227,27 +224,14 @@ app.whenReady().then(async () => {
 });
 
 app.on("quit", () => {
+  Logging.instance().log("WakaTime will terminate");
   watcher?.stop();
 });
-
-// Start: Will remove these
-ipcMain.on(GET_SETTINGS_IPC_KEY, (event) => {
-  event.returnValue = SettingsManager.get();
-});
-
-ipcMain.on(SET_SETTINGS_IPC_KEY, (event, value) => {
-  event.returnValue = SettingsManager.set(value);
-});
-
-ipcMain.on(RESET_SETTINGS_IPC_KEY, (event) => {
-  event.returnValue = SettingsManager.reset();
-});
-// End
 
 ipcMain.on(
   "get-setting",
   (event, section: string, key: string, internal: boolean = false) => {
-    event.returnValue = configFile.getSettings(section, key, internal);
+    event.returnValue = ConfigFile.getSettings(section, key, internal);
   },
 );
 
@@ -260,7 +244,7 @@ ipcMain.on(
     value: string,
     internal: boolean = false,
   ) => {
-    configFile.setSettings(section, key, value, internal);
+    ConfigFile.setSettings(section, key, value, internal);
   },
 );
 

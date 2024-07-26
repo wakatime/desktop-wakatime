@@ -4,10 +4,7 @@ import {
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
   GET_SETTING_IPC_KEY,
-  GET_SETTINGS_IPC_KEY,
-  RESET_SETTINGS_IPC_KEY,
   SET_SETTING_IPC_KEY,
-  SET_SETTINGS_IPC_KEY,
 } from "./utils/constants";
 
 // --------- Expose some API to the Renderer process ---------
@@ -29,17 +26,6 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);
-  },
-  settings: {
-    get() {
-      return ipcRenderer.sendSync(GET_SETTINGS_IPC_KEY);
-    },
-    set(settings: string) {
-      ipcRenderer.send(SET_SETTINGS_IPC_KEY, settings);
-    },
-    reset() {
-      ipcRenderer.send(RESET_SETTINGS_IPC_KEY);
-    },
   },
   getSetting(section: string, key: string, internal = false) {
     return ipcRenderer.sendSync(GET_SETTING_IPC_KEY, section, key, internal);

@@ -3,32 +3,28 @@ import fs, { createWriteStream } from "node:fs";
 import path from "node:path";
 import { pipeline } from "node:stream";
 import { promisify } from "node:util";
-import { addHours, getUnixTime, isAfter } from "date-fns";
+import { addHours, formatDistanceToNow, getUnixTime, isAfter } from "date-fns";
 import fetch from "node-fetch";
 import unzpier from "unzipper";
 import { z } from "zod";
 
+import { getResourcesFolderPath } from "../utils";
+import { Logging, LogLevel } from "../utils/logging";
 import { ConfigFile } from "./config-file";
-import { Logger } from "./logger";
 
 const streamPipeline = promisify(pipeline);
 
 export class Dependencies {
-  private logger: Logger;
-  private configFile: ConfigFile;
-
-  constructor(logger: Logger, configFile: ConfigFile) {
-    this.logger = logger;
-    this.configFile = configFile;
-  }
-
   async installDependencies() {
     try {
       if (!(await this.isCLILatest())) {
         await this.downloadCLI();
       }
     } catch (error) {
-      this.logger.error(`Failed to install dependencies: ${error}`);
+      Logging.instance().log(
+        `Failed to install dependencies: ${error}`,
+        LogLevel.ERROR,
+      );
     }
   }
 
@@ -37,18 +33,18 @@ export class Dependencies {
     const arch = this.getArch();
     const platfrom = this.getPlatfrom();
     return path.join(
-      this.configFile.resourcesFolder,
+      getResourcesFolderPath(),
       `wakatime-cli-${platfrom}-${arch}${ext}`,
     );
   }
 
   private async getLatestCLIVersion(): Promise<string | null> {
-    const lastModified = this.configFile.getSettings(
+    const lastModified = ConfigFile.getSettings(
       "internal",
       "cli_version_last_modified",
       true,
     );
-    const currentVersion = this.configFile.getSettings(
+    const currentVersion = ConfigFile.getSettings(
       "internal",
       "cli_version",
       true,
@@ -68,7 +64,7 @@ export class Dependencies {
     const data = await res.json();
 
     const now = getUnixTime(new Date());
-    this.configFile.setSettings(
+    ConfigFile.setSettings(
       "internal",
       "cli_version_last_accessed",
       String(now),
@@ -83,18 +79,13 @@ export class Dependencies {
       lastModified === res.headers.get("Last-Modified")
     ) {
       const release = z.object({ tag_name: z.string() }).parse(data);
-      this.configFile.setSettings(
+      ConfigFile.setSettings(
         "internal",
         "cli_version_last_modified",
         lastModified,
         true,
       );
-      this.configFile.setSettings(
-        "internal",
-        "cli_version",
-        release.tag_name,
-        true,
-      );
+      ConfigFile.setSettings("internal", "cli_version", release.tag_name, true);
       return release.tag_name;
     }
 
@@ -136,14 +127,14 @@ export class Dependencies {
       version = match[0];
     }
 
-    const accessed = this.configFile.getSettings(
+    const accessed = ConfigFile.getSettings(
       "internal",
       "cli_version_last_accessed",
       true,
     );
     if (accessed && isAfter(new Date(), addHours(new Date(accessed), 4))) {
-      this.logger.info(
-        "Skip checking for wakatime-cli updates because recently checked (now - accessed) seconds ago",
+      Logging.instance().log(
+        `Skip checking for wakatime-cli updates because recently checked ${formatDistanceToNow(new Date(accessed), { addSuffix: true })}`,
       );
       return true;
     }
@@ -165,17 +156,17 @@ export class Dependencies {
     const platfrom = this.getPlatfrom();
 
     const url = `https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-${platfrom}-${arch}.zip`;
-    const zipFile = path.join(
-      this.configFile.resourcesFolder,
-      "wakatime-cli.zip",
-    );
+    const zipFile = path.join(getResourcesFolderPath(), "wakatime-cli.zip");
     const cli = this.getCLIPath();
 
     if (fs.existsSync(zipFile)) {
       try {
         fs.rmSync(zipFile);
       } catch (error) {
-        console.error(error);
+        Logging.instance().log(
+          `Failed to remove file: ${zipFile}. Error: ${error}`,
+          LogLevel.ERROR,
+        );
       }
     }
 
@@ -194,13 +185,16 @@ export class Dependencies {
       try {
         fs.rmSync(cli);
       } catch (error) {
-        console.error(error);
+        Logging.instance().log(
+          `Failed to remove file: ${cli}. Error: ${error}`,
+          LogLevel.ERROR,
+        );
       }
     }
 
     await new Promise((resolve, reject) => {
       fs.createReadStream(zipFile)
-        .pipe(unzpier.Extract({ path: this.configFile.resourcesFolder }))
+        .pipe(unzpier.Extract({ path: getResourcesFolderPath() }))
         .on("close", resolve)
         .on("error", reject);
     });

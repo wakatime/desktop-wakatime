@@ -1,22 +1,15 @@
 import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useApiKey } from "~/hooks/useApiKey";
-import {
-  useAppVersion,
-  useSettings,
-  useSettingsMutation,
-} from "~/utils/queries";
+import { useAppVersion } from "~/utils/queries";
 
 export function Component() {
   const { apiKey, setApiKey } = useApiKey();
-  const settingsQuery = useSettings();
   const appVersionQuery = useAppVersion();
-  const setSettingsMut = useSettingsMutation();
 
   const debouncedSetApiKey = useDebounceCallback((key: string) => {
     setApiKey(key);
@@ -25,22 +18,6 @@ export function Component() {
   useEffect(() => {
     window.document.title = "Settings";
   }, []);
-
-  if (settingsQuery.isPending) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
-  }
-
-  if (settingsQuery.isError) {
-    return (
-      <div className="p-4 text-muted-foreground">
-        <p>{settingsQuery.error.message}</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-1 flex-col space-y-6 p-4">
@@ -58,16 +35,7 @@ export function Component() {
       </div>
       <div className="space-y-2">
         <fieldset className="flex gap-2">
-          <Checkbox
-            id="launch-at-login"
-            checked={settingsQuery.data.launchAtLogIn}
-            onCheckedChange={(checked) => {
-              setSettingsMut.mutate({
-                launchAtLogIn: checked === true,
-              });
-            }}
-            className="mt-1"
-          />
+          <Checkbox id="launch-at-login" className="mt-1" />
           <Label htmlFor="launch-at-login" className="my-0.5 leading-5">
             Launch at login
           </Label>

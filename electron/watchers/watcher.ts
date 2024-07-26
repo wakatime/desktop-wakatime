@@ -8,18 +8,19 @@ import {
 import { GlobalKeyboardListener } from "node-global-key-listener";
 
 import { AppsManager } from "../helpers/apps-manager";
+import { MonitoringManager } from "../helpers/monitoring-manager";
+import { Logging } from "../utils/logging";
 import { Wakatime } from "./wakatime";
 
 export class Watcher {
   wakatime: Wakatime;
-  activeWindow: WindowInfo;
+  activeWindow?: WindowInfo;
   private activeWindowSubscription: number | null;
   private gkl: GlobalKeyboardListener;
   private isWatchingForKeyboardEvents = false;
 
   constructor(wakatime: Wakatime) {
     this.wakatime = wakatime;
-    this.activeWindow = activeWindow();
     this.activeWindowSubscription = null;
     this.gkl = new GlobalKeyboardListener();
   }
@@ -42,7 +43,7 @@ export class Watcher {
         processId: window.info.processId,
       });
     } catch (error) {
-      console.error(error);
+      Logging.instance().log((error as Error).message);
     }
   };
 
@@ -57,15 +58,18 @@ export class Watcher {
   }
 
   start() {
-    console.log("Started Watching...");
     this.activeWindowSubscription = subscribeActiveWindow(
       (windowInfo: WindowInfo) => {
         if (this.isWatchingForKeyboardEvents) {
           this.unwatchKeyboardEvents();
         }
 
+        Logging.instance().log(
+          `App changed from ${this.activeWindow?.info.name ?? "nil"} to ${windowInfo.info.name}`,
+        );
+
         this.activeWindow = windowInfo;
-        const isMonitored = AppsManager.isMonitoredPath(
+        const isMonitored = MonitoringManager.isMonitored(
           this.activeWindow.info.path,
         );
 
@@ -80,6 +84,5 @@ export class Watcher {
     if (this.activeWindowSubscription !== null) {
       unsubscribeActiveWindow(this.activeWindowSubscription);
     }
-    console.log("Stopped watching");
   }
 }
