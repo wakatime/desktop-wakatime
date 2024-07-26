@@ -11,6 +11,7 @@ import {
 } from "electron";
 
 import { AppsManager } from "./helpers/apps-manager";
+import { ConfigFile } from "./helpers/config-file";
 import { Dependencies } from "./helpers/dependencies";
 import { Logger, LogLevel } from "./helpers/logger";
 import { SettingsManager } from "./helpers/settings-manager";
@@ -50,6 +51,7 @@ let watcher: Watcher | null = null;
 let wakatime: Wakatime;
 let dependencies: Dependencies;
 let logger: Logger;
+let configFile: ConfigFile;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -210,10 +212,12 @@ app.on("activate", () => {});
 
 app.whenReady().then(async () => {
   logger = new Logger(LogLevel.INFO);
-  dependencies = new Dependencies(logger);
-  wakatime = new Wakatime(logger);
+  configFile = new ConfigFile(logger);
+  dependencies = new Dependencies(logger, configFile);
+  wakatime = new Wakatime(logger, configFile);
   watcher = new Watcher(wakatime);
 
+  // TODO: Move them to a background task
   await dependencies.installDependencies();
   await AppsManager.load();
 
