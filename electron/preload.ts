@@ -3,8 +3,10 @@ import { contextBridge, ipcRenderer } from "electron";
 import {
   GET_APP_VERSION_IPC_KEY,
   GET_INSTALLED_APPS_IPC_KEY,
+  GET_SETTING_IPC_KEY,
   GET_SETTINGS_IPC_KEY,
   RESET_SETTINGS_IPC_KEY,
+  SET_SETTING_IPC_KEY,
   SET_SETTINGS_IPC_KEY,
 } from "./utils/constants";
 
@@ -38,6 +40,12 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     reset() {
       ipcRenderer.send(RESET_SETTINGS_IPC_KEY);
     },
+  },
+  getSetting(section: string, key: string, internal = false) {
+    return ipcRenderer.sendSync(GET_SETTING_IPC_KEY, section, key, internal);
+  },
+  setSetting(section: string, key: string, value: string, internal = false) {
+    ipcRenderer.send(SET_SETTING_IPC_KEY, section, key, value, internal);
   },
   getInstalledApps() {
     return ipcRenderer.sendSync(GET_INSTALLED_APPS_IPC_KEY);

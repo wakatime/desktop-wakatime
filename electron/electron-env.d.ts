@@ -31,6 +31,13 @@ interface Window {
       ) => import("./helpers/settings-manager").Settings;
       reset: () => import("./helpers/settings-manager").Settings;
     };
+    getSetting: (section: string, key: string, internal?: boolean) => string;
+    setSetting: (
+      section: string,
+      key: string,
+      value: string,
+      internal?: boolean,
+    ) => string;
     getAppVersion: () => string;
     getInstalledApps: () => import("./helpers/apps-manager").AppData[];
   };

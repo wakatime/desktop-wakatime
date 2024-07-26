@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 
-import type { Settings } from "../../electron/helpers/settings-manager";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useApiKey } from "~/hooks/useApiKey";
 import {
   useAppVersion,
   useSettings,
@@ -13,16 +13,14 @@ import {
 } from "~/utils/queries";
 
 export function Component() {
+  const { apiKey, setApiKey } = useApiKey();
   const settingsQuery = useSettings();
   const appVersionQuery = useAppVersion();
   const setSettingsMut = useSettingsMutation();
 
-  const debouncedSetAppSettings = useDebounceCallback(
-    (settings: Partial<Settings>) => {
-      setSettingsMut.mutate(settings);
-    },
-    200,
-  );
+  const debouncedSetApiKey = useDebounceCallback((key: string) => {
+    setApiKey(key);
+  }, 200);
 
   useEffect(() => {
     window.document.title = "Settings";
@@ -51,12 +49,10 @@ export function Component() {
           <Label htmlFor="wakatime-api-key">Wakatime API Key:</Label>
           <Input
             id="wakatime-api-key"
-            defaultValue={settingsQuery.data.apiKey ?? ""}
-            onChange={(e) =>
-              debouncedSetAppSettings({
-                apiKey: e.target.value,
-              })
-            }
+            defaultValue={apiKey}
+            onChange={(e) => {
+              debouncedSetApiKey(e.target.value);
+            }}
           />
         </fieldset>
       </div>

@@ -14,7 +14,10 @@ export class ConfigFile {
   constructor(logger: Logger) {
     this.logger = logger;
     this.userHome = app.getPath("home");
-    this.resourcesFolder = path.join(this.userHome, ".wakatime-test");
+    this.resourcesFolder = path.join(
+      this.userHome,
+      app.isPackaged ? ".wakatime" : ".wakatime-test",
+    );
 
     if (!fs.existsSync(this.resourcesFolder)) {
       try {
@@ -23,7 +26,10 @@ export class ConfigFile {
         console.error(error);
       }
     }
-    this.filePath = path.join(app.getPath("home"), ".wakatime.cfg");
+    this.filePath = path.join(
+      this.userHome,
+      app.isPackaged ? ".wakatime.cfg" : ".wakatime-test.cfg",
+    );
     this.filePathInternal = path.join(
       this.resourcesFolder,
       "wakatime-internal.cfg",

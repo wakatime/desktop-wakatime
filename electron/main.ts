@@ -230,6 +230,7 @@ app.on("quit", () => {
   watcher?.stop();
 });
 
+// Start: Will remove these
 ipcMain.on(GET_SETTINGS_IPC_KEY, (event) => {
   event.returnValue = SettingsManager.get();
 });
@@ -241,6 +242,27 @@ ipcMain.on(SET_SETTINGS_IPC_KEY, (event, value) => {
 ipcMain.on(RESET_SETTINGS_IPC_KEY, (event) => {
   event.returnValue = SettingsManager.reset();
 });
+// End
+
+ipcMain.on(
+  "get-setting",
+  (event, section: string, key: string, internal: boolean = false) => {
+    event.returnValue = configFile.getSettings(section, key, internal);
+  },
+);
+
+ipcMain.on(
+  "set-setting",
+  (
+    _event,
+    section: string,
+    key: string,
+    value: string,
+    internal: boolean = false,
+  ) => {
+    configFile.setSettings(section, key, value, internal);
+  },
+);
 
 ipcMain.on(GET_APPS_IPC_KEY, (event) => {
   event.returnValue = AppsManager.getApps();
