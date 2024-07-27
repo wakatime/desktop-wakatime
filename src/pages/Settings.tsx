@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  DomainPreferenceType,
+  FilterType,
+  IpcKeys,
+} from "electron/utils/constants";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { Checkbox } from "~/components/ui/checkbox";
@@ -13,7 +18,7 @@ export function Component() {
     () => window.ipcRenderer.getSetting("settings", "api_key") ?? "",
   );
   const [logFilePath] = useState(
-    () => window.ipcRenderer.sendSync("log_file_path") as string,
+    () => window.ipcRenderer.sendSync(IpcKeys.logFilePath) as string,
   );
   const [shouldLogToFile, setShouldLogToFile] = useState(() =>
     window.ipcRenderer.shouldLogToFile(),
@@ -22,19 +27,22 @@ export function Component() {
     window.ipcRenderer.shouldLaunchOnLogIn(),
   );
   const [isBrowserMonitored] = useState(
-    () => window.ipcRenderer.sendSync("is_browser_monitored") as boolean,
+    () => window.ipcRenderer.sendSync(IpcKeys.isBrowserMonitored) as boolean,
   );
   const [domainPreference, setDomainPreference] = useState(
-    () => window.ipcRenderer.sendSync("get_domain_preference") as string,
+    () =>
+      window.ipcRenderer.sendSync(
+        IpcKeys.getDomainPreference,
+      ) as DomainPreferenceType,
   );
   const [filterType, setFilterType] = useState(
-    () => window.ipcRenderer.sendSync("get_filter_type") as string,
+    () => window.ipcRenderer.sendSync(IpcKeys.getFilterType) as FilterType,
   );
   const [denylist, setDenylist] = useState(
-    () => window.ipcRenderer.sendSync("get_denylist") as string,
+    () => window.ipcRenderer.sendSync(IpcKeys.getDenylist) as string,
   );
   const [allowlist, setAllowlist] = useState(
-    () => window.ipcRenderer.sendSync("get_allowlist") as string,
+    () => window.ipcRenderer.sendSync(IpcKeys.getAllowlist) as string,
   );
   const appVersionQuery = useAppVersion();
 
@@ -43,11 +51,11 @@ export function Component() {
     setApiKey(apiKey);
   }, 200);
   const debouncedSetDenylist = useDebounceCallback((value: string) => {
-    window.ipcRenderer.send("set_denylist", value);
+    window.ipcRenderer.send(IpcKeys.setDenylist, value);
     setDenylist(value);
   }, 200);
   const debouncedSetAllowlist = useDebounceCallback((value: string) => {
-    window.ipcRenderer.send("set_allowlist", value);
+    window.ipcRenderer.send(IpcKeys.setAllowlist, value);
     setAllowlist(value);
   }, 200);
 
@@ -61,17 +69,16 @@ export function Component() {
     setShouldLaunchOnLogIn(value);
   }, []);
 
-  const handleDomainPreferenceChange = useCallback((value: string) => {
-    if (["domain", "url"].includes(value)) {
-      window.ipcRenderer.send("set_domain_preference", value);
+  const handleDomainPreferenceChange = useCallback(
+    (value: DomainPreferenceType) => {
+      window.ipcRenderer.send(IpcKeys.setDomainPreference, value);
       setDomainPreference(value);
-    }
-  }, []);
-  const handleFilterTypeChange = useCallback((value: string) => {
-    if (["denylist", "allowlist"].includes(value)) {
-      window.ipcRenderer.send("set_filter_type", value);
-      setFilterType(value);
-    }
+    },
+    [],
+  );
+  const handleFilterTypeChange = useCallback((value: FilterType) => {
+    window.ipcRenderer.send(IpcKeys.setFilterType, value);
+    setFilterType(value);
   }, []);
 
   useEffect(() => {
@@ -132,14 +139,18 @@ export function Component() {
               <Tabs value={domainPreference}>
                 <TabsList>
                   <TabsTrigger
-                    value="domain"
-                    onClick={() => handleDomainPreferenceChange("domain")}
+                    value={DomainPreferenceType.domain}
+                    onClick={() =>
+                      handleDomainPreferenceChange(DomainPreferenceType.domain)
+                    }
                   >
                     Domain Only
                   </TabsTrigger>
                   <TabsTrigger
-                    value="url"
-                    onClick={() => handleDomainPreferenceChange("url")}
+                    value={DomainPreferenceType.url}
+                    onClick={() =>
+                      handleDomainPreferenceChange(DomainPreferenceType.url)
+                    }
                   >
                     Full url
                   </TabsTrigger>
@@ -153,14 +164,14 @@ export function Component() {
               <Tabs value={filterType}>
                 <TabsList>
                   <TabsTrigger
-                    value="denylist"
-                    onClick={() => handleFilterTypeChange("denylist")}
+                    value={FilterType.denylist}
+                    onClick={() => handleFilterTypeChange(FilterType.denylist)}
                   >
                     All except denied sites
                   </TabsTrigger>
                   <TabsTrigger
-                    value="allowlist"
-                    onClick={() => handleFilterTypeChange("allowlist")}
+                    value={FilterType.allowlist}
+                    onClick={() => handleFilterTypeChange(FilterType.allowlist)}
                   >
                     Only allowed sites
                   </TabsTrigger>

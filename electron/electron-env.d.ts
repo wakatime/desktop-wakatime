@@ -38,7 +38,7 @@ interface Window {
     isMonitored: (path: string) => boolean;
     setMonitored: (path: string, monitor: boolean) => void;
     getAppVersion: () => string;
-    getInstalledApps: () => import("./helpers/apps-manager").AppData[];
+    getInstalledApps: () => import("./utils/validators").AppData[];
     shouldLaunchOnLogIn: () => boolean;
     setShouldLaunchOnLogIn: (shouldLaunchOnLogIn: boolean) => void;
     shouldLogToFile: () => boolean;

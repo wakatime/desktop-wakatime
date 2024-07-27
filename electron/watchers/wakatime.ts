@@ -1,4 +1,4 @@
-import type { AppData } from "../helpers/apps-manager";
+import type { AppData } from "../utils/validators";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { Logging } from "../utils/logging";
 

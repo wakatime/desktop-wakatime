@@ -1,13 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-import {
-  GET_APP_VERSION_IPC_KEY,
-  GET_INSTALLED_APPS_IPC_KEY,
-  GET_SETTING_IPC_KEY,
-  IS_MONITORED_KEY,
-  SET_MONITORED_KEY,
-  SET_SETTING_IPC_KEY,
-} from "./utils/constants";
+import { IpcKeys } from "./utils/constants";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -34,33 +27,33 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     return ipcRenderer.invoke(channel, ...omit);
   },
   getSetting(section: string, key: string, internal = false) {
-    return ipcRenderer.sendSync(GET_SETTING_IPC_KEY, section, key, internal);
+    return ipcRenderer.sendSync(IpcKeys.getSetting, section, key, internal);
   },
   setSetting(section: string, key: string, value: string, internal = false) {
-    ipcRenderer.send(SET_SETTING_IPC_KEY, section, key, value, internal);
+    ipcRenderer.send(IpcKeys.setSetting, section, key, value, internal);
   },
   isMonitored(path: string) {
-    return ipcRenderer.sendSync(IS_MONITORED_KEY, path);
+    return ipcRenderer.sendSync(IpcKeys.isMonitored, path);
   },
   setMonitored(path: string, monitor: boolean) {
-    ipcRenderer.send(SET_MONITORED_KEY, path, monitor);
+    ipcRenderer.send(IpcKeys.setMonitored, path, monitor);
   },
   getInstalledApps() {
-    return ipcRenderer.sendSync(GET_INSTALLED_APPS_IPC_KEY);
+    return ipcRenderer.sendSync(IpcKeys.getApps);
   },
   getAppVersion() {
-    return ipcRenderer.sendSync(GET_APP_VERSION_IPC_KEY);
+    return ipcRenderer.sendSync(IpcKeys.getAppVersion);
   },
   shouldLaunchOnLogIn() {
-    return ipcRenderer.sendSync("should_launch_on_login");
+    return ipcRenderer.sendSync(IpcKeys.shouldLaunchOnLogin);
   },
   setShouldLaunchOnLogIn(shouldLaunchOnLogIn: boolean) {
-    ipcRenderer.send("set_should_launch_on_login", shouldLaunchOnLogIn);
+    ipcRenderer.send(IpcKeys.setShouldLaunchOnLogin, shouldLaunchOnLogIn);
   },
   shouldLogToFile() {
-    return ipcRenderer.sendSync("should_log_to_file");
+    return ipcRenderer.sendSync(IpcKeys.shouldLogToFile);
   },
   setShouldLogToFile(shouldLogToFile: boolean) {
-    ipcRenderer.send("set_should_log_to_file", shouldLogToFile);
+    ipcRenderer.send(IpcKeys.setShouldLogToFile, shouldLogToFile);
   },
 });

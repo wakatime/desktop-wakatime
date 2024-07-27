@@ -1,16 +1,7 @@
 import { getDesktopWakaTimeConfigFilePath } from "../utils";
+import { DomainPreferenceType, FilterType } from "../utils/constants";
 import { Logging } from "../utils/logging";
 import { ConfigFileReader } from "./config-file-reader";
-
-export enum FilterType {
-  denylist = "denylist",
-  allowlist = "allowlist",
-}
-
-export enum DomainPreferenceType {
-  domain = "domain",
-  url = "url",
-}
 
 enum Keys {
   shouldLaunchOnLogin = "launch_on_login",

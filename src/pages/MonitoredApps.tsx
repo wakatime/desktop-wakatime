@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { ImageIcon } from "lucide-react";
 
-import type { AppData } from "../../electron/helpers/apps-manager";
+import type { AppData } from "../../electron/utils/validators";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Switch } from "~/components/ui/switch";
 

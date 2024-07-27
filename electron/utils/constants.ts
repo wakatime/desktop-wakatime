@@ -1,9 +1,32 @@
-export const GET_INSTALLED_APPS_IPC_KEY = "get_apps";
+export enum IpcKeys {
+  getApps = "get_apps",
+  getAppVersion = "get_app_version",
+  getSetting = "get_setting",
+  setSetting = "set_setting",
+  isMonitored = "is_monitored",
+  setMonitored = "set_monitored",
+  shouldLogToFile = "should_log_to_file",
+  setShouldLogToFile = "set_should_log_to_file",
+  shouldLaunchOnLogin = "should_launch_on_login",
+  setShouldLaunchOnLogin = "set_should_launch_on_login",
+  logFilePath = "log_file_path",
+  isBrowserMonitored = "is_browser_monitored",
+  getDomainPreference = "get_domain_preference",
+  setDomainPreference = "set_domain_preference",
+  getFilterType = "get_filter_type",
+  setFilterType = "set_filter_type",
+  getDenylist = "get_denylist",
+  setDenylist = "set_denylist",
+  getAllowlist = "get_allowlist",
+  setAllowlist = "set_allowlist",
+}
 
-export const GET_APP_VERSION_IPC_KEY = "get_app_version";
+export enum FilterType {
+  denylist = "denylist",
+  allowlist = "allowlist",
+}
 
-export const GET_SETTING_IPC_KEY = "get_setting";
-export const SET_SETTING_IPC_KEY = "set_setting";
-
-export const IS_MONITORED_KEY = "is_monitored";
-export const SET_MONITORED_KEY = "set_monitored";
+export enum DomainPreferenceType {
+  domain = "domain",
+  url = "url",
+}

@@ -14,20 +14,9 @@ import { AppsManager } from "./helpers/apps-manager";
 import { ConfigFile } from "./helpers/config-file";
 import { Dependencies } from "./helpers/dependencies";
 import { MonitoringManager } from "./helpers/monitoring-manager";
-import {
-  DomainPreferenceType,
-  FilterType,
-  PropertiesManager,
-} from "./helpers/properties-manager";
-import { getDesktopWakaTimeConfigFilePath, getLogFilePath } from "./utils";
-import {
-  GET_APP_VERSION_IPC_KEY,
-  GET_INSTALLED_APPS_IPC_KEY as GET_APPS_IPC_KEY,
-  GET_SETTING_IPC_KEY,
-  IS_MONITORED_KEY,
-  SET_MONITORED_KEY,
-  SET_SETTING_IPC_KEY,
-} from "./utils/constants";
+import { PropertiesManager } from "./helpers/properties-manager";
+import { getLogFilePath } from "./utils";
+import { DomainPreferenceType, FilterType, IpcKeys } from "./utils/constants";
 import { Logging } from "./utils/logging";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
@@ -55,20 +44,22 @@ let settingsWindow: BrowserWindow | null = null;
 let monitoredAppsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let watcher: Watcher | null = null;
-let wakatime: Wakatime;
-let dependencies: Dependencies;
+let wakatime: Wakatime | null = null;
+let dependencies: Dependencies | null = null;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
-const windowIcon = nativeImage.createFromPath(
-  path.join(process.env.VITE_PUBLIC, "app-icon.png"),
-);
+function getWindowIcon() {
+  return nativeImage.createFromPath(
+    path.join(process.env.VITE_PUBLIC, "app-icon.png"),
+  );
+}
 
 function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     title: "Settings",
-    icon: windowIcon,
+    icon: getWindowIcon(),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -107,7 +98,7 @@ function createSettingsWindow() {
 function createMonitoredAppsWindow() {
   monitoredAppsWindow = new BrowserWindow({
     title: "Monitored Apps",
-    icon: windowIcon,
+    icon: getWindowIcon(),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       webSecurity: false,
@@ -230,8 +221,6 @@ app.whenReady().then(async () => {
   createTray();
 
   watcher.start();
-
-  console.log(getDesktopWakaTimeConfigFilePath());
 });
 
 app.on("quit", () => {
@@ -240,16 +229,16 @@ app.on("quit", () => {
 });
 
 ipcMain.on(
-  GET_SETTING_IPC_KEY,
+  IpcKeys.getSetting,
   (event, section: string, key: string, internal: boolean = false) => {
     event.returnValue = ConfigFile.getSetting(section, key, internal);
   },
 );
 
 ipcMain.on(
-  SET_SETTING_IPC_KEY,
+  IpcKeys.setSetting,
   (
-    _event,
+    _,
     section: string,
     key: string,
     value: string,
@@ -259,68 +248,68 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(GET_APPS_IPC_KEY, (event) => {
+ipcMain.on(IpcKeys.getApps, (event) => {
   event.returnValue = AppsManager.getApps();
 });
 
-ipcMain.on(GET_APP_VERSION_IPC_KEY, (event) => {
+ipcMain.on(IpcKeys.getAppVersion, (event) => {
   event.returnValue = app.getVersion();
 });
 
-ipcMain.on(IS_MONITORED_KEY, (event, path) => {
+ipcMain.on(IpcKeys.isMonitored, (event, path) => {
   event.returnValue = MonitoringManager.isMonitored(path);
 });
 
-ipcMain.on(SET_MONITORED_KEY, (_event, path: string, monitor: boolean) => {
+ipcMain.on(IpcKeys.setMonitored, (_, path: string, monitor: boolean) => {
   MonitoringManager.set(path, monitor);
 });
 
-ipcMain.on("should_log_to_file", (event) => {
+ipcMain.on(IpcKeys.shouldLogToFile, (event) => {
   event.returnValue = PropertiesManager.shouldLogToFile;
 });
-ipcMain.on("set_should_log_to_file", (_event, value) => {
+ipcMain.on(IpcKeys.setShouldLogToFile, (_, value) => {
   PropertiesManager.shouldLogToFile = value;
 });
 
-ipcMain.on("should_launch_on_login", (event) => {
+ipcMain.on(IpcKeys.shouldLaunchOnLogin, (event) => {
   event.returnValue = PropertiesManager.shouldLaunchOnLogin;
 });
-ipcMain.on("set_should_launch_on_login", (_event, value) => {
+ipcMain.on(IpcKeys.setShouldLaunchOnLogin, (_, value) => {
   PropertiesManager.shouldLaunchOnLogin = value;
 });
 
-ipcMain.on("log_file_path", (event) => {
+ipcMain.on(IpcKeys.logFilePath, (event) => {
   event.returnValue = getLogFilePath();
 });
 
-ipcMain.on("is_browser_monitored", (event) => {
+ipcMain.on(IpcKeys.isBrowserMonitored, (event) => {
   event.returnValue = MonitoringManager.isBrowserMonitored();
 });
 
-ipcMain.on("get_domain_preference", (event) => {
+ipcMain.on(IpcKeys.getDomainPreference, (event) => {
   event.returnValue = PropertiesManager.domainPreference;
 });
-ipcMain.on("set_domain_preference", (_event, value: DomainPreferenceType) => {
+ipcMain.on(IpcKeys.setDomainPreference, (_, value: DomainPreferenceType) => {
   PropertiesManager.domainPreference = value;
 });
 
-ipcMain.on("get_filter_type", (event) => {
+ipcMain.on(IpcKeys.getFilterType, (event) => {
   event.returnValue = PropertiesManager.filterType;
 });
-ipcMain.on("set_filter_type", (_event, value: FilterType) => {
+ipcMain.on(IpcKeys.setFilterType, (_, value: FilterType) => {
   PropertiesManager.filterType = value;
 });
 
-ipcMain.on("get_denylist", (event) => {
+ipcMain.on(IpcKeys.getDenylist, (event) => {
   event.returnValue = PropertiesManager.denylist;
 });
-ipcMain.on("set_denylist", (_event, value: string) => {
+ipcMain.on(IpcKeys.setDenylist, (_, value: string) => {
   PropertiesManager.denylist = value;
 });
 
-ipcMain.on("get_allowlist", (event) => {
+ipcMain.on(IpcKeys.getAllowlist, (event) => {
   event.returnValue = PropertiesManager.allowlist;
 });
-ipcMain.on("set_allowlist", (_event, value: string) => {
+ipcMain.on(IpcKeys.setAllowlist, (_, value: string) => {
   PropertiesManager.allowlist = value;
 });

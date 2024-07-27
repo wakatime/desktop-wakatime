@@ -4,7 +4,9 @@ import { isBefore, subHours } from "date-fns";
 import { app } from "electron";
 import { z } from "zod";
 
+import type { AppData } from "../utils/validators";
 import { store } from "../store";
+import { appDataSchema } from "../utils/validators";
 import { allApps } from "../watchers";
 import { getInstalledApps } from "./installed-apps";
 import {
@@ -14,29 +16,15 @@ import {
 
 const APPS_KEY = "apps";
 
-export const appDataSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  path: z.string(),
-  icon: z.string().nullish(),
-  version: z.string().nullish(),
-  bundleId: z.string().nullish(),
-  isBrowser: z.boolean().optional(),
-  isDefaultEnabled: z.boolean().optional(),
-  isElectronApp: z.boolean().optional(),
-});
-
 const appsFileContentSchema = z.object({
   storedAt: z.string(),
   apps: z.array(appDataSchema).min(1),
 });
 
-export type AppData = z.infer<typeof appDataSchema>;
-
-async function getApps() {
+async function getApps(): Promise<AppData[]> {
   const installedApps = await getInstalledApps();
   const apps = allApps
-    .map<AppData | null>((app) => {
+    .map((app) => {
       if (process.platform === "win32" && app.windows?.DisplayName) {
         const record = installedApps.find(
           (ia) =>
@@ -67,6 +55,9 @@ async function getApps() {
         }
 
         const name = record["DisplayName"];
+        if (!name) {
+          return null;
+        }
         const version = record["DisplayVersion"];
 
         return {
@@ -75,10 +66,10 @@ async function getApps() {
           name,
           version,
           path: filePath,
-          bundleId: app.mac?.bundleId,
-          isBrowser: app.isBrowser,
-          isDefaultEnabled: app.isDefaultEnabled,
-          isElectronApp: app.isElectronApp,
+          bundleId: app.mac?.bundleId ?? null,
+          isBrowser: app.isBrowser ?? false,
+          isDefaultEnabled: app.isDefaultEnabled ?? false,
+          isElectronApp: app.isElectronApp ?? false,
         } satisfies AppData;
       }
 
@@ -105,7 +96,7 @@ async function getApps() {
 
       return null;
     })
-    .filter((app) => !!app);
+    .filter((app) => app !== null) as AppData[];
   return apps;
 }
 
