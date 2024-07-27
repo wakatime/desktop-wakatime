@@ -1,8 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-
-import "node:fs/promises";
-
 import { format } from "date-fns";
 
 import { getResourcesFolderPath } from ".";

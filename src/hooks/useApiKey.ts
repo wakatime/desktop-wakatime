@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const useApiKey = () => {
-  const [apiKey, _setApiKey] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const apiKey = window.ipcRenderer.getSetting("settings", "api_key");
-      _setApiKey(apiKey);
-    }
-  }, []);
+  const [apiKey, _setApiKey] = useState(() =>
+    window.ipcRenderer.getSetting("settings", "api_key"),
+  );
 
   const setApiKey = (apiKey: string) => {
     _setApiKey(apiKey);

@@ -39,12 +39,12 @@ export class Dependencies {
   }
 
   private async getLatestCLIVersion(): Promise<string | null> {
-    const lastModified = ConfigFile.getSettings(
+    const lastModified = ConfigFile.getSetting(
       "internal",
       "cli_version_last_modified",
       true,
     );
-    const currentVersion = ConfigFile.getSettings(
+    const currentVersion = ConfigFile.getSetting(
       "internal",
       "cli_version",
       true,
@@ -64,7 +64,7 @@ export class Dependencies {
     const data = await res.json();
 
     const now = getUnixTime(new Date());
-    ConfigFile.setSettings(
+    ConfigFile.setSetting(
       "internal",
       "cli_version_last_accessed",
       String(now),
@@ -79,13 +79,13 @@ export class Dependencies {
       lastModified === res.headers.get("Last-Modified")
     ) {
       const release = z.object({ tag_name: z.string() }).parse(data);
-      ConfigFile.setSettings(
+      ConfigFile.setSetting(
         "internal",
         "cli_version_last_modified",
         lastModified,
         true,
       );
-      ConfigFile.setSettings("internal", "cli_version", release.tag_name, true);
+      ConfigFile.setSetting("internal", "cli_version", release.tag_name, true);
       return release.tag_name;
     }
 
@@ -127,7 +127,7 @@ export class Dependencies {
       version = match[0];
     }
 
-    const accessed = ConfigFile.getSettings(
+    const accessed = ConfigFile.getSetting(
       "internal",
       "cli_version_last_accessed",
       true,

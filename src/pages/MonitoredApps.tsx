@@ -6,12 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Switch } from "~/components/ui/switch";
 
 export function Component() {
-  const [apps, setApps] = useState<AppData[]>([]);
+  const [apps] = useState<AppData[]>(() =>
+    window.ipcRenderer.getInstalledApps(),
+  );
 
   useEffect(() => {
     window.document.title = "Monitored Apps";
-    const apps = window.ipcRenderer.getInstalledApps();
-    setApps(apps);
   }, []);
 
   return (
@@ -33,14 +33,13 @@ export function Component() {
 }
 
 const AppListItem = ({ app }: { app: AppData }) => {
-  const [isMonitored, setIsMonitored] = useState(false);
+  const [isMonitored, setIsMonitored] = useState(() =>
+    window.ipcRenderer.isMonitored(app.path),
+  );
 
   const onMonitoredChange = useCallback((monitor: boolean) => {
     setIsMonitored(monitor);
-  }, []);
-
-  useEffect(() => {
-    setIsMonitored(false);
+    window.ipcRenderer.setMonitored(app.path, monitor);
   }, []);
 
   return (

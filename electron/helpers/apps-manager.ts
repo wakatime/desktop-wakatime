@@ -15,10 +15,15 @@ import {
 const APPS_KEY = "apps";
 
 export const appDataSchema = z.object({
+  id: z.string(),
   name: z.string(),
   path: z.string(),
   icon: z.string().nullish(),
   version: z.string().nullish(),
+  bundleId: z.string().nullish(),
+  isBrowser: z.boolean().optional(),
+  isDefaultEnabled: z.boolean().optional(),
+  isElectronApp: z.boolean().optional(),
 });
 
 const appsFileContentSchema = z.object({
@@ -30,69 +35,77 @@ export type AppData = z.infer<typeof appDataSchema>;
 
 async function getApps() {
   const installedApps = await getInstalledApps();
-  const apps = (
-    await Promise.all(
-      allApps.map(async (app) => {
-        if (process.platform === "win32" && app.windows?.DisplayName) {
-          const record = installedApps.find(
-            (ia) =>
-              ia["DisplayName"] &&
-              app.windows?.DisplayName &&
-              ia["DisplayName"].startsWith(app.windows.DisplayName),
-          );
+  const apps = allApps
+    .map<AppData | null>((app) => {
+      if (process.platform === "win32" && app.windows?.DisplayName) {
+        const record = installedApps.find(
+          (ia) =>
+            ia["DisplayName"] &&
+            app.windows?.DisplayName &&
+            ia["DisplayName"].startsWith(app.windows.DisplayName),
+        );
 
-          if (!record) {
-            return null;
-          }
-
-          let filePath: string | null = null;
-          try {
-            filePath = getFilePathWindows(record, app.windows.exePath);
-          } catch (error) {
-            /* empty */
-          }
-          if (!filePath) {
-            return null;
-          }
-
-          let icon: string | null = null;
-          try {
-            icon = getIconFromWindows(filePath);
-          } catch (error) {
-            /* empty */
-          }
-
-          const name = record["DisplayName"];
-          const version = record["DisplayVersion"];
-
-          return { icon, name, version, path: filePath };
+        if (!record) {
+          return null;
         }
 
-        // if (process.platform === "darwin" && app.mac?.bundleId) {
-        //   const record = installedApps.find(
-        //     (ia) =>
-        //       ia["kMDItemCFBundleIdentifier"] &&
-        //       app.mac?.bundleId &&
-        //       ia["kMDItemCFBundleIdentifier"] === app.mac.bundleId,
-        //   );
+        let filePath: string | null = null;
+        try {
+          filePath = getFilePathWindows(record, app.windows.exePath);
+        } catch (error) {
+          /* empty */
+        }
+        if (!filePath) {
+          return null;
+        }
 
-        //   if (!record) {
-        //     return null;
-        //   }
-        //   const name = record["kMDItemDisplayName"]?.replace(".app", "");
-        //   const path = record["_FILE_PATH"];
-        //   if (!path || !name) {
-        //     return;
-        //   }
-        //   const icon = await getAppIconMac(path);
+        let icon: string | null = null;
+        try {
+          icon = getIconFromWindows(filePath);
+        } catch (error) {
+          /* empty */
+        }
 
-        //   return { path, icon, name };
-        // }
+        const name = record["DisplayName"];
+        const version = record["DisplayVersion"];
 
-        return null;
-      }),
-    )
-  ).filter((app) => !!app);
+        return {
+          id: app.id,
+          icon,
+          name,
+          version,
+          path: filePath,
+          bundleId: app.mac?.bundleId,
+          isBrowser: app.isBrowser,
+          isDefaultEnabled: app.isDefaultEnabled,
+          isElectronApp: app.isElectronApp,
+        } satisfies AppData;
+      }
+
+      // if (process.platform === "darwin" && app.mac?.bundleId) {
+      //   const record = installedApps.find(
+      //     (ia) =>
+      //       ia["kMDItemCFBundleIdentifier"] &&
+      //       app.mac?.bundleId &&
+      //       ia["kMDItemCFBundleIdentifier"] === app.mac.bundleId,
+      //   );
+
+      //   if (!record) {
+      //     return null;
+      //   }
+      //   const name = record["kMDItemDisplayName"]?.replace(".app", "");
+      //   const path = record["_FILE_PATH"];
+      //   if (!path || !name) {
+      //     return;
+      //   }
+      //   const icon = await getAppIconMac(path);
+
+      //   return { path, icon, name };
+      // }
+
+      return null;
+    })
+    .filter((app) => !!app);
   return apps;
 }
 

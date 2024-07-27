@@ -65,16 +65,18 @@ export class Watcher {
         }
 
         Logging.instance().log(
-          `App changed from ${this.activeWindow?.info.name ?? "nil"} to ${windowInfo.info.name}`,
+          `App changed from ${this.activeWindow?.info.name || "nil"} to ${windowInfo.info.name || "nil"}`,
         );
 
         this.activeWindow = windowInfo;
-        const isMonitored = MonitoringManager.isMonitored(
-          this.activeWindow.info.path,
-        );
+        if (this.activeWindow.info.path) {
+          const isMonitored = MonitoringManager.isMonitored(
+            this.activeWindow.info.path,
+          );
 
-        if (isMonitored) {
-          this.watchKeyboardEvents();
+          if (isMonitored) {
+            this.watchKeyboardEvents();
+          }
         }
       },
     );

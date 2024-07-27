@@ -17,12 +17,12 @@ export abstract class ConfigFile {
     }
   }
 
-  static getSettings(section: string, key: string, internalConfig = false) {
+  static getSetting(section: string, key: string, internalConfig = false) {
     const file = this.getConfigFilePath(internalConfig);
     return ConfigFileReader.get(file, section, key);
   }
 
-  static setSettings(
+  static setSetting(
     section: string,
     key: string,
     value: string,

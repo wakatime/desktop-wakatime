@@ -21,7 +21,7 @@ export abstract class ConfigFileReader {
       } else if (currentSection === section) {
         const parts = line.split("=", 2);
         if (parts.length === 2 && parts[0].trim() === key) {
-          return parts[1].trim();
+          return parts[1].trim().replace(/\\n/g, "\n");
         }
       }
     }
@@ -29,6 +29,7 @@ export abstract class ConfigFileReader {
   }
 
   static set(file: string, section: string, key: string, value: string) {
+    value = value.replace(/\n/g, "\\n");
     let contents = "";
 
     try {
@@ -41,7 +42,7 @@ export abstract class ConfigFileReader {
         throw new Error(`Failed writing to URL: ${file}, Error: ${error}`);
       }
     }
-    const lines = contents.split("\n");
+    const lines = contents ? contents.split("\n") : [];
     let output: string[] = [];
     let currentSection = "";
     let found = false;
@@ -63,6 +64,8 @@ export abstract class ConfigFileReader {
         } else {
           output.push(line);
         }
+      } else {
+        output.push(line);
       }
     }
 
@@ -78,5 +81,14 @@ export abstract class ConfigFileReader {
     } catch (error) {
       throw new Error(`Failed writing to URL: ${file}, Error: ${error}`);
     }
+  }
+
+  static setBool(file: string, section: string, key: string, value: boolean) {
+    this.set(file, section, key, value ? "True" : "False");
+  }
+
+  static getBool(file: string, section: string, key: string) {
+    const value = this.get(file, section, key);
+    return value === "True" ? true : value === "False" ? false : null;
   }
 }

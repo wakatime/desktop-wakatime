@@ -1,4 +1,5 @@
 export type MonitoredAppInfo = {
+  id: string;
   mac?: {
     bundleId: string;
   };
@@ -6,10 +7,14 @@ export type MonitoredAppInfo = {
     exePath?: string;
     DisplayName?: string;
   };
+  isBrowser?: boolean;
+  isDefaultEnabled?: boolean;
+  isElectronApp?: boolean;
 };
 
-export const MonitoredApp = {
-  arcbrowser: {
+export const allApps = [
+  {
+    id: "arcbrowser",
     mac: {
       bundleId: "company.thebrowser.Browser",
     },
@@ -17,8 +22,10 @@ export const MonitoredApp = {
       exePath: "arc.exe",
       DisplayName: "Arc",
     },
+    isBrowser: true,
   },
-  brave: {
+  {
+    id: "brave",
     mac: {
       bundleId: "com.brave.Browser",
     },
@@ -26,8 +33,10 @@ export const MonitoredApp = {
       exePath: "brave.exe",
       DisplayName: "Brave",
     },
+    isBrowser: true,
   },
-  canva: {
+  {
+    id: "canva",
     mac: {
       bundleId: "com.canva.CanvaDesktop",
     },
@@ -35,8 +44,10 @@ export const MonitoredApp = {
       exePath: "Canva.exe",
       DisplayName: "Canva",
     },
+    isDefaultEnabled: true,
   },
-  chrome: {
+  {
+    id: "chrome",
     mac: {
       bundleId: "com.google.Chrome",
     },
@@ -44,8 +55,10 @@ export const MonitoredApp = {
       exePath: "chrome.exe",
       DisplayName: "Google Chrome",
     },
+    isBrowser: true,
   },
-  figma: {
+  {
+    id: "figma",
     mac: {
       bundleId: "com.figma.Desktop",
     },
@@ -53,8 +66,11 @@ export const MonitoredApp = {
       exePath: "Figma.exe",
       DisplayName: "Figma",
     },
+    isElectronApp: true,
+    isDefaultEnabled: true,
   },
-  firefox: {
+  {
+    id: "firefox",
     mac: {
       bundleId: "org.mozilla.firefox",
     },
@@ -62,24 +78,29 @@ export const MonitoredApp = {
       exePath: "firefox.exe",
       DisplayName: "Mozilla Firefox",
     },
+    isBrowser: true,
   },
-  imessage: {
+  {
+    id: "imessage",
     mac: {
       bundleId: "com.apple.MobileSMS",
     },
   },
-  iterm2: {
+  {
+    id: "iterm2",
     mac: {
       bundleId: "com.googlecode.iterm2",
     },
   },
-  powershell: {
+  {
+    id: "powershell",
     windows: {
       exePath: "PowerShell.exe",
       DisplayName: "Windows Powershell",
     },
   },
-  linear: {
+  {
+    id: "linear",
     mac: {
       bundleId: "com.linear",
     },
@@ -87,13 +108,17 @@ export const MonitoredApp = {
       exePath: "Linear.exe",
       DisplayName: "Linear",
     },
+    isDefaultEnabled: true,
   },
-  notes: {
+  {
+    id: "notes",
     mac: {
       bundleId: "com.apple.Notes",
     },
+    isDefaultEnabled: true,
   },
-  notion: {
+  {
+    id: "notion",
     mac: {
       bundleId: "notion.id",
     },
@@ -101,8 +126,10 @@ export const MonitoredApp = {
       exePath: "Notion.exe",
       DisplayName: "Notion",
     },
+    isDefaultEnabled: true,
   },
-  postman: {
+  {
+    id: "postman",
     mac: {
       bundleId: "com.postmanlabs.mac",
     },
@@ -110,24 +137,32 @@ export const MonitoredApp = {
       exePath: "Postman.exe",
       DisplayName: "Postman",
     },
+    isDefaultEnabled: true,
   },
-  safari: {
+  {
+    id: "safari",
     mac: {
       bundleId: "com.apple.Safari",
     },
+    isBrowser: true,
   },
-  safaripreview: {
+  {
+    id: "safaripreview",
     mac: {
       bundleId: "com.apple.SafariTechnologyPreview",
     },
+    isBrowser: true,
   },
-  microsoftEdge: {
+  {
+    id: "microsoftEdge",
     windows: {
       exePath: "msedge.exe",
       DisplayName: "Microsoft Edge",
     },
+    isBrowser: true,
   },
-  slack: {
+  {
+    id: "slack",
     mac: {
       bundleId: "com.tinyspeck.slackmacgap",
     },
@@ -135,8 +170,10 @@ export const MonitoredApp = {
       exePath: "slack.exe",
       DisplayName: "Slack",
     },
+    isElectronApp: true,
   },
-  tableplus: {
+  {
+    id: "tableplus",
     mac: {
       bundleId: "com.tinyapp.TablePlus",
     },
@@ -144,29 +181,35 @@ export const MonitoredApp = {
       exePath: "TablePlus.exe",
       DisplayName: "TablePlus",
     },
+    isDefaultEnabled: true,
   },
-  macTerminal: {
+  {
+    id: "mac_terminal",
     mac: {
       bundleId: "com.apple.Terminal",
     },
   },
-  windowsTerminal: {
+  {
+    id: "windows_terminal",
     windows: {
       exePath: "terminal.exe",
       DisplayName: "Terminal",
     },
   },
-  warp: {
+  {
+    id: "warp",
     mac: {
       bundleId: "dev.warp.Warp-Stable",
     },
   },
-  wecom: {
+  {
+    id: "wecom",
     mac: {
       bundleId: "com.tencent.WeWorkMac",
     },
   },
-  whatsapp: {
+  {
+    id: "whatsapp",
     mac: {
       bundleId: "net.whatsapp.WhatsApp",
     },
@@ -174,12 +217,15 @@ export const MonitoredApp = {
       DisplayName: "WhatsApp",
     },
   },
-  xcode: {
+  {
+    id: "xcode",
     mac: {
       bundleId: "com.apple.dt.Xcode",
     },
+    isDefaultEnabled: true,
   },
-  zoom: {
+  {
+    id: "zoom",
     mac: {
       bundleId: "us.zoom.xos",
     },
@@ -187,34 +233,6 @@ export const MonitoredApp = {
       exePath: "Zoom.exe",
       DisplayName: "Zoom",
     },
+    isDefaultEnabled: true,
   },
-} as const satisfies Record<string, MonitoredAppInfo>;
-
-export const allApps: MonitoredAppInfo[] = Object.values(MonitoredApp);
-
-export const electronApps: MonitoredAppInfo[] = [
-  MonitoredApp.figma,
-  MonitoredApp.slack,
-];
-
-export const browserApps: MonitoredAppInfo[] = [
-  MonitoredApp.arcbrowser,
-  MonitoredApp.brave,
-  MonitoredApp.chrome,
-  MonitoredApp.firefox,
-  MonitoredApp.safari,
-  MonitoredApp.safaripreview,
-  MonitoredApp.microsoftEdge,
-];
-
-export const defaultEnabledApps: MonitoredAppInfo[] = [
-  MonitoredApp.canva,
-  MonitoredApp.figma,
-  MonitoredApp.linear,
-  MonitoredApp.notes,
-  MonitoredApp.notion,
-  MonitoredApp.postman,
-  MonitoredApp.tableplus,
-  MonitoredApp.xcode,
-  MonitoredApp.zoom,
 ];

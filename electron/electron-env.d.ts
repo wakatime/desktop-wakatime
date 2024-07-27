@@ -24,15 +24,25 @@ declare namespace NodeJS {
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
   ipcRenderer: import("electron").IpcRenderer & {
-    getSetting: (section: string, key: string, internal?: boolean) => string;
+    getSetting: (
+      section: string,
+      key: string,
+      internal?: boolean,
+    ) => string | null;
     setSetting: (
       section: string,
       key: string,
       value: string,
       internal?: boolean,
     ) => string;
+    isMonitored: (path: string) => boolean;
+    setMonitored: (path: string, monitor: boolean) => void;
     getAppVersion: () => string;
     getInstalledApps: () => import("./helpers/apps-manager").AppData[];
+    shouldLaunchOnLogIn: () => boolean;
+    setShouldLaunchOnLogIn: (shouldLaunchOnLogIn: boolean) => void;
+    shouldLogToFile: () => boolean;
+    setShouldLogToFile: (shouldLogToFile: boolean) => void;
   };
 }
 

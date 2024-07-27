@@ -2,8 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
 
-import { Logging, LogLevel } from "./logging";
-
 export function getResourcesFolderPath() {
   const userHome = app.getPath("home");
 
@@ -13,15 +11,23 @@ export function getResourcesFolderPath() {
   );
 
   if (!fs.existsSync(resourcesFolder)) {
-    try {
-      fs.mkdirSync(resourcesFolder, { recursive: true });
-    } catch (error) {
-      Logging.instance().log(
-        `Failed to create folder: ${resourcesFolder}. Error: ${error}`,
-        LogLevel.ERROR,
-      );
-    }
+    fs.mkdirSync(resourcesFolder, { recursive: true });
   }
 
   return resourcesFolder;
+}
+
+export function getDesktopWakaTimeConfigFilePath() {
+  const folder = path.join(app.getPath("appData"), "WakaTime");
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true });
+  }
+  return path.join(folder, "desktop-wakatime.cfg");
+}
+
+export function getLogFilePath() {
+  return path.join(
+    getResourcesFolderPath(),
+    `${process.platform}-wakatime.log`,
+  );
 }
