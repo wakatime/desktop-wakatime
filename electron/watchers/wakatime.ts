@@ -19,7 +19,7 @@ export class Wakatime {
   private lastTime: number = 0;
   private lastCategory: Category = "coding";
 
-  async init() {
+  init() {
     if (PropertiesManager.shouldLogToFile) {
       Logging.instance().activateLoggingToFile();
     }

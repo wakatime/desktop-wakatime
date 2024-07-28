@@ -129,12 +129,6 @@ function createMonitoredAppsWindow() {
     autoHideMenuBar: true,
   });
 
-  // Test active push message to Renderer-process.
-  // monitoredAppsWindow.webContents.on("did-finish-load", async () => {
-  //   const apps = await getAvailableApps();
-  //   const appSettings = getAppSettings();
-  // });
-
   if (VITE_DEV_SERVER_URL) {
     monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
   } else {
@@ -250,7 +244,7 @@ if (!gotTheLock) {
 
   app.whenReady().then(async () => {
     wakatime = new Wakatime();
-    await wakatime.init();
+    wakatime.init();
     watcher = new Watcher(wakatime);
     createTray();
     watcher.start();
