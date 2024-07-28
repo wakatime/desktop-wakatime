@@ -35,3 +35,5 @@ export enum DeepLink {
   settings = "settings",
   monitoredApps = "monitoredApps",
 }
+
+export const WAKATIME_PROTOCALL = "wakatime";

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
 
-import { DeepLink } from "./constants";
+import { DeepLink, WAKATIME_PROTOCALL } from "./constants";
 
 export function getResourcesFolderPath() {
   const userHome = app.getPath("home");
@@ -57,5 +57,5 @@ export function getCLIPath() {
 }
 
 export function getDeepLinkUrl(link: DeepLink) {
-  return `wakatime://${link}`;
+  return `${WAKATIME_PROTOCALL}://${link}`;
 }

@@ -62,11 +62,11 @@ export class Wakatime {
   checkForApiKey() {
     const key = ConfigFile.getSetting("settings", "api_key");
     if (!key) {
-      this.openSettingsDeeplink();
+      this.openSettingsDeepLink();
     }
   }
 
-  openSettingsDeeplink() {
+  openSettingsDeepLink() {
     shell.openExternal(getDeepLinkUrl(DeepLink.settings));
   }
 

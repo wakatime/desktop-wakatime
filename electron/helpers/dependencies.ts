@@ -54,8 +54,12 @@ export abstract class Dependencies {
     try {
       const url = `https://api.wakatime.com/api/v1/users/current/user_agents?api_key=${apiKey}`;
       const res = await fetch(url);
+      if (res.status !== 200) {
+        throw res.statusText;
+      }
       const release = (await res.json()) as { data: UserAgent[] };
       const now = new Date();
+      console.log({ release });
 
       for (const agent of release.data) {
         if (agent.is_browser_extension && agent.last_seen_at && agent.editor) {

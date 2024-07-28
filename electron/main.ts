@@ -17,7 +17,13 @@ import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import { getLogFilePath } from "./utils";
-import { DomainPreferenceType, FilterType, IpcKeys } from "./utils/constants";
+import {
+  DeepLink,
+  DomainPreferenceType,
+  FilterType,
+  IpcKeys,
+  WAKATIME_PROTOCALL,
+} from "./utils/constants";
 import { Logging } from "./utils/logging";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
@@ -53,12 +59,12 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 // Register Deep Link `wakatime://`
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("wakatime", process.execPath, [
+    app.setAsDefaultProtocolClient(WAKATIME_PROTOCALL, process.execPath, [
       path.resolve(process.argv[1]),
     ]);
   }
 } else {
-  app.setAsDefaultProtocolClient("wakatime");
+  app.setAsDefaultProtocolClient(WAKATIME_PROTOCALL);
 }
 
 function getWindowIcon() {
@@ -142,6 +148,28 @@ function createMonitoredAppsWindow() {
   });
 }
 
+function openDashboard() {
+  shell.openExternal("https://wakatime.com/dashboard");
+}
+
+function openSettings() {
+  if (settingsWindow) {
+    if (settingsWindow.isMinimized()) settingsWindow.restore();
+    settingsWindow.focus();
+  } else {
+    createSettingsWindow();
+  }
+}
+
+function openMonitoredApps() {
+  if (monitoredAppsWindow) {
+    if (monitoredAppsWindow.isMinimized()) monitoredAppsWindow.restore();
+    monitoredAppsWindow.focus();
+  } else {
+    createMonitoredAppsWindow();
+  }
+}
+
 function createTray() {
   const trayIcon = nativeImage.createFromPath(
     path.join(process.env.VITE_PUBLIC!, "trayIconTemplate.png"),
@@ -151,31 +179,17 @@ function createTray() {
     {
       label: "Dashboard",
       type: "normal",
-      click: () => {
-        shell.openExternal("https://wakatime.com/dashboard");
-      },
+      click: openDashboard,
     },
     {
       label: "Settings",
       type: "normal",
-      click: () => {
-        if (settingsWindow) {
-          settingsWindow.focus();
-        } else {
-          createSettingsWindow();
-        }
-      },
+      click: openSettings,
     },
     {
       label: "Monitored Apps",
       type: "normal",
-      click: () => {
-        if (monitoredAppsWindow) {
-          monitoredAppsWindow.focus();
-        } else {
-          createMonitoredAppsWindow();
-        }
-      },
+      click: openMonitoredApps,
     },
     { type: "separator" },
     {
@@ -211,20 +225,29 @@ if (isMacOS) {
 
 const gotTheLock = app.requestSingleInstanceLock();
 
+function handleDeepLink(url: string) {
+  const pathname = url.replace(`${WAKATIME_PROTOCALL}://`, "");
+  console.log({ pathname });
+  switch (pathname) {
+    case DeepLink.settings:
+      openSettings();
+      break;
+    case DeepLink.monitoredApps:
+      openMonitoredApps();
+      break;
+    default:
+      break;
+  }
+}
+
 if (!gotTheLock) {
   app.quit();
 } else {
   app.on("second-instance", (_event, commandLine, _workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
-    // if (mainWindow) {
-    //   if (mainWindow.isMinimized()) mainWindow.restore()
-    //   mainWindow.focus()
-    // }
-
-    dialog.showErrorBox(
-      "Welcome Back",
-      `You arrived from: ${commandLine.pop()?.slice(0, -1)}`,
-    );
+    const url = commandLine.pop()?.slice(0, -1);
+    if (url) {
+      handleDeepLink(url);
+    }
   });
 
   app.whenReady().then(async () => {
@@ -236,7 +259,7 @@ if (!gotTheLock) {
   });
 
   app.on("open-url", (_event, url) => {
-    dialog.showErrorBox("Welcome Back", `You arrived from: ${url}`);
+    handleDeepLink(url);
   });
 }
 
@@ -249,6 +272,7 @@ app.on("quit", () => {
   watcher?.stop();
 });
 
+// IPC Events
 ipcMain.on(
   IpcKeys.getSetting,
   (event, section: string, key: string, internal: boolean = false) => {
