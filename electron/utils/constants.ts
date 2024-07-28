@@ -30,3 +30,8 @@ export enum DomainPreferenceType {
   domain = "domain",
   url = "url",
 }
+
+export enum DeepLink {
+  settings = "settings",
+  monitoredApps = "monitoredApps",
+}

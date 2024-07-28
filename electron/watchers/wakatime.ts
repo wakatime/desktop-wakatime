@@ -1,12 +1,17 @@
 import { exec } from "child_process";
 import { WindowInfo } from "@miniben90/x-win";
-import { app } from "electron";
+import { app, Notification, shell } from "electron";
 
 import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
+import { AppsManager } from "../helpers/apps-manager";
 import { ConfigFile } from "../helpers/config-file";
+import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
-import { getCLIPath, getPlatfrom } from "../utils";
+import { PropertiesManager } from "../helpers/properties-manager";
+import { SettingsManager } from "../helpers/settings-manager";
+import { getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { DeepLink } from "../utils/constants";
 import { Logging } from "../utils/logging";
 
 export class Wakatime {
@@ -14,8 +19,44 @@ export class Wakatime {
   private lastTime: number = 0;
   private lastCategory: Category = "coding";
 
-  openSettingsDeeplink() {
-    // TODO: Open Settings Window
+  async init() {
+    if (PropertiesManager.shouldLogToFile) {
+      Logging.instance().activateLoggingToFile();
+    }
+
+    Logging.instance().log("Starting Wakatime");
+
+    if (SettingsManager.shouldRegisterAsLogInItem()) {
+      SettingsManager.registerAsLogInItem();
+    }
+
+    // TODO: Move them to a background task
+    await Dependencies.installDependencies();
+    await AppsManager.load();
+
+    this.checkForApiKey();
+
+    if (!PropertiesManager.hasLaunchedBefore) {
+      const allApps = AppsManager.getApps();
+      for (const app of allApps) {
+        if (app.isDefaultEnabled) {
+          MonitoringManager.set(app.path, true);
+        }
+      }
+      PropertiesManager.hasLaunchedBefore = true;
+    }
+
+    if (MonitoringManager.isBrowserMonitored()) {
+      // TODO: Move it to background task
+      const browser = await Dependencies.recentBrowserExtension();
+      if (browser && Notification.isSupported()) {
+        const notification = new Notification({
+          title: "Warning",
+          subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
+        });
+        notification.show();
+      }
+    }
   }
 
   checkForApiKey() {
@@ -23,6 +64,10 @@ export class Wakatime {
     if (!key) {
       this.openSettingsDeeplink();
     }
+  }
+
+  openSettingsDeeplink() {
+    shell.openExternal(getDeepLinkUrl(DeepLink.settings));
   }
 
   private shouldSendHeartbeat(

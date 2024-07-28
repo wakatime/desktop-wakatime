@@ -32,8 +32,8 @@ type UserAgent = {
   last_seen_at: string | null;
 };
 
-export class Dependencies {
-  async installDependencies() {
+export abstract class Dependencies {
+  static async installDependencies() {
     try {
       if (!(await this.isCLILatest())) {
         await this.downloadCLI();
@@ -77,7 +77,7 @@ export class Dependencies {
     return null;
   }
 
-  private async getLatestCLIVersion(): Promise<string | null> {
+  private static async getLatestCLIVersion(): Promise<string | null> {
     const lastModified = ConfigFile.getSetting(
       "internal",
       "cli_version_last_modified",
@@ -131,7 +131,7 @@ export class Dependencies {
     return null;
   }
 
-  private async isCLILatest(): Promise<boolean> {
+  private static async isCLILatest(): Promise<boolean> {
     const cli = getCLIPath();
 
     if (!fs.existsSync(cli)) {
@@ -190,7 +190,7 @@ export class Dependencies {
     return true;
   }
 
-  private async downloadCLI() {
+  private static async downloadCLI() {
     const url = `https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-${getPlatfrom()}-${getArch()}.zip`;
     const zipFile = path.join(getResourcesFolderPath(), "wakatime-cli.zip");
     const cli = getCLIPath();

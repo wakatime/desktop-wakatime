@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
 
+import { DeepLink } from "./constants";
+
 export function getResourcesFolderPath() {
   const userHome = app.getPath("home");
 
@@ -52,4 +54,8 @@ export function getCLIPath() {
     getResourcesFolderPath(),
     `wakatime-cli-${getPlatfrom()}-${getArch()}${ext}`,
   );
+}
+
+export function getDeepLinkUrl(link: DeepLink) {
+  return `wakatime://${link}`;
 }

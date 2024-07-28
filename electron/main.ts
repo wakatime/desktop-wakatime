@@ -2,6 +2,7 @@ import path from "node:path";
 import {
   app,
   BrowserWindow,
+  dialog,
   ipcMain,
   Menu,
   nativeImage,
@@ -12,7 +13,6 @@ import {
 
 import { AppsManager } from "./helpers/apps-manager";
 import { ConfigFile } from "./helpers/config-file";
-import { Dependencies } from "./helpers/dependencies";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
@@ -46,10 +46,20 @@ let monitoredAppsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let watcher: Watcher | null = null;
 let wakatime: Wakatime | null = null;
-let dependencies: Dependencies | null = null;
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+
+// Register Deep Link `wakatime://`
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("wakatime", process.execPath, [
+      path.resolve(process.argv[1]),
+    ]);
+  }
+} else {
+  app.setAsDefaultProtocolClient("wakatime");
+}
 
 function getWindowIcon() {
   return nativeImage.createFromPath(
@@ -199,59 +209,40 @@ if (isMacOS) {
   app.dock.hide();
 }
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (_event, commandLine, _workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    // if (mainWindow) {
+    //   if (mainWindow.isMinimized()) mainWindow.restore()
+    //   mainWindow.focus()
+    // }
+
+    dialog.showErrorBox(
+      "Welcome Back",
+      `You arrived from: ${commandLine.pop()?.slice(0, -1)}`,
+    );
+  });
+
+  app.whenReady().then(async () => {
+    wakatime = new Wakatime();
+    await wakatime.init();
+    watcher = new Watcher(wakatime);
+    createTray();
+    watcher.start();
+  });
+
+  app.on("open-url", (_event, url) => {
+    dialog.showErrorBox("Welcome Back", `You arrived from: ${url}`);
+  });
+}
+
 app.on("window-all-closed", () => {});
 
 app.on("activate", () => {});
-
-app.whenReady().then(async () => {
-  // TODO: Check if properties if we should activate logging to file or not
-  if (PropertiesManager.shouldLogToFile) {
-    Logging.instance().activateLoggingToFile();
-  }
-
-  Logging.instance().log("Starting Wakatime");
-
-  if (SettingsManager.shouldRegisterAsLogInItem()) {
-    SettingsManager.registerAsLogInItem();
-  }
-
-  dependencies = new Dependencies();
-
-  // TODO: Move them to a background task
-  await dependencies.installDependencies();
-  await AppsManager.load();
-
-  wakatime = new Wakatime();
-  watcher = new Watcher(wakatime);
-
-  wakatime.checkForApiKey();
-
-  if (!PropertiesManager.hasLaunchedBefore) {
-    const allApps = AppsManager.getApps();
-    for (const app of allApps) {
-      if (app.isDefaultEnabled) {
-        MonitoringManager.set(app.path, true);
-      }
-    }
-    PropertiesManager.hasLaunchedBefore = true;
-  }
-
-  if (MonitoringManager.isBrowserMonitored()) {
-    // TODO: Move it to background task
-    const browser = await Dependencies.recentBrowserExtension();
-    if (browser && Notification.isSupported()) {
-      const notification = new Notification({
-        title: "Warning",
-        subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
-      });
-      notification.show();
-    }
-  }
-
-  createTray();
-
-  watcher.start();
-});
 
 app.on("quit", () => {
   Logging.instance().log("WakaTime will terminate");
