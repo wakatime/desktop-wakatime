@@ -2,7 +2,6 @@ import path from "node:path";
 import {
   app,
   BrowserWindow,
-  dialog,
   ipcMain,
   Menu,
   nativeImage,
