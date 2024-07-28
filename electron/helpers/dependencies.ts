@@ -3,16 +3,34 @@ import fs, { createWriteStream } from "node:fs";
 import path from "node:path";
 import { pipeline } from "node:stream";
 import { promisify } from "node:util";
-import { addHours, formatDistanceToNow, getUnixTime, isAfter } from "date-fns";
+import {
+  addHours,
+  formatDistanceToNow,
+  getUnixTime,
+  interval,
+  intervalToDuration,
+  isAfter,
+} from "date-fns";
 import fetch from "node-fetch";
 import unzpier from "unzipper";
 import { z } from "zod";
 
-import { getResourcesFolderPath } from "../utils";
+import {
+  getArch,
+  getCLIPath,
+  getPlatfrom,
+  getResourcesFolderPath,
+} from "../utils";
 import { Logging, LogLevel } from "../utils/logging";
 import { ConfigFile } from "./config-file";
 
 const streamPipeline = promisify(pipeline);
+
+type UserAgent = {
+  editor: string | null;
+  is_browser_extension: boolean;
+  last_seen_at: string | null;
+};
 
 export class Dependencies {
   async installDependencies() {
@@ -28,14 +46,35 @@ export class Dependencies {
     }
   }
 
-  private getCLIPath() {
-    const ext = process.platform === "win32" ? ".exe" : "";
-    const arch = this.getArch();
-    const platfrom = this.getPlatfrom();
-    return path.join(
-      getResourcesFolderPath(),
-      `wakatime-cli-${platfrom}-${arch}${ext}`,
-    );
+  static async recentBrowserExtension() {
+    const apiKey = ConfigFile.getSetting("settings", "api_key");
+    if (!apiKey) {
+      return null;
+    }
+    try {
+      const url = `https://api.wakatime.com/api/v1/users/current/user_agents?api_key=${apiKey}`;
+      const res = await fetch(url);
+      const release = (await res.json()) as { data: UserAgent[] };
+      const now = new Date();
+
+      for (const agent of release.data) {
+        if (agent.is_browser_extension && agent.last_seen_at && agent.editor) {
+          const timeInterval = intervalToDuration(
+            interval(new Date(agent.last_seen_at), now),
+          ).seconds;
+          if (!!timeInterval && timeInterval > 600) {
+            break;
+          }
+          return agent.editor;
+        }
+      }
+    } catch (error) {
+      Logging.instance().log(
+        `Request error checking for conflicting browser extension: ${error}`,
+        LogLevel.ERROR,
+      );
+    }
+    return null;
   }
 
   private async getLatestCLIVersion(): Promise<string | null> {
@@ -93,7 +132,7 @@ export class Dependencies {
   }
 
   private async isCLILatest(): Promise<boolean> {
-    const cli = this.getCLIPath();
+    const cli = getCLIPath();
 
     if (!fs.existsSync(cli)) {
       return false;
@@ -152,12 +191,9 @@ export class Dependencies {
   }
 
   private async downloadCLI() {
-    const arch = this.getArch();
-    const platfrom = this.getPlatfrom();
-
-    const url = `https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-${platfrom}-${arch}.zip`;
+    const url = `https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-${getPlatfrom()}-${getArch()}.zip`;
     const zipFile = path.join(getResourcesFolderPath(), "wakatime-cli.zip");
-    const cli = this.getCLIPath();
+    const cli = getCLIPath();
 
     if (fs.existsSync(zipFile)) {
       try {
@@ -204,19 +240,5 @@ export class Dependencies {
     if (!fs.existsSync(cli)) {
       throw new Error(`${cli} file not found!`);
     }
-  }
-
-  private getArch() {
-    return process.arch.indexOf("arm") !== -1
-      ? "arm64"
-      : process.arch.indexOf("64")
-        ? "amd64"
-        : process.arch.indexOf("32")
-          ? "386"
-          : process.arch;
-  }
-
-  private getPlatfrom() {
-    return process.platform === "win32" ? "windows" : process.platform;
   }
 }

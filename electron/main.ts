@@ -211,12 +211,37 @@ app.whenReady().then(async () => {
   Logging.instance().log("Starting Wakatime");
 
   dependencies = new Dependencies();
-  wakatime = new Wakatime();
-  watcher = new Watcher(wakatime);
 
   // TODO: Move them to a background task
   await dependencies.installDependencies();
   await AppsManager.load();
+
+  wakatime = new Wakatime();
+  watcher = new Watcher(wakatime);
+
+  wakatime.checkForApiKey();
+
+  if (!PropertiesManager.hasLaunchedBefore) {
+    const allApps = AppsManager.getApps();
+    for (const app of allApps) {
+      if (app.isDefaultEnabled) {
+        MonitoringManager.set(app.path, true);
+      }
+    }
+    PropertiesManager.hasLaunchedBefore = true;
+  }
+
+  if (MonitoringManager.isBrowserMonitored()) {
+    // TODO: Move it to background task
+    const browser = await Dependencies.recentBrowserExtension();
+    if (browser && Notification.isSupported()) {
+      const notification = new Notification({
+        title: "Warning",
+        subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
+      });
+      notification.show();
+    }
+  }
 
   createTray();
 

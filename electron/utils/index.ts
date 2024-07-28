@@ -31,3 +31,25 @@ export function getLogFilePath() {
     `${process.platform}-wakatime.log`,
   );
 }
+
+export function getArch() {
+  return process.arch.indexOf("arm") !== -1
+    ? "arm64"
+    : process.arch.indexOf("64")
+      ? "amd64"
+      : process.arch.indexOf("32")
+        ? "386"
+        : process.arch;
+}
+
+export function getPlatfrom() {
+  return process.platform === "win32" ? "windows" : process.platform;
+}
+
+export function getCLIPath() {
+  const ext = process.platform === "win32" ? ".exe" : "";
+  return path.join(
+    getResourcesFolderPath(),
+    `wakatime-cli-${getPlatfrom()}-${getArch()}${ext}`,
+  );
+}
