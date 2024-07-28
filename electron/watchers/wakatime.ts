@@ -30,15 +30,13 @@ export class Wakatime {
       SettingsManager.registerAsLogInItem();
     }
 
-    // TODO: Move them to a background task
-    await Dependencies.installDependencies();
-    await AppsManager.load();
+    Dependencies.installDependencies();
+    AppsManager.instance().loadApps();
 
     this.checkForApiKey();
 
     if (!PropertiesManager.hasLaunchedBefore) {
-      const allApps = AppsManager.getApps();
-      for (const app of allApps) {
+      for (const app of AppsManager.instance().apps) {
         if (app.isDefaultEnabled) {
           MonitoringManager.set(app.path, true);
         }
@@ -47,15 +45,16 @@ export class Wakatime {
     }
 
     if (MonitoringManager.isBrowserMonitored()) {
-      // TODO: Move it to background task
-      const browser = await Dependencies.recentBrowserExtension();
-      if (browser && Notification.isSupported()) {
-        const notification = new Notification({
-          title: "Warning",
-          subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
-        });
-        notification.show();
-      }
+      (async () => {
+        const browser = await Dependencies.recentBrowserExtension();
+        if (browser && Notification.isSupported()) {
+          const notification = new Notification({
+            title: "Warning",
+            subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
+          });
+          notification.show();
+        }
+      })();
     }
   }
 

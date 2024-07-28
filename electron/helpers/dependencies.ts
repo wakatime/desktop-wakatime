@@ -33,17 +33,19 @@ type UserAgent = {
 };
 
 export abstract class Dependencies {
-  static async installDependencies() {
-    try {
-      if (!(await this.isCLILatest())) {
-        await this.downloadCLI();
+  static installDependencies() {
+    (async () => {
+      try {
+        if (!(await this.isCLILatest())) {
+          await this.downloadCLI();
+        }
+      } catch (error) {
+        Logging.instance().log(
+          `Failed to install dependencies: ${error}`,
+          LogLevel.ERROR,
+        );
       }
-    } catch (error) {
-      Logging.instance().log(
-        `Failed to install dependencies: ${error}`,
-        LogLevel.ERROR,
-      );
-    }
+    })();
   }
 
   static async recentBrowserExtension() {
@@ -59,7 +61,6 @@ export abstract class Dependencies {
       }
       const release = (await res.json()) as { data: UserAgent[] };
       const now = new Date();
-      console.log({ release });
 
       for (const agent of release.data) {
         if (agent.is_browser_extension && agent.last_seen_at && agent.editor) {

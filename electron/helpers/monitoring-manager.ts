@@ -4,13 +4,14 @@ import { ConfigFileReader } from "./config-file-reader";
 
 export abstract class MonitoringManager {
   static isBrowserMonitored() {
-    const allApps = AppsManager.getApps();
-    const browserApps = allApps.filter((app) => app.isBrowser);
+    const browserApps = AppsManager.instance().apps.filter(
+      (app) => app.isBrowser,
+    );
     return browserApps.findIndex((app) => this.isMonitored(app.path)) !== -1;
   }
 
   static isMonitored(path: string) {
-    if (!AppsManager.getApp(path)) {
+    if (!AppsManager.instance().getApp(path)) {
       return;
     }
     const monitoringKey = this.monitoredKey(path);
@@ -28,7 +29,7 @@ export abstract class MonitoringManager {
   }
 
   static set(path: string, monitor: boolean) {
-    if (!AppsManager.getApp(path)) {
+    if (!AppsManager.instance().getApp(path)) {
       return;
     }
     const file = getDesktopWakaTimeConfigFilePath();

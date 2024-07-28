@@ -5,7 +5,6 @@ import { app } from "electron";
 import { z } from "zod";
 
 import type { AppData } from "../utils/validators";
-import { store } from "../store";
 import { appDataSchema } from "../utils/validators";
 import { allApps } from "../watchers/apps";
 import { getInstalledApps } from "./installed-apps";
@@ -13,8 +12,6 @@ import {
   getFilePathWindows,
   getIconFromWindows,
 } from "./installed-apps/windows";
-
-const APPS_KEY = "apps";
 
 const appsFileContentSchema = z.object({
   storedAt: z.string(),
@@ -100,8 +97,18 @@ async function getApps(): Promise<AppData[]> {
   return apps;
 }
 
-export abstract class AppsManager {
-  static async load() {
+export class AppsManager {
+  apps: AppData[] = [];
+  static _instacneCache?: AppsManager;
+
+  static instance(): AppsManager {
+    if (!this._instacneCache) {
+      this._instacneCache = new this();
+    }
+    return this._instacneCache;
+  }
+
+  loadApps() {
     const cacheFilePath = path.join(
       app.getPath("userData"),
       "cache/wakatime-apps.json",
@@ -111,30 +118,28 @@ export abstract class AppsManager {
       const data = fs.readFileSync(cacheFilePath, { encoding: "utf-8" });
       const content = appsFileContentSchema.parse(JSON.parse(data));
       if (!isBefore(new Date(content.storedAt), subHours(new Date(), 1))) {
-        store.set(APPS_KEY, content.apps);
+        this.apps = content.apps;
         return;
       }
     } catch (error) {}
 
-    const apps = await getApps();
-    store.set(APPS_KEY, apps);
+    (async () => {
+      const apps = await getApps();
+      this.apps = apps;
 
-    try {
-      fs.writeFileSync(
-        cacheFilePath,
-        JSON.stringify({
-          storedAt: new Date().toISOString(),
-          apps,
-        } satisfies z.infer<typeof appsFileContentSchema>),
-      );
-    } catch (error) {}
+      try {
+        fs.writeFileSync(
+          cacheFilePath,
+          JSON.stringify({
+            storedAt: new Date().toISOString(),
+            apps,
+          } satisfies z.infer<typeof appsFileContentSchema>),
+        );
+      } catch (error) {}
+    })();
   }
 
-  static getApps() {
-    return store.get<AppData[]>(APPS_KEY) ?? [];
-  }
-
-  static getApp(path: string) {
-    return this.getApps().find((app) => app.path === path);
+  getApp(path: string) {
+    return this.apps.find((app) => app.path === path);
   }
 }

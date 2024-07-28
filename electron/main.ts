@@ -226,7 +226,6 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 function handleDeepLink(url: string) {
   const pathname = url.replace(`${WAKATIME_PROTOCALL}://`, "");
-  console.log({ pathname });
   switch (pathname) {
     case DeepLink.settings:
       openSettings();
@@ -293,7 +292,7 @@ ipcMain.on(
 );
 
 ipcMain.on(IpcKeys.getApps, (event) => {
-  event.returnValue = AppsManager.getApps();
+  event.returnValue = AppsManager.instance().apps;
 });
 
 ipcMain.on(IpcKeys.getAppVersion, (event) => {

@@ -116,13 +116,11 @@ export class MonitoredApp {
     }
 
     switch (app.id) {
-      // TODO: Will implement these later as it's a complex task and even if it's possible with electron.
-      // case 'canva':
-
-      //   break;
-      // case 'notes':
-
-      //   break;
+      // TODO: Unimplemented feature
+      case "canva":
+        return null;
+      case "notes":
+        return null;
 
       default:
         return this.title(windowInfo, app);

@@ -34,7 +34,7 @@ export class Watcher {
     try {
       // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
       const window = activeWindow();
-      const app = AppsManager.getApp(window.info.path);
+      const app = AppsManager.instance().getApp(window.info.path);
       if (!app) {
         return;
       }
