@@ -1,7 +1,9 @@
 import { z } from "zod";
 
+import { MonitoredApp } from "./types";
+
 export const appDataSchema = z.object({
-  id: z.string(),
+  id: z.custom<MonitoredApp>(),
   name: z.string(),
   path: z.string(),
   icon: z.string().nullable(),

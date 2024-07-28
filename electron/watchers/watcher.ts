@@ -8,6 +8,7 @@ import {
 import { GlobalKeyboardListener } from "node-global-key-listener";
 
 import { AppsManager } from "../helpers/apps-manager";
+import { MonitoredApp } from "../helpers/monitored-app";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { Logging } from "../utils/logging";
 import { Wakatime } from "./wakatime";
@@ -37,10 +38,20 @@ export class Watcher {
       if (!app) {
         return;
       }
-      this.wakatime.sendHeartbeat(app, {
-        title: window.title,
-        url: window.url,
-        processId: window.info.processId,
+      const heartbeatData = MonitoredApp.heartbeatData(window, app);
+      if (!heartbeatData) {
+        return;
+      }
+
+      this.wakatime.sendHeartbeat({
+        appData: app,
+        windowInfo: window,
+        project: heartbeatData.project,
+        entity: heartbeatData.entity,
+        entityType: "app",
+        category: heartbeatData.category,
+        language: heartbeatData.language,
+        isWrite: false,
       });
     } catch (error) {
       Logging.instance().log((error as Error).message);

@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { AppData } from "../utils/validators";
 import { store } from "../store";
 import { appDataSchema } from "../utils/validators";
-import { allApps } from "../watchers";
+import { allApps } from "../watchers/apps";
 import { getInstalledApps } from "./installed-apps";
 import {
   getFilePathWindows,

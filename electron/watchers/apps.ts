@@ -1,18 +1,6 @@
-export type MonitoredAppInfo = {
-  id: string;
-  mac?: {
-    bundleId: string;
-  };
-  windows?: {
-    exePath?: string;
-    DisplayName?: string;
-  };
-  isBrowser?: boolean;
-  isDefaultEnabled?: boolean;
-  isElectronApp?: boolean;
-};
+import { MonitoredAppInfo } from "../utils/types";
 
-export const allApps = [
+export const allApps: MonitoredAppInfo[] = [
   {
     id: "arcbrowser",
     mac: {
@@ -154,7 +142,7 @@ export const allApps = [
     isBrowser: true,
   },
   {
-    id: "microsoftEdge",
+    id: "microsoft_edge",
     windows: {
       exePath: "msedge.exe",
       DisplayName: "Microsoft Edge",

@@ -47,17 +47,16 @@ export class Wakatime {
 
   async sendHeartbeat(props: {
     appData: AppData;
-    windowInfo?: WindowInfo;
+    windowInfo: WindowInfo;
     entity: string;
     entityType: EntityType;
-    category?: Category;
-    project?: string;
-    language?: string;
+    category: Category | null;
+    project: string | null;
+    language: string | null;
     isWrite: boolean;
   }) {
     const {
-      appData: appData,
-      category = "coding",
+      appData,
       entity,
       entityType,
       isWrite,
@@ -65,6 +64,7 @@ export class Wakatime {
       project,
       windowInfo,
     } = props;
+    const category = props.category ?? "coding";
     const time = Date.now() / 1000;
 
     if (!this.shouldSendHeartbeat(entity, time, isWrite, category)) {
