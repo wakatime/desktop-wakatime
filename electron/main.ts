@@ -15,6 +15,7 @@ import { ConfigFile } from "./helpers/config-file";
 import { Dependencies } from "./helpers/dependencies";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
+import { SettingsManager } from "./helpers/settings-manager";
 import { getLogFilePath } from "./utils";
 import { DomainPreferenceType, FilterType, IpcKeys } from "./utils/constants";
 import { Logging } from "./utils/logging";
@@ -210,6 +211,10 @@ app.whenReady().then(async () => {
 
   Logging.instance().log("Starting Wakatime");
 
+  if (SettingsManager.shouldRegisterAsLogInItem()) {
+    SettingsManager.registerAsLogInItem();
+  }
+
   dependencies = new Dependencies();
 
   // TODO: Move them to a background task
@@ -300,7 +305,11 @@ ipcMain.on(IpcKeys.shouldLaunchOnLogin, (event) => {
   event.returnValue = PropertiesManager.shouldLaunchOnLogin;
 });
 ipcMain.on(IpcKeys.setShouldLaunchOnLogin, (_, value) => {
-  PropertiesManager.shouldLaunchOnLogin = value;
+  if (value) {
+    SettingsManager.registerAsLogInItem();
+  } else {
+    SettingsManager.unregisterAsLogInItem();
+  }
 });
 
 ipcMain.on(IpcKeys.logFilePath, (event) => {

@@ -1,9 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  DomainPreferenceType,
-  FilterType,
-  IpcKeys,
-} from "electron/utils/constants";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { Checkbox } from "~/components/ui/checkbox";
@@ -12,6 +7,11 @@ import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { useAppVersion } from "~/utils/queries";
+import {
+  DomainPreferenceType,
+  FilterType,
+  IpcKeys,
+} from "../../electron/utils/constants";
 
 export function Component() {
   const [apiKey, setApiKey] = useState(

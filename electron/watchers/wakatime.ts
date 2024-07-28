@@ -1,10 +1,10 @@
 import { exec } from "child_process";
 import { WindowInfo } from "@miniben90/x-win";
 import { app } from "electron";
-import { ConfigFile } from "electron/helpers/config-file";
 
 import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
+import { ConfigFile } from "../helpers/config-file";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { getCLIPath, getPlatfrom } from "../utils";
 import { Logging } from "../utils/logging";
