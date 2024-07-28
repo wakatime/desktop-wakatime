@@ -2,10 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { isBefore, subHours } from "date-fns";
 import { app } from "electron";
-import { Logging } from "electron/utils/logging";
 import { z } from "zod";
 
 import type { AppData } from "../utils/validators";
+import { Logging } from "../utils/logging";
 import { appDataSchema } from "../utils/validators";
 import { getApps } from "./installed-apps";
 
