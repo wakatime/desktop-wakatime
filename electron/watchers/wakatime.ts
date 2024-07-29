@@ -31,31 +31,33 @@ export class Wakatime {
     }
 
     Dependencies.installDependencies();
-    AppsManager.instance().loadApps();
+    AppsManager.instance()
+      .loadApps()
+      .then((apps) => {
+        if (!PropertiesManager.hasLaunchedBefore) {
+          for (const app of apps) {
+            if (app.isDefaultEnabled) {
+              MonitoringManager.set(app.path, true);
+            }
+          }
+          PropertiesManager.hasLaunchedBefore = true;
+        }
+
+        if (apps.find((app) => app.isBrowser)) {
+          (async () => {
+            const browser = await Dependencies.recentBrowserExtension();
+            if (browser && Notification.isSupported()) {
+              const notification = new Notification({
+                title: "Warning",
+                subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
+              });
+              notification.show();
+            }
+          })();
+        }
+      });
 
     this.checkForApiKey();
-
-    if (!PropertiesManager.hasLaunchedBefore) {
-      for (const app of AppsManager.instance().apps) {
-        if (app.isDefaultEnabled) {
-          MonitoringManager.set(app.path, true);
-        }
-      }
-      PropertiesManager.hasLaunchedBefore = true;
-    }
-
-    if (MonitoringManager.isBrowserMonitored()) {
-      (async () => {
-        const browser = await Dependencies.recentBrowserExtension();
-        if (browser && Notification.isSupported()) {
-          const notification = new Notification({
-            title: "Warning",
-            subtitle: `WakaTime ${browser} extension detected. It’s recommended to only track browsing activity with the ${browser} extension or The Desktop app, but not both.`,
-          });
-          notification.show();
-        }
-      })();
-    }
   }
 
   checkForApiKey() {

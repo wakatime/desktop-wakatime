@@ -47,12 +47,11 @@ export class AppsManager {
     }
   }
 
-  loadApps() {
+  async loadApps() {
     this.apps = this.getCachedApps();
-    (async () => {
-      this.apps = await getApps();
-      this.setCachedApps(this.apps);
-    })();
+    this.apps = await getApps();
+    this.setCachedApps(this.apps);
+    return this.apps;
   }
 
   getApp(path: string) {
