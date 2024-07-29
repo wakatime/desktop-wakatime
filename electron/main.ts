@@ -15,7 +15,7 @@ import { ConfigFile } from "./helpers/config-file";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
-import { getLogFilePath } from "./utils";
+import { getDesktopWakaTimeConfigFilePath, getLogFilePath } from "./utils";
 import {
   DeepLink,
   DomainPreferenceType,
@@ -26,6 +26,8 @@ import {
 import { Logging } from "./utils/logging";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
+
+console.log("Desktop config file path:", getDesktopWakaTimeConfigFilePath());
 
 // The built directory structure
 //

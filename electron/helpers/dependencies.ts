@@ -233,14 +233,27 @@ export abstract class Dependencies {
       }
     }
 
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(zipFile)
-        .pipe(unzpier.Extract({ path: getResourcesFolderPath() }))
-        .on("close", resolve)
-        .on("error", reject);
-    });
+    if (process.platform === "win32") {
+      const directory = await unzpier.Open.file(zipFile);
+      await directory.extract({ path: getResourcesFolderPath() });
+    } else if (process.platform === "darwin") {
+      await new Promise((resolve, reject) =>
+        exec(
+          `/usr/bin/unzip ${zipFile} -d ${getResourcesFolderPath()}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              reject(error);
+            }
+            if (stderr) {
+              reject(stderr);
+            }
+            resolve(stdout);
+          },
+        ),
+      );
+    }
     // remove the downloaded zip file
-    fs.rmSync(zipFile);
+    // fs.rmSync(zipFile);
 
     if (!fs.existsSync(cli)) {
       throw new Error(`${cli} file not found!`);

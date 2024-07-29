@@ -1,6 +1,6 @@
 import { AppData } from "../../utils/validators";
 import { allApps } from "../../watchers/apps";
-import { getInstalledApps as getInstalledAppsMac } from "./mac";
+import { getAppIconMac, getInstalledApps as getInstalledAppsMac } from "./mac";
 import {
   getFilePathWindows,
   getIconFromWindows,
@@ -48,7 +48,7 @@ export async function getApps(): Promise<AppData[]> {
 
           let icon: string | null = null;
           try {
-            icon = getIconFromWindows(filePath);
+            icon = await getIconFromWindows(filePath);
           } catch (error) {
             /* empty */
           }
@@ -72,26 +72,37 @@ export async function getApps(): Promise<AppData[]> {
           } satisfies AppData;
         }
 
-        // if (process.platform === "darwin" && app.mac?.bundleId) {
-        //   const record = installedApps.find(
-        //     (ia) =>
-        //       ia["kMDItemCFBundleIdentifier"] &&
-        //       app.mac?.bundleId &&
-        //       ia["kMDItemCFBundleIdentifier"] === app.mac.bundleId,
-        //   );
+        if (process.platform === "darwin" && app.mac?.bundleId) {
+          const record = installedApps.find(
+            (ia) =>
+              ia["kMDItemCFBundleIdentifier"] &&
+              app.mac?.bundleId &&
+              ia["kMDItemCFBundleIdentifier"] === app.mac.bundleId,
+          );
 
-        //   if (!record) {
-        //     return null;
-        //   }
-        //   const name = record["kMDItemDisplayName"]?.replace(".app", "");
-        //   const path = record["_FILE_PATH"];
-        //   if (!path || !name) {
-        //     return;
-        //   }
-        //   const icon = await getAppIconMac(path);
+          if (!record) {
+            return null;
+          }
+          const name = record["kMDItemDisplayName"]?.replace(".app", "");
+          const path = record["_FILE_PATH"];
+          if (!path || !name) {
+            return;
+          }
+          const icon = await getAppIconMac(path);
+          const version = record["kMDItemVersion"] || null;
 
-        //   return { path, icon, name };
-        // }
+          return {
+            path,
+            icon,
+            name,
+            bundleId: app.mac.bundleId,
+            id: app.id,
+            isBrowser: app.isBrowser ?? false,
+            isDefaultEnabled: app.isDefaultEnabled ?? false,
+            isElectronApp: app.isElectronApp ?? false,
+            version,
+          } satisfies AppData;
+        }
 
         return null;
       }),

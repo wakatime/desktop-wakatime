@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { extractIcon } from "exe-icon-extractor";
 import Winreg from "winreg";
 
 import { store } from "../../store";
@@ -45,7 +44,7 @@ export function getFilePathWindows(
   return filePath;
 }
 
-export function getIconFromWindows(filePath: string) {
+export async function getIconFromWindows(filePath: string) {
   if (process.platform !== "win32") {
     return null;
   }
@@ -54,6 +53,7 @@ export function getIconFromWindows(filePath: string) {
   if (typeof cachedIcon === "string") {
     return cachedIcon;
   }
+  const { extractIcon } = await import("exe-icon-extractor");
 
   const buffer = extractIcon(filePath, "large");
   const icon = "data:image/png;base64," + buffer.toString("base64");
