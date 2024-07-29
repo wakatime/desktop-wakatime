@@ -53,4 +53,9 @@ declare module "iconutil" {
   ): void;
 }
 
-declare module "icon-extractor";
+declare module "exe-icon-extractor" {
+  export function extractIcon(
+    filePath: string,
+    size: "large" | "small",
+  ): Buffer;
+}

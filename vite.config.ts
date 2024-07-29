@@ -16,7 +16,7 @@ export default defineConfig({
             rollupOptions: {
               external: [
                 "@miniben90/x-win",
-                "@inithink/exe-icon-extractor",
+                "exe-icon-extractor",
                 "node-global-key-listener",
               ],
             },

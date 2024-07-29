@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { extractIcon } from "@inithink/exe-icon-extractor";
+import { extractIcon } from "exe-icon-extractor";
 import Winreg from "winreg";
 
 import { store } from "../../store";

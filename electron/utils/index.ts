@@ -19,12 +19,16 @@ export function getResourcesFolderPath() {
   return resourcesFolder;
 }
 
-export function getDesktopWakaTimeConfigFilePath() {
-  const folder = path.join(app.getPath("appData"), "WakaTime");
-  if (!fs.existsSync(folder)) {
-    fs.mkdirSync(folder, { recursive: true });
+export function getWakatimeAppDataFolderPath() {
+  const wakatimeAppDataFolder = path.join(app.getPath("appData"), "WakaTime");
+  if (!fs.existsSync(wakatimeAppDataFolder)) {
+    fs.mkdirSync(wakatimeAppDataFolder, { recursive: true });
   }
-  return path.join(folder, "desktop-wakatime.cfg");
+  return wakatimeAppDataFolder;
+}
+
+export function getDesktopWakaTimeConfigFilePath() {
+  return path.join(getWakatimeAppDataFolderPath(), "desktop-wakatime.cfg");
 }
 
 export function getLogFilePath() {
