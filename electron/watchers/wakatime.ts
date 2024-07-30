@@ -43,7 +43,11 @@ export class Wakatime {
           PropertiesManager.hasLaunchedBefore = true;
         }
 
-        if (apps.find((app) => app.isBrowser)) {
+        if (
+          apps.find(
+            (app) => app.isBrowser && MonitoringManager.isMonitored(app.path),
+          )
+        ) {
           (async () => {
             const browser = await Dependencies.recentBrowserExtension();
             if (browser && Notification.isSupported()) {
