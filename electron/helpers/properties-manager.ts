@@ -13,9 +13,37 @@ enum Keys {
   filterType = "filter_type",
   denylist = "denylist",
   allowlist = "allowlist",
+  autoUpdateEnabled = "auto_update_enabled",
 }
 
 export class PropertiesManager {
+  static get autoUpdateEnabled(): boolean {
+    const file = getDesktopWakaTimeConfigFilePath();
+    const value = ConfigFileReader.getBool(
+      file,
+      "properties",
+      Keys.autoUpdateEnabled,
+    );
+    if (value === null) {
+      ConfigFileReader.setBool(
+        file,
+        "properties",
+        Keys.autoUpdateEnabled,
+        true,
+      );
+      return true;
+    }
+    return value;
+  }
+  static set autoUpdateEnabled(value: boolean) {
+    ConfigFileReader.setBool(
+      getDesktopWakaTimeConfigFilePath(),
+      "properties",
+      Keys.autoUpdateEnabled,
+      value,
+    );
+  }
+
   static get shouldLaunchOnLogin(): boolean {
     const file = getDesktopWakaTimeConfigFilePath();
     const value = ConfigFileReader.getBool(

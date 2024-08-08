@@ -5,6 +5,8 @@ export enum IpcKeys {
   setSetting = "set_setting",
   isMonitored = "is_monitored",
   setMonitored = "set_monitored",
+  autoUpdateEnabled = "auto_update_enabled",
+  setAutoUpdateEnabled = "set_auto_update_enabled",
   shouldLogToFile = "should_log_to_file",
   setShouldLogToFile = "set_should_log_to_file",
   shouldLaunchOnLogin = "should_launch_on_login",

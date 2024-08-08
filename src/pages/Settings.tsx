@@ -26,6 +26,9 @@ export function Component() {
   const [shouldLaunchOnLogIn, setShouldLaunchOnLogIn] = useState(() =>
     window.ipcRenderer.shouldLaunchOnLogIn(),
   );
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(() =>
+    window.ipcRenderer.autoUpdateEnabled(),
+  );
   const [isBrowserMonitored] = useState(
     () => window.ipcRenderer.sendSync(IpcKeys.isBrowserMonitored) as boolean,
   );
@@ -67,6 +70,11 @@ export function Component() {
   const handleShouldLaunchOnLogInChange = useCallback((value: boolean) => {
     window.ipcRenderer.setShouldLaunchOnLogIn(value);
     setShouldLaunchOnLogIn(value);
+  }, []);
+
+  const handleAutoUpdateEnabledChange = useCallback((value: boolean) => {
+    window.ipcRenderer.setAutoUpdateEnabled(value);
+    setAutoUpdateEnabled(value);
   }, []);
 
   const handleDomainPreferenceChange = useCallback(
@@ -113,6 +121,7 @@ export function Component() {
             Launch at login
           </Label>
         </fieldset>
+
         <fieldset className="flex gap-2">
           <Checkbox
             id="enable-logging"
@@ -124,6 +133,20 @@ export function Component() {
           />
           <Label htmlFor="enable-logging" className="my-0.5 leading-5">
             Enable logging to <code>{logFilePath}</code>
+          </Label>
+        </fieldset>
+
+        <fieldset className="flex gap-2">
+          <Checkbox
+            id="auto-update-enabled"
+            checked={autoUpdateEnabled}
+            onCheckedChange={(checked) => {
+              handleAutoUpdateEnabledChange(checked === true);
+            }}
+            className="mt-1"
+          />
+          <Label htmlFor="auto-update-enabled" className="my-0.5 leading-5">
+            Install updates automatically
           </Label>
         </fieldset>
       </div>

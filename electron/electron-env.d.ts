@@ -43,6 +43,8 @@ interface Window {
     setShouldLaunchOnLogIn: (shouldLaunchOnLogIn: boolean) => void;
     shouldLogToFile: () => boolean;
     setShouldLogToFile: (shouldLogToFile: boolean) => void;
+    autoUpdateEnabled: () => boolean;
+    setAutoUpdateEnabled: (autoUpdateEnabled: boolean) => void;
   };
 }
 

@@ -5,7 +5,6 @@ import {
   ipcMain,
   Menu,
   nativeImage,
-  Notification,
   shell,
   Tray,
 } from "electron";
@@ -15,7 +14,7 @@ import { ConfigFile } from "./helpers/config-file";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
-import { getDesktopWakaTimeConfigFilePath, getLogFilePath } from "./utils";
+import { getLogFilePath } from "./utils";
 import {
   DeepLink,
   DomainPreferenceType,
@@ -26,8 +25,6 @@ import {
 import { Logging } from "./utils/logging";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
-
-console.log("Desktop config file path:", getDesktopWakaTimeConfigFilePath());
 
 // The built directory structure
 //
@@ -86,7 +83,7 @@ function createSettingsWindow() {
     maximizable: false,
     resizable: false,
     width: 512,
-    height: MonitoringManager.isBrowserMonitored() ? 768 : 320,
+    height: MonitoringManager.isBrowserMonitored() ? 820 : 320,
     show: false,
     autoHideMenuBar: true,
   });
@@ -185,17 +182,6 @@ function createTray() {
       label: "Monitored Apps",
       type: "normal",
       click: openMonitoredApps,
-    },
-    { type: "separator" },
-    {
-      label: "Check for Updates",
-      type: "normal",
-      click: () => {
-        const notification = new Notification({
-          title: "Not implemented yet!",
-        });
-        notification.show();
-      },
     },
     { type: "separator" },
     {
@@ -301,6 +287,13 @@ ipcMain.on(IpcKeys.isMonitored, (event, path) => {
 
 ipcMain.on(IpcKeys.setMonitored, (_, path: string, monitor: boolean) => {
   MonitoringManager.set(path, monitor);
+});
+
+ipcMain.on(IpcKeys.autoUpdateEnabled, (event) => {
+  event.returnValue = PropertiesManager.autoUpdateEnabled;
+});
+ipcMain.on(IpcKeys.setAutoUpdateEnabled, (_, value) => {
+  PropertiesManager.autoUpdateEnabled = value;
 });
 
 ipcMain.on(IpcKeys.shouldLogToFile, (event) => {

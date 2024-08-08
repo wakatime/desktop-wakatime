@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { WindowInfo } from "@miniben90/x-win";
 import { app, Notification, shell } from "electron";
+import { updateElectronApp } from "update-electron-app";
 
 import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
@@ -12,7 +13,7 @@ import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
 import { getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
 import { DeepLink } from "../utils/constants";
-import { Logging } from "../utils/logging";
+import { Logging, LogLevel } from "../utils/logging";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -20,6 +21,19 @@ export class Wakatime {
   private lastCategory: Category = "coding";
 
   init() {
+    if (PropertiesManager.autoUpdateEnabled) {
+      // https://github.com/electron/update-electron-app?tab=readme-ov-file#with-updateelectronjsorg
+      // app will check for updates at startup, then every ten minutes
+      updateElectronApp({
+        logger: {
+          log: (message) => Logging.instance().log(message, LogLevel.DEBUG),
+          error: (message) => Logging.instance().log(message, LogLevel.ERROR),
+          info: (message) => Logging.instance().log(message, LogLevel.INFO),
+          warn: (message) => Logging.instance().log(message, LogLevel.WARN),
+        },
+      });
+    }
+
     if (PropertiesManager.shouldLogToFile) {
       Logging.instance().activateLoggingToFile();
     }
