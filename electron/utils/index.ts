@@ -7,10 +7,7 @@ import { DeepLink, WAKATIME_PROTOCALL } from "./constants";
 export function getResourcesFolderPath() {
   const userHome = app.getPath("home");
 
-  const resourcesFolder = path.join(
-    userHome,
-    app.isPackaged ? ".wakatime" : ".wakatime-test",
-  );
+  const resourcesFolder = path.join(userHome, ".wakatime");
 
   if (!fs.existsSync(resourcesFolder)) {
     fs.mkdirSync(resourcesFolder, { recursive: true });

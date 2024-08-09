@@ -10,10 +10,7 @@ export abstract class ConfigFile {
       return path.join(getResourcesFolderPath(), "wakatime-internal.cfg");
     } else {
       const userHome = app.getPath("home");
-      return path.join(
-        userHome,
-        app.isPackaged ? ".wakatime.cfg" : ".wakatime-test.cfg",
-      );
+      return path.join(userHome, ".wakatime.cfg");
     }
   }
 
