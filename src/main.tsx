@@ -15,12 +15,3 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </StrictMode>,
 );
-
-// Use contextBridge
-// window.ipcRenderer.on("app-settings", (_event, appSettings) => {
-//   useAppSettings.setState({ appSettings });
-// });
-
-// window.ipcRenderer.on("installed-apps", (_event, apps) => {
-//   useInstalledApps.setState({ apps });
-// });

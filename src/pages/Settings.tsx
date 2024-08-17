@@ -6,7 +6,6 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import { useAppVersion } from "~/utils/queries";
 import {
   DomainPreferenceType,
   FilterType,
@@ -47,7 +46,7 @@ export function Component() {
   const [allowlist, setAllowlist] = useState(
     () => window.ipcRenderer.sendSync(IpcKeys.getAllowlist) as string,
   );
-  const appVersionQuery = useAppVersion();
+  const [appVersion] = useState(() => window.ipcRenderer.getAppVersion());
 
   const debouncedSetApiKey = useDebounceCallback((apiKey: string) => {
     window.ipcRenderer.setSetting("settings", "api_key", apiKey);
@@ -240,14 +239,7 @@ export function Component() {
       )}
       <div className="flex-1"></div>
       <div>
-        <p className="text-sm text-muted-foreground">
-          Version:{" "}
-          {appVersionQuery.isPending
-            ? "Loading..."
-            : appVersionQuery.isError
-              ? appVersionQuery.error.message
-              : appVersionQuery.data}
-        </p>
+        <p className="text-sm text-muted-foreground">Version: {appVersion}</p>
       </div>
     </div>
   );
