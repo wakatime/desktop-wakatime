@@ -45,6 +45,8 @@ interface Window {
     setShouldLogToFile: (shouldLogToFile: boolean) => void;
     autoUpdateEnabled: () => boolean;
     setAutoUpdateEnabled: (autoUpdateEnabled: boolean) => void;
+    codeTimeInStatusBar: () => boolean;
+    setCodeTimeInStatusBar: (codeTimeInStatusBar: boolean) => void;
   };
 }
 

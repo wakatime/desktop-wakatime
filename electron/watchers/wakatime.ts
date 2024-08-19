@@ -1,6 +1,5 @@
-import { exec } from "child_process";
 import { WindowInfo } from "@miniben90/x-win";
-import { app, Notification, shell } from "electron";
+import { app, Notification, shell, Tray } from "electron";
 import { updateElectronApp } from "update-electron-app";
 
 import type { Category, EntityType } from "../utils/types";
@@ -11,16 +10,21 @@ import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
-import { getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
 import { DeepLink } from "../utils/constants";
 import { Logging, LogLevel } from "../utils/logging";
 
 export class Wakatime {
   private lastEntitiy = "";
   private lastTime: number = 0;
+  private lastCodeTimeFetched: number = 0;
+  private lastCodeTimeText = "";
   private lastCategory: Category = "coding";
+  private tray?: Tray | null;
 
-  init() {
+  init(tray: Tray | null) {
+    this.tray = tray;
+
     if (PropertiesManager.autoUpdateEnabled) {
       // https://github.com/electron/update-electron-app?tab=readme-ov-file#with-updateelectronjsorg
       // app will check for updates at startup, then every ten minutes
@@ -38,7 +42,7 @@ export class Wakatime {
       Logging.instance().activateLoggingToFile();
     }
 
-    Logging.instance().log("Starting Wakatime");
+    Logging.instance().log("Starting WakaTime");
 
     if (SettingsManager.shouldRegisterAsLogInItem()) {
       SettingsManager.registerAsLogInItem();
@@ -76,6 +80,8 @@ export class Wakatime {
       });
 
     this.checkForApiKey();
+
+    this.fetchToday();
   }
 
   checkForApiKey() {
@@ -144,6 +150,10 @@ export class Wakatime {
       return;
     }
 
+    this.lastEntitiy = entity;
+    this.lastCategory = category;
+    this.lastTime = time;
+
     const args: string[] = [
       "--entity",
       entity,
@@ -165,31 +175,64 @@ export class Wakatime {
       args.push("--language", language);
     }
 
-    Logging.instance().log(`Sending heartbeat with: ${args}`);
-
-    this.lastEntitiy = entity;
-    this.lastCategory = category;
-    this.lastTime = time;
-
     const cli = getCLIPath();
+    Logging.instance().log(`Sending heartbeat: ${cli} ${args}`);
 
     try {
-      await new Promise((resolve, reject) => {
-        const command = `${cli} ${args.join(" ")}`;
-        console.log(`Executing Command: "${command}"`);
-        exec(command, (error, stdout, stderr) => {
-          if (error) {
-            reject(error);
-          }
-          if (stderr) {
-            reject(stderr);
-          }
-          resolve(stdout);
-        });
-      });
+      const [_, err] = await exec(cli, ...args);
+      if (err) {
+        Logging.instance().log(
+          `Error sending heartbeat: ${err}`,
+          LogLevel.ERROR,
+        );
+      }
+    } catch (error) {
+      Logging.instance().log(`Failed to send heartbeat: ${error}`);
+    }
+
+    await this.fetchToday();
+  }
+
+  public async fetchToday() {
+    if (!PropertiesManager.showCodeTimeInStatusBar) {
+      this.tray?.setTitle("");
+      return;
+    }
+
+    const time = Date.now() / 1000;
+    if (this.lastCodeTimeFetched + 120 > time) {
+      this.tray?.setTitle(` ${this.lastCodeTimeText}`);
+      return;
+    }
+
+    this.lastCodeTimeFetched = time;
+
+    const args: string[] = [
+      "--today",
+      "--today-hide-categories",
+      "true",
+      "--plugin",
+      `${getPlatfrom()}-wakatime/${app.getVersion()}`,
+    ];
+
+    const cli = getCLIPath();
+    Logging.instance().log(`Fetching code time: ${cli} ${args}`);
+
+    try {
+      const [output, err] = await exec(cli, ...args);
+      if (err) {
+        Logging.instance().log(
+          `Error fetching code time: ${err}`,
+          LogLevel.ERROR,
+        );
+        return;
+      }
+      this.lastCodeTimeText = output;
+      this.tray?.setTitle(` ${output}`);
     } catch (error) {
       Logging.instance().log(
-        `Failed to run wakatime-cli: ${cli}. Error: ${error}`,
+        `Failed to fetch code time: ${error}`,
+        LogLevel.ERROR,
       );
     }
   }

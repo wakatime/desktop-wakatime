@@ -192,10 +192,11 @@ function createTray() {
       },
     },
   ]);
-  tray.setToolTip("Wakatime");
+  tray.setToolTip("WakaTime");
   tray.setContextMenu(contextMenu);
   tray.addListener("click", () => {
     tray?.popUpContextMenu();
+    wakatime?.fetchToday();
   });
 }
 
@@ -231,10 +232,10 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(async () => {
-    wakatime = new Wakatime();
-    wakatime.init();
-    watcher = new Watcher(wakatime);
     createTray();
+    wakatime = new Wakatime();
+    wakatime.init(tray);
+    watcher = new Watcher(wakatime);
     watcher.start();
   });
 
@@ -312,6 +313,14 @@ ipcMain.on(IpcKeys.setShouldLaunchOnLogin, (_, value) => {
   } else {
     SettingsManager.unregisterAsLogInItem();
   }
+});
+
+ipcMain.on(IpcKeys.codeTimeInStatusBar, (event) => {
+  event.returnValue = PropertiesManager.showCodeTimeInStatusBar;
+});
+ipcMain.on(IpcKeys.setCodeTimeInStatusBar, (_, value) => {
+  PropertiesManager.showCodeTimeInStatusBar = value;
+  wakatime?.fetchToday();
 });
 
 ipcMain.on(IpcKeys.logFilePath, (event) => {

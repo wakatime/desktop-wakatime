@@ -121,10 +121,7 @@ export abstract class Dependencies {
 
     if (res.status === 304) {
       // Current version is still the latest version available
-      Logging.instance().log(
-        `Latest wakatime-cli release: ${currentVersion}`,
-        LogLevel.DEBUG,
-      );
+      Logging.instance().log(`Latest wakatime-cli release: ${currentVersion}`);
       return currentVersion;
     } else if (
       lastModified &&
@@ -140,7 +137,6 @@ export abstract class Dependencies {
       }
       Logging.instance().log(
         `Latest wakatime-cli release: ${release.data.tag_name}`,
-        LogLevel.DEBUG,
       );
       ConfigFile.setSetting(
         "internal",

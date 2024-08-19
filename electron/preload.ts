@@ -56,6 +56,12 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   setShouldLaunchOnLogIn(shouldLaunchOnLogIn: boolean) {
     ipcRenderer.send(IpcKeys.setShouldLaunchOnLogin, shouldLaunchOnLogIn);
   },
+  codeTimeInStatusBar() {
+    return ipcRenderer.sendSync(IpcKeys.codeTimeInStatusBar);
+  },
+  setCodeTimeInStatusBar(codeTimeInStatusBar: boolean) {
+    ipcRenderer.send(IpcKeys.setCodeTimeInStatusBar, codeTimeInStatusBar);
+  },
   shouldLogToFile() {
     return ipcRenderer.sendSync(IpcKeys.shouldLogToFile);
   },

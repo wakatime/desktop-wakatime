@@ -14,6 +14,7 @@ enum Keys {
   denylist = "denylist",
   allowlist = "allowlist",
   autoUpdateEnabled = "auto_update_enabled",
+  codeTimeInStatusBar = "code_time_in_status_bar",
 }
 
 export class PropertiesManager {
@@ -67,6 +68,33 @@ export class PropertiesManager {
       getDesktopWakaTimeConfigFilePath(),
       "properties",
       Keys.shouldLaunchOnLogin,
+      value,
+    );
+  }
+
+  static get showCodeTimeInStatusBar(): boolean {
+    const file = getDesktopWakaTimeConfigFilePath();
+    const value = ConfigFileReader.getBool(
+      file,
+      "properties",
+      Keys.codeTimeInStatusBar,
+    );
+    if (value === null) {
+      ConfigFileReader.setBool(
+        file,
+        "properties",
+        Keys.codeTimeInStatusBar,
+        true,
+      );
+      return true;
+    }
+    return value;
+  }
+  static set showCodeTimeInStatusBar(value: boolean) {
+    ConfigFileReader.setBool(
+      getDesktopWakaTimeConfigFilePath(),
+      "properties",
+      Keys.codeTimeInStatusBar,
       value,
     );
   }

@@ -25,6 +25,9 @@ export function Component() {
   const [shouldLaunchOnLogIn, setShouldLaunchOnLogIn] = useState(() =>
     window.ipcRenderer.shouldLaunchOnLogIn(),
   );
+  const [codeTimeInStatusBar, setCodeTimeInStatusBar] = useState(() =>
+    window.ipcRenderer.codeTimeInStatusBar(),
+  );
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(() =>
     window.ipcRenderer.autoUpdateEnabled(),
   );
@@ -69,6 +72,11 @@ export function Component() {
   const handleShouldLaunchOnLogInChange = useCallback((value: boolean) => {
     window.ipcRenderer.setShouldLaunchOnLogIn(value);
     setShouldLaunchOnLogIn(value);
+  }, []);
+
+  const handleCodeTimeInStatusBarChange = useCallback((value: boolean) => {
+    window.ipcRenderer.setCodeTimeInStatusBar(value);
+    setCodeTimeInStatusBar(value);
   }, []);
 
   const handleAutoUpdateEnabledChange = useCallback((value: boolean) => {
@@ -118,6 +126,20 @@ export function Component() {
           />
           <Label htmlFor="launch-at-login" className="my-0.5 leading-5">
             Launch at login
+          </Label>
+        </fieldset>
+
+        <fieldset className="flex gap-2">
+          <Checkbox
+            id="code-time-in-status-bar"
+            checked={codeTimeInStatusBar}
+            onCheckedChange={(checked) => {
+              handleCodeTimeInStatusBarChange(checked === true);
+            }}
+            className="mt-1"
+          />
+          <Label htmlFor="code-time-in-status-bar" className="my-0.5 leading-5">
+            Show code time in status bar
           </Label>
         </fieldset>
 
