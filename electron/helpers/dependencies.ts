@@ -1,4 +1,3 @@
-import { exec } from "node:child_process";
 import fs, { createWriteStream } from "node:fs";
 import path from "node:path";
 import { pipeline } from "node:stream";
@@ -16,10 +15,12 @@ import unzpier from "unzipper";
 import { z } from "zod";
 
 import {
+  exec,
   getArch,
   getCLIPath,
   getPlatfrom,
   getResourcesFolderPath,
+  parseJSONObject,
 } from "../utils";
 import { Logging, LogLevel } from "../utils/logging";
 import { ConfigFile } from "./config-file";
@@ -59,7 +60,8 @@ export abstract class Dependencies {
       if (res.status !== 200) {
         throw res.statusText;
       }
-      const release = (await res.json()) as { data: UserAgent[] };
+      const text = await res.text();
+      const release = parseJSONObject(text) as { data: UserAgent[] };
       const now = new Date();
 
       for (const agent of release.data) {
@@ -105,7 +107,9 @@ export abstract class Dependencies {
     const res = await fetch(apiUrl, {
       headers,
     });
-    const data = await res.json();
+
+    const text = await res.text();
+    const data = parseJSONObject(text);
 
     const now = getUnixTime(new Date());
     ConfigFile.setSetting(
@@ -117,20 +121,40 @@ export abstract class Dependencies {
 
     if (res.status === 304) {
       // Current version is still the latest version available
+      Logging.instance().log(
+        `Latest wakatime-cli release: ${currentVersion}`,
+        LogLevel.DEBUG,
+      );
       return currentVersion;
     } else if (
       lastModified &&
       lastModified === res.headers.get("Last-Modified")
     ) {
-      const release = z.object({ tag_name: z.string() }).parse(data);
+      const release = z.object({ tag_name: z.string() }).safeParse(data);
+      if (!release.success) {
+        Logging.instance().log(
+          `Failed to parse latest release: ${release.error}`,
+          LogLevel.ERROR,
+        );
+        return null;
+      }
+      Logging.instance().log(
+        `Latest wakatime-cli release: ${release.data.tag_name}`,
+        LogLevel.DEBUG,
+      );
       ConfigFile.setSetting(
         "internal",
         "cli_version_last_modified",
         lastModified,
         true,
       );
-      ConfigFile.setSetting("internal", "cli_version", release.tag_name, true);
-      return release.tag_name;
+      ConfigFile.setSetting(
+        "internal",
+        "cli_version",
+        release.data.tag_name,
+        true,
+      );
+      return release.data.tag_name;
     }
 
     return null;
@@ -143,23 +167,13 @@ export abstract class Dependencies {
       return false;
     }
 
-    const output = await new Promise<string>((resolve, reject) => {
-      exec(`${cli} --version`, (error, stdout, stderr) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        if (stderr) {
-          reject(stderr);
-          return;
-        }
-
-        resolve(stdout);
-      });
-    });
+    const [output, err] = await exec(cli, "--version");
+    if (err) {
+      Logging.instance().log(`Error 1: ${err}`, LogLevel.ERROR);
+    }
 
     // disable updating wakatime-cli when it was built from source
-    if (output.trim() === "<local-build>") {
+    if (output === "<local-build>") {
       return true;
     }
 
@@ -237,23 +251,11 @@ export abstract class Dependencies {
       const directory = await unzpier.Open.file(zipFile);
       await directory.extract({ path: getResourcesFolderPath() });
     } else if (process.platform === "darwin") {
-      await new Promise((resolve, reject) =>
-        exec(
-          `/usr/bin/unzip ${zipFile} -d ${getResourcesFolderPath()}`,
-          (error, stdout, stderr) => {
-            if (error) {
-              reject(error);
-            }
-            if (stderr) {
-              reject(stderr);
-            }
-            resolve(stdout);
-          },
-        ),
-      );
+      await exec("/usr/bin/unzip", zipFile, "-d", getResourcesFolderPath());
     }
+
     // remove the downloaded zip file
-    // fs.rmSync(zipFile);
+    fs.rmSync(zipFile);
 
     if (!fs.existsSync(cli)) {
       throw new Error(`${cli} file not found!`);

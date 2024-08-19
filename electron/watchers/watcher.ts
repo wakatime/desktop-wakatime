@@ -71,12 +71,17 @@ export class Watcher {
   start() {
     this.activeWindowSubscription = subscribeActiveWindow(
       (windowInfo: WindowInfo) => {
+        if (!windowInfo.info.processId) return;
+        if (this.activeWindow?.info.processId === windowInfo.info.processId) {
+          return;
+        }
+
         if (this.isWatchingForKeyboardEvents) {
           this.unwatchKeyboardEvents();
         }
 
         Logging.instance().log(
-          `App changed from ${this.activeWindow?.info.name || "nil"} to ${windowInfo.info.name || "nil"}`,
+          `App changed from ${this.activeWindow?.info.name || "nil"} to ${windowInfo.info.name}`,
         );
 
         this.activeWindow = windowInfo;

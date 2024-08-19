@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
@@ -59,4 +60,57 @@ export function getCLIPath() {
 
 export function getDeepLinkUrl(link: DeepLink) {
   return `${WAKATIME_PROTOCALL}://${link}`;
+}
+
+export async function exec(...command: string[]) {
+  if (command.length === 0) {
+    return ["", "No command provided"];
+  }
+  const binary = command[0];
+  const args = command.slice(1);
+
+  try {
+    const output = await new Promise<string>((resolve, reject) => {
+      execFile(binary, args, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          reject(stderr);
+          return;
+        }
+
+        resolve(stdout);
+      });
+    });
+
+    return [output.trim(), ""];
+  } catch (e) {
+    return ["", String(e)];
+  }
+}
+
+export function parseJSONObject(data: string): object | null {
+  if (!data?.trim()) {
+    return null;
+  }
+  try {
+    const obj = JSON.parse(atob(data)) as unknown;
+    if (typeof obj !== "object") {
+      return null;
+    }
+    return obj;
+  } catch (e) {
+    try {
+      const obj = JSON.parse(data) as unknown;
+      if (typeof obj !== "object") {
+        return null;
+      }
+      return obj;
+    } catch (e) {
+      /* ignore */
+    }
+  }
+  return null;
 }
