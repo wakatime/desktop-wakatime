@@ -83,7 +83,7 @@ function createSettingsWindow() {
     maximizable: false,
     resizable: false,
     width: 512,
-    height: MonitoringManager.isBrowserMonitored() ? 820 : 320,
+    height: MonitoringManager.isBrowserMonitored() ? 840 : 380,
     show: false,
     autoHideMenuBar: true,
   });
@@ -97,8 +97,7 @@ function createSettingsWindow() {
   if (VITE_DEV_SERVER_URL) {
     settingsWindow.loadURL(VITE_DEV_SERVER_URL + "settings");
   } else {
-    // win.loadFile('dist/index.html')
-    settingsWindow.loadFile(path.join(process.env.DIST!, "index.html"));
+    settingsWindow.loadFile(path.join(process.env.DIST!, "settings.html"));
   }
 
   settingsWindow.on("closed", () => {
@@ -131,8 +130,9 @@ function createMonitoredAppsWindow() {
   if (VITE_DEV_SERVER_URL) {
     monitoredAppsWindow.loadURL(VITE_DEV_SERVER_URL + "monitored-apps");
   } else {
-    // win.loadFile('dist/index.html')
-    monitoredAppsWindow.loadFile(path.join(process.env.DIST!, "index.html"));
+    monitoredAppsWindow.loadFile(
+      path.join(process.env.DIST!, "monitored-apps.html"),
+    );
   }
 
   monitoredAppsWindow.on("closed", () => {

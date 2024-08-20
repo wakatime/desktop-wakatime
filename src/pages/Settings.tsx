@@ -12,87 +12,87 @@ import {
   IpcKeys,
 } from "../../electron/utils/constants";
 
-export function Component() {
+export function SettingsPage() {
   const [apiKey, setApiKey] = useState(
-    () => window.ipcRenderer.getSetting("settings", "api_key") ?? "",
+    () => window.ipcRenderer?.getSetting("settings", "api_key") ?? "",
   );
   const [logFilePath] = useState(
-    () => window.ipcRenderer.sendSync(IpcKeys.logFilePath) as string,
+    () => window.ipcRenderer?.sendSync(IpcKeys.logFilePath) as string,
   );
   const [shouldLogToFile, setShouldLogToFile] = useState(() =>
-    window.ipcRenderer.shouldLogToFile(),
+    window.ipcRenderer?.shouldLogToFile(),
   );
   const [shouldLaunchOnLogIn, setShouldLaunchOnLogIn] = useState(() =>
-    window.ipcRenderer.shouldLaunchOnLogIn(),
+    window.ipcRenderer?.shouldLaunchOnLogIn(),
   );
   const [codeTimeInStatusBar, setCodeTimeInStatusBar] = useState(() =>
-    window.ipcRenderer.codeTimeInStatusBar(),
+    window.ipcRenderer?.codeTimeInStatusBar(),
   );
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(() =>
-    window.ipcRenderer.autoUpdateEnabled(),
+    window.ipcRenderer?.autoUpdateEnabled(),
   );
   const [isBrowserMonitored] = useState(
-    () => window.ipcRenderer.sendSync(IpcKeys.isBrowserMonitored) as boolean,
+    () => window.ipcRenderer?.sendSync(IpcKeys.isBrowserMonitored) as boolean,
   );
   const [domainPreference, setDomainPreference] = useState(
     () =>
-      window.ipcRenderer.sendSync(
+      window.ipcRenderer?.sendSync(
         IpcKeys.getDomainPreference,
       ) as DomainPreferenceType,
   );
   const [filterType, setFilterType] = useState(
-    () => window.ipcRenderer.sendSync(IpcKeys.getFilterType) as FilterType,
+    () => window.ipcRenderer?.sendSync(IpcKeys.getFilterType) as FilterType,
   );
   const [denylist, setDenylist] = useState(
-    () => window.ipcRenderer.sendSync(IpcKeys.getDenylist) as string,
+    () => window.ipcRenderer?.sendSync(IpcKeys.getDenylist) as string,
   );
   const [allowlist, setAllowlist] = useState(
-    () => window.ipcRenderer.sendSync(IpcKeys.getAllowlist) as string,
+    () => window.ipcRenderer?.sendSync(IpcKeys.getAllowlist) as string,
   );
-  const [appVersion] = useState(() => window.ipcRenderer.getAppVersion());
+  const [appVersion] = useState(() => window.ipcRenderer?.getAppVersion());
 
   const debouncedSetApiKey = useDebounceCallback((apiKey: string) => {
-    window.ipcRenderer.setSetting("settings", "api_key", apiKey);
+    window.ipcRenderer?.setSetting("settings", "api_key", apiKey);
     setApiKey(apiKey);
   }, 200);
   const debouncedSetDenylist = useDebounceCallback((value: string) => {
-    window.ipcRenderer.send(IpcKeys.setDenylist, value);
+    window.ipcRenderer?.send(IpcKeys.setDenylist, value);
     setDenylist(value);
   }, 200);
   const debouncedSetAllowlist = useDebounceCallback((value: string) => {
-    window.ipcRenderer.send(IpcKeys.setAllowlist, value);
+    window.ipcRenderer?.send(IpcKeys.setAllowlist, value);
     setAllowlist(value);
   }, 200);
 
   const handleShouldLogToFileChange = useCallback((value: boolean) => {
-    window.ipcRenderer.setShouldLogToFile(value);
+    window.ipcRenderer?.setShouldLogToFile(value);
     setShouldLogToFile(value);
   }, []);
 
   const handleShouldLaunchOnLogInChange = useCallback((value: boolean) => {
-    window.ipcRenderer.setShouldLaunchOnLogIn(value);
+    window.ipcRenderer?.setShouldLaunchOnLogIn(value);
     setShouldLaunchOnLogIn(value);
   }, []);
 
   const handleCodeTimeInStatusBarChange = useCallback((value: boolean) => {
-    window.ipcRenderer.setCodeTimeInStatusBar(value);
+    window.ipcRenderer?.setCodeTimeInStatusBar(value);
     setCodeTimeInStatusBar(value);
   }, []);
 
   const handleAutoUpdateEnabledChange = useCallback((value: boolean) => {
-    window.ipcRenderer.setAutoUpdateEnabled(value);
+    window.ipcRenderer?.setAutoUpdateEnabled(value);
     setAutoUpdateEnabled(value);
   }, []);
 
   const handleDomainPreferenceChange = useCallback(
     (value: DomainPreferenceType) => {
-      window.ipcRenderer.send(IpcKeys.setDomainPreference, value);
+      window.ipcRenderer?.send(IpcKeys.setDomainPreference, value);
       setDomainPreference(value);
     },
     [],
   );
   const handleFilterTypeChange = useCallback((value: FilterType) => {
-    window.ipcRenderer.send(IpcKeys.setFilterType, value);
+    window.ipcRenderer?.send(IpcKeys.setFilterType, value);
     setFilterType(value);
   }, []);
 

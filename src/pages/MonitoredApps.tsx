@@ -5,9 +5,9 @@ import type { AppData } from "../../electron/utils/validators";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Switch } from "~/components/ui/switch";
 
-export function Component() {
-  const [apps] = useState<AppData[]>(() =>
-    window.ipcRenderer.getInstalledApps(),
+export function MonitoredAppsPage() {
+  const [apps] = useState<AppData[]>(
+    () => window.ipcRenderer?.getInstalledApps() ?? [],
   );
 
   useEffect(() => {
@@ -34,12 +34,12 @@ export function Component() {
 
 const AppListItem = ({ app }: { app: AppData }) => {
   const [isMonitored, setIsMonitored] = useState(() =>
-    window.ipcRenderer.isMonitored(app.path),
+    window.ipcRenderer?.isMonitored(app.path),
   );
 
   const onMonitoredChange = useCallback((monitor: boolean) => {
     setIsMonitored(monitor);
-    window.ipcRenderer.setMonitored(app.path, monitor);
+    window.ipcRenderer?.setMonitored(app.path, monitor);
   }, []);
 
   return (
