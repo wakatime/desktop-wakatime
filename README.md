@@ -12,7 +12,7 @@ Keep the app running in your system tray, and your app usage will show on your [
 
 ## Local Development Setup
 
-```
+```shell
 git clone git@github.com:wakatime/desktop-wakatime.git
 cd desktop-wakatime
 npm i
@@ -23,13 +23,13 @@ npm run dev
 
 To create a release build for the platform you are currently using, run the following command:
 
-```
+```shell
 npm run build
 ```
 
 Once the build completes, you will find the installer file at the following path:
 
-```
+```shell
 /release/[Version]/Wakatime-[Platform]-[Version]-Installer.[Extension]
 ```
 
