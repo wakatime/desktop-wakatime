@@ -5,6 +5,6 @@ import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <p>Wakatime</p>
+    <p>WakaTime</p>
   </StrictMode>,
 );
