@@ -41,4 +41,12 @@ export default defineConfig({
       electron: path.resolve(__dirname, "./electron"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        monitored_apps: path.resolve(__dirname, "monitored-apps.html"),
+        settings: path.resolve(__dirname, "settings.html"),
+      },
+    },
+  },
 });
