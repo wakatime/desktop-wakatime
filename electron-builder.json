@@ -1,30 +1,21 @@
-/**
- * @see https://www.electron.build/configuration/configuration
- */
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.WakaTime.WakaTime",
   "asar": true,
-  "productName": "Wakatime",
-
+  "publish": null,
+  "productName": "WakaTime",
   "directories": {
-    "output": "release/${version}"
+    "output": "release"
   },
   "files": ["dist", "dist-electron", "public"],
-  "mac": {
-    "target": ["dmg"],
-    "artifactName": "${productName}-Mac-${version}-Installer.${ext}",
-    "icon": "./public/app-icon.icns",
-    "category": "public.app-category.developer-tools"
-  },
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64", "arm64", "universal"]
+        "arch": ["x64", "arm64"]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+    "artifactName": "wakatime-windows-${arch}.${ext}",
     "icon": "./public/app-icon.ico"
   },
   "nsis": {
@@ -34,7 +25,12 @@
     "deleteAppDataOnUninstall": false
   },
   "linux": {
-    "target": ["AppImage"],
-    "artifactName": "${productName}-Linux-${version}.${ext}"
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "artifactName": "wakatime-linux-${arch}.${ext}"
   }
 }

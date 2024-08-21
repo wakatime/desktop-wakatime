@@ -4,8 +4,8 @@ import tsParser from "@typescript-eslint/parser";
 
 export default [
     {
-        ignores: ["**/dist", "**/dist-electron", "**/dist-web", "**/node_modules"],
-        files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+        ignores: ["**/dist/*", "**/dist-electron/*", "**/dist-web/*", "**/node_modules/*"],
+        files: ["**/*.{ts,tsx}"],
         plugins: {
             "react-refresh": reactRefresh,
         },
