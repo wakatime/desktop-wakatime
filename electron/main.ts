@@ -371,7 +371,8 @@ ipcMain.on(IpcKeys.getOpenWindows, async (event) => {
     await Promise.all(
       windows
         .filter(
-          (win, i) =>win.info.execName &&
+          (win, i) =>
+            win.info.execName &&
             windows.findIndex((win2) => win2.info.path === win.info.path) === i,
         )
         .sort((a, b) => a.info.name.localeCompare(b.info.name))

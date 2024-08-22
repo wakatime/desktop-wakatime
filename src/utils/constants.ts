@@ -3,7 +3,12 @@ export const PLUGINS: {
   pluginUrl: string;
 }[] = [
   {
-    execNames: ["Visual Studio Code.app", "Visual Studio Code - Insiders.app", "Code.exe", "Code - Insiders.exe"],
+    execNames: [
+      "Visual Studio Code.app",
+      "Visual Studio Code - Insiders.app",
+      "Code.exe",
+      "Code - Insiders.exe",
+    ],
     pluginUrl: "https://wakatime.com/vs-code",
   },
   {
@@ -11,11 +16,11 @@ export const PLUGINS: {
     pluginUrl: "https://wakatime.com/sublime-text",
   },
   {
-    execNames: ["Discord.app", 'Discord.exe'],
+    execNames: ["Discord.app", "Discord.exe"],
     pluginUrl: "https://wakatime.com/discord",
   },
   {
-    execNames: ["Visual Studio.app", 'devenv.exe'],
+    execNames: ["Visual Studio.app", "devenv.exe"],
     pluginUrl: "https://wakatime.com/visual-studio",
   },
   {
@@ -31,7 +36,7 @@ export const PLUGINS: {
     pluginUrl: "https://wakatime.com/android-studio",
   },
   {
-    execNames: ["Obsidian.app", 'Obsidian.exe'],
+    execNames: ["Obsidian.app", "Obsidian.exe"],
     pluginUrl: "https://wakatime.com/obsidian",
   },
 ];

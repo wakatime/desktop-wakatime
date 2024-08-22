@@ -179,7 +179,7 @@ export class Wakatime {
     Logging.instance().log(`Sending heartbeat: ${cli} ${args}`);
 
     try {
-      const [_, err] = await exec(cli, ...args);
+      const [, err] = await exec(cli, ...args);
       if (err) {
         Logging.instance().log(
           `Error sending heartbeat: ${err}`,
