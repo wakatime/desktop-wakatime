@@ -185,7 +185,7 @@ jobs:
         # Run only for main branch
         if: ${{ github.ref == 'refs/heads/main' }}
         name: Changelog
-        uses: gandarez/changelog-action@v1.2.0
+        uses: gandarez/changelog-action@v1.3.0
         id: changelog-release
         with:
           current_tag: ${{ github.sha }}
