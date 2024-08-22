@@ -68,4 +68,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   setShouldLogToFile(shouldLogToFile: boolean) {
     ipcRenderer.send(IpcKeys.setShouldLogToFile, shouldLogToFile);
   },
+  getOpenWindows() {
+    return ipcRenderer.sendSync(IpcKeys.getOpenWindows);
+  },
 });

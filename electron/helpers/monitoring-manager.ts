@@ -11,9 +11,6 @@ export abstract class MonitoringManager {
   }
 
   static isMonitored(path: string) {
-    if (!AppsManager.instance().getApp(path)) {
-      return;
-    }
     const monitoringKey = this.monitoredKey(path);
     const file = getDesktopWakaTimeConfigFilePath();
     const monitoring = ConfigFileReader.getBool(
@@ -29,9 +26,6 @@ export abstract class MonitoringManager {
   }
 
   static set(path: string, monitor: boolean) {
-    if (!AppsManager.instance().getApp(path)) {
-      return;
-    }
     const file = getDesktopWakaTimeConfigFilePath();
     const monitoringKey = this.monitoredKey(path);
     ConfigFileReader.setBool(file, "monitoring", monitoringKey, monitor);

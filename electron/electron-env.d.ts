@@ -47,6 +47,7 @@ interface Window {
     setAutoUpdateEnabled: (autoUpdateEnabled: boolean) => void;
     codeTimeInStatusBar: () => boolean;
     setCodeTimeInStatusBar: (codeTimeInStatusBar: boolean) => void;
+    getOpenWindows: () => Promise<import("./utils/validators").AppData[]>;
   };
 }
 

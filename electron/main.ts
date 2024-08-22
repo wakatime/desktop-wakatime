@@ -1,4 +1,5 @@
 import path from "node:path";
+import { openWindowsAsync } from "@miniben90/x-win";
 import {
   app,
   BrowserWindow,
@@ -357,4 +358,34 @@ ipcMain.on(IpcKeys.getAllowlist, (event) => {
 });
 ipcMain.on(IpcKeys.setAllowlist, (_, value: string) => {
   PropertiesManager.allowlist = value;
+});
+
+ipcMain.on(IpcKeys.getOpenWindows, async (event) => {
+  const windows = await openWindowsAsync();
+  event.returnValue = (
+    await Promise.all(
+      windows.map(async (window) => {
+        const app = AppsManager.instance().apps.find(
+          (item) => item.path === window.info.path,
+        );
+
+        if (app) {
+          return null;
+        }
+
+        const icon = (await window.getIconAsync()).data;
+        return {
+          id: window.info.path,
+          name: window.info.name + (window.title ? ` - ${window.title}` : ""),
+          path: window.info.path,
+          icon,
+          isBrowser: false,
+          isDefaultEnabled: false,
+          isElectronApp: false,
+          bundleId: null,
+          version: null,
+        };
+      }),
+    )
+  ).filter((item) => !!item);
 });

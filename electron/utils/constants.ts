@@ -23,6 +23,7 @@ export enum IpcKeys {
   setDenylist = "set_denylist",
   getAllowlist = "get_allowlist",
   setAllowlist = "set_allowlist",
+  getOpenWindows = "get_opened_windows",
 }
 
 export enum FilterType {
