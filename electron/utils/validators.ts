@@ -1,9 +1,7 @@
 import { z } from "zod";
 
-import { MonitoredApp } from "./types";
-
 export const appDataSchema = z.object({
-  id: z.custom<MonitoredApp>(),
+  id: z.string(),
   name: z.string(),
   path: z.string(),
   icon: z.string().nullable(),
@@ -12,6 +10,7 @@ export const appDataSchema = z.object({
   isBrowser: z.boolean(),
   isDefaultEnabled: z.boolean(),
   isElectronApp: z.boolean(),
+  execName: z.string().nullish(),
 });
 
 export type AppData = z.infer<typeof appDataSchema>;

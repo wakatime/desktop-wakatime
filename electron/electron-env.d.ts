@@ -35,6 +35,9 @@ interface Window {
       value: string,
       internal?: boolean,
     ) => string;
+    shell: {
+      openExternal: (url: string) => void;
+    };
     isMonitored: (path: string) => boolean;
     setMonitored: (path: string, monitor: boolean) => void;
     getAppVersion: () => string;

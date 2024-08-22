@@ -22,6 +22,11 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     const [channel, ...omit] = args;
     return ipcRenderer.sendSync(channel, ...omit);
   },
+  shell: {
+    openExternal: (url: string) => {
+      ipcRenderer.send(IpcKeys.shellOpenExternal, url);
+    },
+  },
   invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);

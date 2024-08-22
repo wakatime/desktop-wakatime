@@ -1,10 +1,12 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ImageIcon, Loader2, RefreshCcw } from "lucide-react";
+import { ExternalLink, ImageIcon, Loader2, RefreshCcw } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
+import { PLUGINS } from "~/utils/constants";
+import { AppData } from "../../electron/utils/validators";
 
 export function MonitoredAppsPage() {
   const installedAppsQuery = useQuery({
@@ -67,7 +69,7 @@ export function MonitoredAppsPage() {
           installedAppsQuery.data.map((app, i) => {
             return (
               <Fragment key={app.path}>
-                <AppListItem title={app.name} icon={app.icon} path={app.path} />
+                <AppListItem app={app} />
                 {i < installedAppsQuery.data.length - 1 && (
                   <div className="pl-[4rem]">
                     <hr className="h-px bg-border" />
@@ -118,7 +120,7 @@ export function MonitoredAppsPage() {
           openWindowsQuery.data.map((app, i) => {
             return (
               <Fragment key={app.path}>
-                <AppListItem title={app.name} icon={app.icon} path={app.path} />
+                <AppListItem app={app} />
                 {i < openWindowsQuery.data.length - 1 && (
                   <div className="pl-[4rem]">
                     <hr className="h-px bg-border" />
@@ -133,34 +135,46 @@ export function MonitoredAppsPage() {
   );
 }
 
-const AppListItem = ({
-  title,
-  path,
-  icon,
-}: {
-  title: string;
-  path: string;
-  icon?: string | null;
-}) => {
+const AppListItem = ({ app }: { app: AppData }) => {
   const [isMonitored, setIsMonitored] = useState(() =>
-    window.ipcRenderer?.isMonitored(path),
+    window.ipcRenderer?.isMonitored(app.path),
   );
+
+  const pluginUrl = useMemo(() => {
+    const plugin = PLUGINS.find((plugin) =>
+      app.execName ? plugin.execNames.includes(app.execName) : false,
+    );
+    return plugin?.pluginUrl;
+  }, [app.execName]);
 
   const onMonitoredChange = useCallback((monitor: boolean) => {
     setIsMonitored(monitor);
-    window.ipcRenderer?.setMonitored(path, monitor);
+    window.ipcRenderer?.setMonitored(app.path, monitor);
   }, []);
 
   return (
     <div className="flex h-14 items-center gap-4 px-4">
-      <Avatar className="h-8 w-8 rounded-none bg-transparent" title={path}>
-        <AvatarImage src={icon ?? undefined} />
+      <Avatar className="h-8 w-8 rounded-none bg-transparent" title={app.path}>
+        <AvatarImage src={app.icon ?? undefined} />
         <AvatarFallback className="rounded-md text-muted-foreground">
           <ImageIcon className="h-5 w-5" />
         </AvatarFallback>
       </Avatar>
-      <p className="flex-1 truncate">{title}</p>
-      <Switch checked={isMonitored} onCheckedChange={onMonitoredChange} />
+      <p className="flex-1 truncate">{app.name}</p>
+      {pluginUrl ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            window.ipcRenderer?.shell.openExternal(pluginUrl);
+          }}
+        >
+          Install Plugin
+          <ExternalLink className="-mr-1 ml-2 h-4 w-4" />
+        </Button>
+      ) : (
+        <Switch checked={isMonitored} onCheckedChange={onMonitoredChange} />
+      )}
     </div>
   );
 };

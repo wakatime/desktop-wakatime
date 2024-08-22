@@ -24,6 +24,7 @@ export enum IpcKeys {
   getAllowlist = "get_allowlist",
   setAllowlist = "set_allowlist",
   getOpenWindows = "get_opened_windows",
+  shellOpenExternal = "shell_open_external",
 }
 
 export enum FilterType {
