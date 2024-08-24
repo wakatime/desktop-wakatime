@@ -1,21 +1,21 @@
+import type { DomainPreferenceType, FilterType } from "../utils/constants";
 import { getDesktopWakaTimeConfigFilePath } from "../utils";
-import { DomainPreferenceType, FilterType } from "../utils/constants";
 import { Logging } from "../utils/logging";
 import { ConfigFileReader } from "./config-file-reader";
 
-enum Keys {
-  shouldLaunchOnLogin = "launch_on_login",
-  shouldLogToFile = "log_to_file",
-  shouldRequestA11y = "request_a11y",
-  shouldAutomaticallyDownloadUpdates = "should_automatically_download_updates",
-  hasLaunchedBefore = "has_launched_before",
-  domainPreference = "domain_preference",
-  filterType = "filter_type",
-  denylist = "denylist",
-  allowlist = "allowlist",
-  autoUpdateEnabled = "auto_update_enabled",
-  codeTimeInStatusBar = "code_time_in_status_bar",
-}
+const Keys = {
+  shouldLaunchOnLogin: "launch_on_login",
+  shouldLogToFile: "log_to_file",
+  shouldRequestA11y: "request_a11y",
+  shouldAutomaticallyDownloadUpdates: "should_automatically_download_updates",
+  hasLaunchedBefore: "has_launched_before",
+  domainPreference: "domain_preference",
+  filterType: "filter_type",
+  denylist: "denylist",
+  allowlist: "allowlist",
+  autoUpdateEnabled: "auto_update_enabled",
+  codeTimeInStatusBar: "code_time_in_status_bar",
+};
 
 export class PropertiesManager {
   static get autoUpdateEnabled(): boolean {
@@ -209,13 +209,9 @@ export class PropertiesManager {
       Keys.domainPreference,
     );
     if (value === null) {
-      return DomainPreferenceType.domain;
+      return "domain";
     }
-    return value === DomainPreferenceType.domain
-      ? DomainPreferenceType.domain
-      : value === DomainPreferenceType.url
-        ? DomainPreferenceType.url
-        : DomainPreferenceType.domain;
+    return value === "domain" ? "domain" : value === "url" ? "url" : "domain";
   }
   static set domainPreference(value: DomainPreferenceType) {
     ConfigFileReader.set(
@@ -230,13 +226,13 @@ export class PropertiesManager {
     const file = getDesktopWakaTimeConfigFilePath();
     const value = ConfigFileReader.get(file, "properties", Keys.filterType);
     if (value === null) {
-      return FilterType.allowlist;
+      return "allowlist";
     }
-    return value === FilterType.allowlist
-      ? FilterType.allowlist
-      : value === FilterType.denylist
-        ? FilterType.denylist
-        : FilterType.denylist;
+    return value === "allowlist"
+      ? "allowlist"
+      : value === "denylist"
+        ? "denylist"
+        : "denylist";
   }
   static set filterType(value: FilterType) {
     ConfigFileReader.set(
@@ -292,9 +288,9 @@ export class PropertiesManager {
 
   static get currentFilterList() {
     switch (this.filterType) {
-      case FilterType.allowlist:
+      case "allowlist":
         return this.allowlist;
-      case FilterType.denylist:
+      case "denylist":
         return this.denylist;
     }
   }

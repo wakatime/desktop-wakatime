@@ -1,6 +1,5 @@
 import { WindowInfo } from "@miniben90/x-win";
 
-import { DomainPreferenceType } from "../utils/constants";
 import { Category } from "../utils/types";
 import { AppData } from "../utils/validators";
 import { FilterManager } from "./filter-manager";
@@ -89,11 +88,11 @@ export class MonitoredApp {
       return null;
     }
     const patterns = [
-      /github\.com\/([^\/]+\/[^\/]+)\/?.*$/,
-      /bitbucket\.org\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
+      /github\.com\/([^/]+\/[^/]+)\/?.*$/,
+      /bitbucket\.org\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
     ];
 
     for (const pattern of patterns) {
@@ -115,9 +114,7 @@ export class MonitoredApp {
   static entity(windowInfo: WindowInfo, app?: AppData) {
     if (app?.isBrowser) {
       if (windowInfo.url && FilterManager.filterBrowsedSites(windowInfo.url)) {
-        if (
-          PropertiesManager.domainPreference === DomainPreferenceType.domain
-        ) {
+        if (PropertiesManager.domainPreference === "domain") {
           return this.domainFromUrl(windowInfo.url);
         }
         return windowInfo.url;

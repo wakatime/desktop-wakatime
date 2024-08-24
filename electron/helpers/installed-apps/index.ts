@@ -41,7 +41,7 @@ export async function getApps(): Promise<AppData[]> {
           let filePath: string | null = null;
           try {
             filePath = getFilePathWindows(record, app.windows.exePath);
-          } catch (error) {
+          } catch (_error) {
             /* empty */
           }
           if (!filePath) {
@@ -51,7 +51,7 @@ export async function getApps(): Promise<AppData[]> {
           let icon: string | null = null;
           try {
             icon = await getIconFromWindows(filePath);
-          } catch (error) {
+          } catch (_error) {
             /* empty */
           }
 

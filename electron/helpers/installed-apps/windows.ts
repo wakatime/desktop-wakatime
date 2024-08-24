@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Winreg from "winreg";
 
-import { store } from "../../store";
+import { Store } from "../../store";
 
 export function getFilePathWindows(
   appData: Record<string, string>,
@@ -49,7 +49,7 @@ export async function getIconFromWindows(filePath: string) {
     return null;
   }
 
-  const cachedIcon = store.get(`${filePath}-icon`);
+  const cachedIcon = Store.instance().get(`${filePath}-icon`);
   if (typeof cachedIcon === "string") {
     return cachedIcon;
   }
@@ -57,7 +57,7 @@ export async function getIconFromWindows(filePath: string) {
 
   const buffer = extractIcon(filePath, "large");
   const icon = "data:image/png;base64," + buffer.toString("base64");
-  store.set(`${filePath}-icon`, icon);
+  Store.instance().set(`${filePath}-icon`, icon);
   return icon;
 }
 

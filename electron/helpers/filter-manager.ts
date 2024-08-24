@@ -1,4 +1,3 @@
-import { FilterType } from "../utils/constants";
 import { PropertiesManager } from "./properties-manager";
 
 export abstract class FilterManager {
@@ -14,7 +13,7 @@ export abstract class FilterManager {
     const httpsUrl = "https://" + url;
 
     switch (PropertiesManager.filterType) {
-      case FilterType.denylist:
+      case "denylist": {
         for (const pattern of patterns) {
           if (
             url.match(pattern) ||
@@ -26,7 +25,8 @@ export abstract class FilterManager {
           }
         }
         break;
-      case FilterType.allowlist:
+      }
+      case "allowlist": {
         const matchedPatternIndex = patterns.findIndex(
           (pattern) =>
             url.match(pattern) ||
@@ -37,6 +37,7 @@ export abstract class FilterManager {
           return false;
         }
         break;
+      }
     }
 
     // The given address passed all filters and will be included

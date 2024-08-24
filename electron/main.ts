@@ -10,19 +10,14 @@ import {
   Tray,
 } from "electron";
 
+import type { DomainPreferenceType, FilterType } from "./utils/constants";
 import { AppsManager } from "./helpers/apps-manager";
 import { ConfigFile } from "./helpers/config-file";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import { getLogFilePath } from "./utils";
-import {
-  DeepLink,
-  DomainPreferenceType,
-  FilterType,
-  IpcKeys,
-  WAKATIME_PROTOCALL,
-} from "./utils/constants";
+import { DeepLink, IpcKeys, WAKATIME_PROTOCALL } from "./utils/constants";
 import { Logging } from "./utils/logging";
 import { AppData } from "./utils/validators";
 import { Wakatime } from "./watchers/wakatime";

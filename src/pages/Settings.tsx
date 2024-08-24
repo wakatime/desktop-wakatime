@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
+import type {
+  DomainPreferenceType,
+  FilterType,
+} from "../../electron/utils/constants";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import {
-  DomainPreferenceType,
-  FilterType,
-  IpcKeys,
-} from "../../electron/utils/constants";
+import { IpcKeys } from "../../electron/utils/constants";
 
 export function SettingsPage() {
   const [apiKey, setApiKey] = useState(
@@ -183,18 +183,14 @@ export function SettingsPage() {
               <Tabs value={domainPreference}>
                 <TabsList>
                   <TabsTrigger
-                    value={DomainPreferenceType.domain}
-                    onClick={() =>
-                      handleDomainPreferenceChange(DomainPreferenceType.domain)
-                    }
+                    value="domain"
+                    onClick={() => handleDomainPreferenceChange("domain")}
                   >
                     Domain Only
                   </TabsTrigger>
                   <TabsTrigger
-                    value={DomainPreferenceType.url}
-                    onClick={() =>
-                      handleDomainPreferenceChange(DomainPreferenceType.url)
-                    }
+                    value="url"
+                    onClick={() => handleDomainPreferenceChange("url")}
                   >
                     Full url
                   </TabsTrigger>
@@ -208,14 +204,14 @@ export function SettingsPage() {
               <Tabs value={filterType}>
                 <TabsList>
                   <TabsTrigger
-                    value={FilterType.denylist}
-                    onClick={() => handleFilterTypeChange(FilterType.denylist)}
+                    value="denylist"
+                    onClick={() => handleFilterTypeChange("denylist")}
                   >
                     All except denied sites
                   </TabsTrigger>
                   <TabsTrigger
-                    value={FilterType.allowlist}
-                    onClick={() => handleFilterTypeChange(FilterType.allowlist)}
+                    value="allowlist"
+                    onClick={() => handleFilterTypeChange("allowlist")}
                   >
                     Only allowed sites
                   </TabsTrigger>

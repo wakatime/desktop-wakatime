@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
 
-import { DeepLink, WAKATIME_PROTOCALL } from "./constants";
+import { WAKATIME_PROTOCALL } from "./constants";
 
 export function getResourcesFolderPath() {
   const userHome = app.getPath("home");
@@ -58,7 +58,7 @@ export function getCLIPath() {
   );
 }
 
-export function getDeepLinkUrl(link: DeepLink) {
+export function getDeepLinkUrl(link: string) {
   return `${WAKATIME_PROTOCALL}://${link}`;
 }
 
@@ -101,15 +101,15 @@ export function parseJSONObject(data: string): object | null {
       return null;
     }
     return obj;
-  } catch (e) {
+  } catch (_error) {
     try {
       const obj = JSON.parse(data) as unknown;
       if (typeof obj !== "object") {
         return null;
       }
       return obj;
-    } catch (e) {
-      /* ignore */
+    } catch (_error) {
+      /* empty */
     }
   }
   return null;

@@ -34,7 +34,7 @@ export abstract class ConfigFileReader {
 
     try {
       contents = fs.readFileSync(file, { encoding: "utf-8" });
-    } catch (error) {
+    } catch (_error) {
       contents = "[" + section + "]\n" + key + " = " + value;
       try {
         fs.writeFileSync(file, contents, { encoding: "utf-8" });
@@ -43,7 +43,7 @@ export abstract class ConfigFileReader {
       }
     }
     const lines = contents ? contents.split("\n") : [];
-    let output: string[] = [];
+    const output: string[] = [];
     let currentSection = "";
     let found = false;
     for (const line of lines) {
@@ -55,7 +55,7 @@ export abstract class ConfigFileReader {
         output.push(line);
         currentSection = line.slice(1, line.length - 1);
       } else if (currentSection === section) {
-        let parts = line.split("=", 2);
+        const parts = line.split("=", 2);
         if (parts.length === 2 && parts[0].trim() === key) {
           if (!found) {
             output.push(key + " = " + value);
