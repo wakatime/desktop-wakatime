@@ -32,7 +32,9 @@ export class AppsManager {
       const data = fs.readFileSync(this.cacheFilePath, { encoding: "utf-8" });
       const apps = z.array(appDataSchema).parse(JSON.parse(data));
       return apps;
-    } catch (error) {}
+    } catch (_error) {
+      /* empty */
+    }
     return [];
   }
 

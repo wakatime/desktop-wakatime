@@ -1,16 +1,25 @@
 import { WindowInfo } from "@miniben90/x-win";
 
-import { DomainPreferenceType } from "../utils/constants";
 import { Category } from "../utils/types";
 import { AppData } from "../utils/validators";
 import { FilterManager } from "./filter-manager";
 import { PropertiesManager } from "./properties-manager";
 
+export interface HeartbeatData {
+  entity: string;
+  category: Category | null;
+  language: string | null;
+  project: string | null;
+}
+
 export class MonitoredApp {
-  static heartbeatData(windowInfo: WindowInfo, app: AppData) {
+  static heartbeatData(
+    windowInfo: WindowInfo,
+    app?: AppData,
+  ): HeartbeatData | null {
     const entity = this.entity(windowInfo, app);
-    const category = this.category(app);
-    const language = this.language(app);
+    const category = app ? this.category(app) : null;
+    const language = app ? this.language(app) : null;
     const project = this.project(windowInfo);
     if (!entity) {
       return null;
@@ -79,11 +88,11 @@ export class MonitoredApp {
       return null;
     }
     const patterns = [
-      /github\.com\/([^\/]+\/[^\/]+)\/?.*$/,
-      /bitbucket\.org\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
-      /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/([^\/]+\/[^\/]+)\/?.*$/,
+      /github\.com\/([^/]+\/[^/]+)\/?.*$/,
+      /bitbucket\.org\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
+      /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
     ];
 
     for (const pattern of patterns) {
@@ -102,12 +111,10 @@ export class MonitoredApp {
     return null;
   }
 
-  static entity(windowInfo: WindowInfo, app: AppData) {
-    if (app.isBrowser) {
+  static entity(windowInfo: WindowInfo, app?: AppData) {
+    if (app?.isBrowser) {
       if (windowInfo.url && FilterManager.filterBrowsedSites(windowInfo.url)) {
-        if (
-          PropertiesManager.domainPreference === DomainPreferenceType.domain
-        ) {
+        if (PropertiesManager.domainPreference === "domain") {
           return this.domainFromUrl(windowInfo.url);
         }
         return windowInfo.url;
@@ -115,7 +122,7 @@ export class MonitoredApp {
       return null;
     }
 
-    switch (app.id) {
+    switch (app?.id) {
       // TODO: Unimplemented feature
       case "canva":
         return null;
@@ -127,8 +134,8 @@ export class MonitoredApp {
     }
   }
 
-  static title(windowInfo: WindowInfo, app: AppData) {
-    switch (app.id) {
+  static title(windowInfo: WindowInfo, app?: AppData) {
+    switch (app?.id) {
       case "arcbrowser":
       case "brave":
       case "canva":
@@ -139,7 +146,7 @@ export class MonitoredApp {
       case "safaripreview":
       case "xcode":
       case "microsoft_edge":
-        return `${app.id} should never use window title as entity`;
+        return `${app?.id} should never use window title as entity`;
       case "figma": {
         const title = windowInfo.title.split(" - ")[0];
         if (!title || title === "Figma" || title === "Drafts") {
@@ -162,7 +169,10 @@ export class MonitoredApp {
         return title;
       }
       default:
-        return windowInfo.title.split(" - ")[0];
+        if (windowInfo.title) {
+          return windowInfo.title.split(" - ")[0];
+        }
+        return windowInfo.info.name;
     }
   }
 

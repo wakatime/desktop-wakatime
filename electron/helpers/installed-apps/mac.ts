@@ -146,14 +146,14 @@ export async function getAppIconMac(appPath: string) {
       }
       icnsPath = path.join(appPath, "Contents/Resources", iconFileName);
     }
-  } catch (error) {
+  } catch (_error) {
     /* empty */
   }
 
   if (!icnsPath) {
     try {
       icnsPath = await getFirstIcnsFileFromResourcesDir();
-    } catch (error) {
+    } catch (_error) {
       /* empty */
     }
   }

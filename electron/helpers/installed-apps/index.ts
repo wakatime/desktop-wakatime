@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { AppData } from "../../utils/validators";
 import { allApps } from "../../watchers/apps";
 import { getAppIconMac, getInstalledApps as getInstalledAppsMac } from "./mac";
@@ -39,7 +41,7 @@ export async function getApps(): Promise<AppData[]> {
           let filePath: string | null = null;
           try {
             filePath = getFilePathWindows(record, app.windows.exePath);
-          } catch (error) {
+          } catch (_error) {
             /* empty */
           }
           if (!filePath) {
@@ -49,7 +51,7 @@ export async function getApps(): Promise<AppData[]> {
           let icon: string | null = null;
           try {
             icon = await getIconFromWindows(filePath);
-          } catch (error) {
+          } catch (_error) {
             /* empty */
           }
 
@@ -69,6 +71,7 @@ export async function getApps(): Promise<AppData[]> {
             isBrowser: app.isBrowser ?? false,
             isDefaultEnabled: app.isDefaultEnabled ?? false,
             isElectronApp: app.isElectronApp ?? false,
+            execName: path.parse(filePath).base,
           } satisfies AppData;
         }
 
@@ -83,16 +86,17 @@ export async function getApps(): Promise<AppData[]> {
           if (!record) {
             return null;
           }
-          const name = record["kMDItemDisplayName"]?.replace(".app", "");
-          const path = record["_FILE_PATH"];
-          if (!path || !name) {
+          const execName = record["kMDItemDisplayName"];
+          const name = execName?.replace(".app", "");
+          const filePath = record["_FILE_PATH"];
+          if (!filePath || !name) {
             return;
           }
-          const icon = await getAppIconMac(path);
+          const icon = await getAppIconMac(filePath);
           const version = record["kMDItemVersion"] || null;
 
           return {
-            path,
+            path: filePath,
             icon,
             name,
             bundleId: app.mac.bundleId,
@@ -101,6 +105,7 @@ export async function getApps(): Promise<AppData[]> {
             isDefaultEnabled: app.isDefaultEnabled ?? false,
             isElectronApp: app.isElectronApp ?? false,
             version,
+            execName: path.parse(filePath).base,
           } satisfies AppData;
         }
 

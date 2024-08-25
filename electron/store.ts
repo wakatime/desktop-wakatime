@@ -1,14 +1,13 @@
-let instance: Store;
-
 // This is just a simple in memory key value pair store to keep in memory caches.
 export class Store {
   records: Record<string, unknown> = {};
+  static _instacneCache?: Store;
 
-  constructor() {
-    if (instance) {
-      throw new Error("There can be only one stroe.");
+  static instance(): Store {
+    if (!this._instacneCache) {
+      this._instacneCache = new this();
     }
-    instance = this;
+    return this._instacneCache;
   }
 
   set<T = unknown>(key: string, value: T) {
@@ -16,7 +15,7 @@ export class Store {
   }
 
   get<T = unknown>(key: string) {
-    let value = this.records[key] as T | undefined;
+    const value = this.records[key] as T | undefined;
     return value;
   }
 
@@ -28,5 +27,3 @@ export class Store {
     this.records[key] = undefined;
   }
 }
-
-export const store = Object.freeze(new Store());

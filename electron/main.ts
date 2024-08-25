@@ -1,4 +1,5 @@
 import path from "node:path";
+import { openWindowsAsync } from "@miniben90/x-win";
 import {
   app,
   BrowserWindow,
@@ -9,20 +10,16 @@ import {
   Tray,
 } from "electron";
 
+import type { DomainPreferenceType, FilterType } from "./utils/constants";
 import { AppsManager } from "./helpers/apps-manager";
 import { ConfigFile } from "./helpers/config-file";
 import { MonitoringManager } from "./helpers/monitoring-manager";
 import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import { getLogFilePath } from "./utils";
-import {
-  DeepLink,
-  DomainPreferenceType,
-  FilterType,
-  IpcKeys,
-  WAKATIME_PROTOCALL,
-} from "./utils/constants";
+import { DeepLink, IpcKeys, WAKATIME_PROTOCALL } from "./utils/constants";
 import { Logging } from "./utils/logging";
+import { AppData } from "./utils/validators";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
 
@@ -224,7 +221,7 @@ function handleDeepLink(url: string) {
 if (!gotTheLock) {
   app.quit();
 } else {
-  app.on("second-instance", (_event, commandLine, _workingDirectory) => {
+  app.on("second-instance", (_event, commandLine) => {
     const url = commandLine.pop()?.slice(0, -1);
     if (url) {
       handleDeepLink(url);
@@ -357,4 +354,46 @@ ipcMain.on(IpcKeys.getAllowlist, (event) => {
 });
 ipcMain.on(IpcKeys.setAllowlist, (_, value: string) => {
   PropertiesManager.allowlist = value;
+});
+
+ipcMain.on(IpcKeys.shellOpenExternal, (_, url: string) => {
+  shell.openExternal(url);
+});
+
+ipcMain.on(IpcKeys.getOpenWindows, async (event) => {
+  const windows = await openWindowsAsync();
+  event.returnValue = (
+    await Promise.all(
+      windows
+        .filter(
+          (win, i) =>
+            win.info.execName &&
+            windows.findIndex((win2) => win2.info.path === win.info.path) === i,
+        )
+        .sort((a, b) => a.info.name.localeCompare(b.info.name))
+        .map(async (window) => {
+          const app = AppsManager.instance().apps.find(
+            (item) => item.path === window.info.path,
+          );
+
+          if (app) {
+            return null;
+          }
+
+          const icon = (await window.getIconAsync()).data;
+          return {
+            id: window.info.path,
+            name: window.info.name,
+            path: window.info.path,
+            icon,
+            isBrowser: false,
+            isDefaultEnabled: false,
+            isElectronApp: false,
+            bundleId: null,
+            version: null,
+            execName: path.parse(window.info.path).base,
+          } satisfies AppData;
+        }),
+    )
+  ).filter((item) => !!item);
 });

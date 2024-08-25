@@ -116,7 +116,7 @@ export class Wakatime {
   }
 
   async sendHeartbeat(props: {
-    appData: AppData;
+    appData?: AppData;
     windowInfo: WindowInfo;
     entity: string;
     entityType: EntityType;
@@ -140,13 +140,13 @@ export class Wakatime {
     if (!this.shouldSendHeartbeat(entity, time, isWrite, category)) {
       return;
     }
-    if (!MonitoringManager.isMonitored(appData.path)) {
+    if (!MonitoringManager.isMonitored(windowInfo.info.path)) {
       return;
     }
 
-    const appName = windowInfo?.info.name ?? appData.name;
-    const appVersion = appData.version;
-    if (!appName || !appVersion) {
+    const appName = windowInfo.info.name ?? appData?.name;
+    const appVersion = appData?.version;
+    if (!appName) {
       return;
     }
 
@@ -162,7 +162,7 @@ export class Wakatime {
       "--category",
       category,
       "--plugin",
-      `${appName}/${appVersion} ${getPlatfrom()}-wakatime/${app.getVersion()}`,
+      `${appName}${appVersion ? `/${appVersion}` : ""} ${getPlatfrom()}-wakatime/${app.getVersion()}`,
     ];
 
     if (project) {
@@ -179,7 +179,7 @@ export class Wakatime {
     Logging.instance().log(`Sending heartbeat: ${cli} ${args}`);
 
     try {
-      const [_, err] = await exec(cli, ...args);
+      const [, err] = await exec(cli, ...args);
       if (err) {
         Logging.instance().log(
           `Error sending heartbeat: ${err}`,
