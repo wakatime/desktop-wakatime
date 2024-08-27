@@ -75,8 +75,9 @@ export class MonitoredApp {
   }
   static language(app: AppData) {
     switch (app.id) {
+      case "canva":
       case "figma":
-        return "Figma Design";
+        return "Image (svg)";
       case "postman":
         return "HTTP Request";
       default:
