@@ -21,6 +21,11 @@ export class Wakatime {
   private lastCodeTimeText = "";
   private lastCategory: Category = "coding";
   private tray?: Tray | null;
+  private versionString: string;
+
+  constructor() {
+    this.versionString = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
+  }
 
   init(tray: Tray | null) {
     this.tray = tray;
@@ -144,8 +149,7 @@ export class Wakatime {
       return;
     }
 
-    const appName = windowInfo.info.name ?? appData?.name;
-    const appVersion = appData?.version;
+    const appName = windowInfo.info.name || appData?.name;
     if (!appName) {
       return;
     }
@@ -162,7 +166,7 @@ export class Wakatime {
       "--category",
       category,
       "--plugin",
-      `${appName}${appVersion ? `/${appVersion}` : ""} ${getPlatfrom()}-wakatime/${app.getVersion()}`,
+      `${this.pluginString(appData, windowInfo)}`,
     ];
 
     if (project) {
@@ -212,7 +216,7 @@ export class Wakatime {
       "--today-hide-categories",
       "true",
       "--plugin",
-      `${getPlatfrom()}-wakatime/${app.getVersion()}`,
+      `${this.pluginString()}`,
     ];
 
     const cli = getCLIPath();
@@ -235,5 +239,17 @@ export class Wakatime {
         LogLevel.ERROR,
       );
     }
+  }
+
+  pluginString(appData?: AppData, windowInfo?: WindowInfo) {
+    const appName = windowInfo?.info.name || appData?.name;
+    if (!appName) {
+      return this.versionString;
+    }
+
+    const appNameSafe = appName.replace(/\s/g, "");
+    const appVersion = appData?.version?.replace(/\s/g, "");
+
+    return `${appNameSafe}${appVersion ? `/${appVersion}` : ""} ${this.versionString}`;
   }
 }
