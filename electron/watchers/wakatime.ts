@@ -248,8 +248,8 @@ export class Wakatime {
     }
 
     const appNameSafe = appName.replace(/\s/g, "");
-    const appVersion = appData?.version?.replace(/\s/g, "");
+    const appVersion = appData?.version?.replace(/\s/g, "") || "unknown";
 
-    return `${appNameSafe}${appVersion ? `/${appVersion}` : ""} ${this.versionString}`;
+    return `${appNameSafe}/${appVersion} ${this.versionString}`;
   }
 }
