@@ -23,6 +23,9 @@ import { AppData } from "./utils/validators";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const uia = require("../build/Release/uia");
+
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -229,6 +232,7 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(async () => {
+    console.log(uia.getDocumentText());
     createTray();
     wakatime = new Wakatime();
     wakatime.init(tray);

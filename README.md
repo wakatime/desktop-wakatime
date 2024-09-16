@@ -48,3 +48,21 @@ Made with :heart: by the WakaTime Team.
 [dashboard]: https://wakatime.com/
 [supported apps]: https://github.com/wakatime/desktop-wakatime/blob/80fba053a1334f22f08c4d0b069be4951d15de95/electron/watchers/apps.ts#L3
 [contributing]: CONTRIBUTING.md
+
+## node-gyp
+
+Install Node GYP globally
+
+```
+npm i -g node-gyp
+```
+
+Read the platform specific installation
+https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-unix
+
+After updating `node-gyp` bindings or cpp files run these commands to rebuild it
+
+```
+node-gyp configure
+node-gyp build
+```

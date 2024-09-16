@@ -24,3 +24,6 @@ release
 *.njsproj
 *.sln
 *.sw?
+
+
+build/
