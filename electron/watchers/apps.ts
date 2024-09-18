@@ -99,6 +99,54 @@ export const allApps: MonitoredAppInfo[] = [
     isDefaultEnabled: true,
   },
   {
+    id: "microsoft_access",
+    windows: {
+      exePath: "MSACCESS.exe",
+      DisplayName: "Microsoft Access",
+    },
+    isDefaultEnabled: true,
+  },
+  {
+    id: "microsoft_excel",
+    windows: {
+      exePath: "EXCEL.exe",
+      DisplayName: "Microsoft Excel",
+    },
+    isDefaultEnabled: true,
+  },
+  {
+    id: "microsoft_onenote",
+    windows: {
+      exePath: "ONENOTE.exe",
+      DisplayName: "Microsoft OneNote",
+    },
+    isDefaultEnabled: true,
+  },
+  {
+    id: "microsoft_outlook",
+    windows: {
+      exePath: "OUTLOOK.exe",
+      DisplayName: "Microsoft Outlook",
+    },
+    isDefaultEnabled: true,
+  },
+  {
+    id: "microsoft_powerpoint",
+    windows: {
+      exePath: "POWERPNT.exe",
+      DisplayName: "Microsoft PowerPoint",
+    },
+    isDefaultEnabled: true,
+  },
+  {
+    id: "microsoft_word",
+    windows: {
+      exePath: "WINWORD.exe",
+      DisplayName: "Microsoft Word",
+    },
+    isDefaultEnabled: true,
+  },
+  {
     id: "notes",
     mac: {
       bundleId: "com.apple.Notes",
