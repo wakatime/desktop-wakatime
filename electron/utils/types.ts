@@ -17,7 +17,7 @@ export type Category =
   | "writing docs"
   | "writing tests";
 
-export type EntityType = "file" | "app";
+export type EntityType = "file" | "app" | "url" | "domain";
 
 export type MonitoredApp =
   | "arcbrowser"
@@ -28,21 +28,27 @@ export type MonitoredApp =
   | "firefox"
   | "imessage"
   | "iterm2"
-  | "powershell"
   | "linear"
+  | "mac_terminal"
+  | "microsoft_access"
+  | "microsoft_edge"
+  | "microsoft_excel"
+  | "microsoft_outlook"
+  | "microsoft_onenote"
+  | "microsoft_powerpoint"
+  | "microsoft_word"
   | "notes"
   | "notion"
   | "postman"
+  | "powershell"
   | "safari"
   | "safaripreview"
-  | "microsoft_edge"
   | "slack"
   | "tableplus"
-  | "mac_terminal"
-  | "windows_terminal"
   | "warp"
   | "wecom"
   | "whatsapp"
+  | "windows_terminal"
   | "xcode"
   | "zoom";
 

@@ -18,12 +18,12 @@ export class MonitoredApp {
     app?: AppData,
   ): HeartbeatData | null {
     const entity = this.entity(windowInfo, app);
-    const category = app ? this.category(app) : null;
-    const language = app ? this.language(app) : null;
-    const project = this.project(windowInfo);
     if (!entity) {
       return null;
     }
+    const category = this.category(app);
+    const language = this.language(app);
+    const project = this.project(windowInfo);
     return {
       entity,
       category,
@@ -31,7 +31,11 @@ export class MonitoredApp {
       project,
     };
   }
-  static category(app: AppData): Category | null {
+  static category(app?: AppData): Category | null {
+    if (!app) {
+      return null;
+    }
+
     switch (app.id) {
       case "arcbrowser":
       case "brave":
@@ -42,12 +46,14 @@ export class MonitoredApp {
         return "browsing";
 
       case "imessage":
+      case "microsoft_outlook":
       case "slack":
       case "wecom":
         return "communicating";
 
       case "iterm2":
       case "mac_terminal":
+      case "microsoft_excel":
       case "windows_terminal":
       case "powershell":
       case "warp":
@@ -58,6 +64,7 @@ export class MonitoredApp {
       case "tableplus":
         return "debugging";
 
+      case "microsoft_word":
       case "notes":
       case "notion":
         return "writing docs";
@@ -73,7 +80,11 @@ export class MonitoredApp {
         return null;
     }
   }
-  static language(app: AppData) {
+  static language(app?: AppData) {
+    if (!app) {
+      return null;
+    }
+
     switch (app.id) {
       case "canva":
       case "figma":
