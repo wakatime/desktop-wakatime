@@ -8,7 +8,7 @@ import {
   getUnixTime,
   interval,
   intervalToDuration,
-  isAfter,
+  isBefore,
 } from "date-fns";
 import fetch from "node-fetch";
 import unzpier from "unzipper";
@@ -37,7 +37,8 @@ export abstract class Dependencies {
   static installDependencies() {
     (async () => {
       try {
-        if (!(await this.isCLILatest())) {
+        const isLatest = await this.isCLILatest();
+        if (!isLatest) {
           await this.downloadCLI();
         }
       } catch (error) {
@@ -118,15 +119,11 @@ export abstract class Dependencies {
       String(now),
       true,
     );
-
     if (res.status === 304) {
       // Current version is still the latest version available
       Logging.instance().log(`Latest wakatime-cli release: ${currentVersion}`);
       return currentVersion;
-    } else if (
-      lastModified &&
-      lastModified === res.headers.get("Last-Modified")
-    ) {
+    } else if (res.headers.get("Last-Modified")) {
       const release = z.object({ tag_name: z.string() }).safeParse(data);
       if (!release.success) {
         Logging.instance().log(
@@ -141,7 +138,7 @@ export abstract class Dependencies {
       ConfigFile.setSetting(
         "internal",
         "cli_version_last_modified",
-        lastModified,
+        res.headers.get("Last-Modified")!,
         true,
       );
       ConfigFile.setSetting(
@@ -151,9 +148,9 @@ export abstract class Dependencies {
         true,
       );
       return release.data.tag_name;
+    } else {
+      return null;
     }
-
-    return null;
   }
 
   private static async isCLILatest(): Promise<boolean> {
@@ -186,9 +183,10 @@ export abstract class Dependencies {
       "cli_version_last_accessed",
       true,
     );
-    if (accessed && isAfter(new Date(), addHours(new Date(accessed), 4))) {
+    const accessedDate = accessed ? new Date(Number(accessed) * 1000) : null;
+    if (accessedDate && isBefore(new Date(), addHours(accessedDate, 4))) {
       Logging.instance().log(
-        `Skip checking for wakatime-cli updates because recently checked ${formatDistanceToNow(new Date(accessed), { addSuffix: true })}`,
+        `Skip checking for wakatime-cli updates because recently checked ${formatDistanceToNow(accessedDate, { addSuffix: true })}`,
       );
       return true;
     }
@@ -198,11 +196,11 @@ export abstract class Dependencies {
       return true;
     }
 
-    if (version === remoteVersion || `v${version}` === remoteVersion) {
+    if (version && `v${version}` === remoteVersion) {
       return true;
+    } else {
+      return false;
     }
-
-    return true;
   }
 
   private static async downloadCLI() {
