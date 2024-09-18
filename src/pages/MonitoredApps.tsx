@@ -140,11 +140,15 @@ const AppListItem = ({ app }: { app: AppData }) => {
     window.ipcRenderer?.isMonitored(app.path),
   );
 
-  const pluginUrl = useMemo(() => {
+  const plugin = useMemo(() => {
     const plugin = PLUGINS.find((plugin) =>
-      app.execName ? plugin.execNames.includes(app.execName) : false,
+      app.execName
+        ? plugin.execNames.includes(app.execName)
+        : app.bundleId
+          ? plugin.bundleIds?.includes(app.bundleId)
+          : false,
     );
-    return plugin?.pluginUrl;
+    return plugin;
   }, [app.execName]);
 
   const onMonitoredChange = useCallback((monitor: boolean) => {
@@ -161,15 +165,15 @@ const AppListItem = ({ app }: { app: AppData }) => {
         </AvatarFallback>
       </Avatar>
       <p className="flex-1 truncate">{app.name}</p>
-      {pluginUrl ? (
+      {plugin ? (
         <Button
           variant="outline"
           size="sm"
           onClick={() => {
-            window.ipcRenderer?.shell.openExternal(pluginUrl);
+            window.ipcRenderer?.shell.openExternal(plugin.url);
           }}
         >
-          Install Plugin
+          Install {plugin.type === "extension" ? "Extension" : "Plugin"}
           <ExternalLink className="-mr-1 ml-2 h-4 w-4" />
         </Button>
       ) : (
