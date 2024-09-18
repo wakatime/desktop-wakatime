@@ -195,6 +195,9 @@ export const allApps: MonitoredAppInfo[] = [
       exePath: "msedge.exe",
       DisplayName: "Microsoft Edge",
     },
+    mac: {
+      bundleId: "com.microsoft.edgemac",
+    },
     isBrowser: true,
   },
   {
