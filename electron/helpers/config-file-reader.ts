@@ -42,8 +42,10 @@ export abstract class ConfigFileReader {
         throw new Error(`Failed writing to URL: ${file}, Error: ${error}`);
       }
     }
-    const lines = contents ? contents.split("\n") : [];
-    const output: string[] = [];
+    const lines = contents
+      ? contents.split("\n").map((line) => line.trim())
+      : [];
+    let output: string[] = [];
     let currentSection = "";
     let found = false;
     for (const line of lines) {
@@ -75,6 +77,25 @@ export abstract class ConfigFileReader {
       }
       output.push(key + " = " + value);
     }
+
+    // Formatting
+    let largestLineKeySize = 0;
+    for (const line of output) {
+      const parts = line.split("=");
+      if (parts.length === 2 && parts[0].length > largestLineKeySize) {
+        largestLineKeySize = parts[0].length;
+      }
+    }
+
+    output = output.map((line) => {
+      const parts = line.split("=");
+      if (parts.length === 2 && parts[0].length < largestLineKeySize) {
+        const spaceCount = largestLineKeySize - parts[0].length;
+        return `${parts[0]}${new Array(spaceCount).fill(" ").join("")}= ${parts[1].trim()}`;
+      } else {
+        return line;
+      }
+    });
 
     try {
       fs.writeFileSync(file, output.join("\n"), { encoding: "utf-8" });
