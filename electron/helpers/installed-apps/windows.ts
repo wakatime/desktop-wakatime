@@ -6,12 +6,8 @@ import { Store } from "../../store";
 import { AppData } from "../../utils/validators";
 import { allApps } from "../../watchers/apps";
 
-function getFilePath(appData: Record<string, string>, fileName?: string) {
+function getFilePath(installLocation: string, execName: string) {
   try {
-    let installLocation = appData["InstallLocation"];
-    if (!installLocation) {
-      return null;
-    }
 
     let files = fs.readdirSync(installLocation);
 
@@ -32,15 +28,11 @@ function getFilePath(appData: Record<string, string>, fileName?: string) {
       }
     }
 
-    if (!fileName) {
-      fileName = files.find((file) => file.endsWith(".exe"));
-    }
-
-    if (!fileName) {
+    if (!files.includes(execName)) {
       return null;
     }
 
-    const filePath = path.join(installLocation, fileName);
+    const filePath = path.join(installLocation, execName);
     return filePath;
   } catch (error) {
     console.log(error);
@@ -58,14 +50,14 @@ async function getIcon(filePath: string) {
     if (typeof cachedIcon === "string") {
       return cachedIcon;
     }
-    const { extractIcon } = await import("exe-icon-extractor");
+    const { extractIcon } = await import("@bitdisaster/exe-icon-extractor");
 
     const buffer = extractIcon(filePath, "large");
     const icon = "data:image/png;base64," + buffer.toString("base64");
     Store.instance().set(`${filePath}-icon`, icon);
     return icon;
   } catch (error) {
-    console.log(error);
+    console.log('Failed to get icon for', filePath, error);
     return null;
   }
 }
@@ -94,20 +86,27 @@ export async function getApp(reg: Winreg.Registry) {
   }
 
   const app = allApps.find((app) => {
-    return (
-      app.windows?.DisplayName &&
+    return (app.windows?.exePath &&
+      app.windows.DisplayName &&
       record["DisplayName"].startsWith(app.windows.DisplayName)
     );
   });
 
-  const filePath = getFilePath(record, app?.windows?.exePath);
+  if(!app?.windows?.exePath) {
+    return undefined;
+  }
+
+  const installLocation = record['InstallLocation'];
+  if(!installLocation) {
+    return undefined;
+  }
+
+  const filePath = getFilePath(installLocation, app.windows.exePath);
   if (!filePath) {
     return undefined;
   }
 
-  const icon = record["DisplayIcon"]
-    ? await getIcon(record["DisplayIcon"])
-    : await getIcon(filePath);
+  const icon = await getIcon(filePath);
 
   return {
     id: app?.id ?? name,

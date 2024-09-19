@@ -94,8 +94,7 @@ async function getAppData(singleAppFileInfo: string[]) {
     );
   });
 
-  const bundleId = app?.mac?.bundleId ?? record["kMDItemCFBundleIdentifier"];
-  if (!bundleId) {
+  if(!app?.mac?.bundleId) {
     return;
   }
 
@@ -117,8 +116,8 @@ async function getAppData(singleAppFileInfo: string[]) {
     path: filePath,
     icon,
     name,
-    bundleId,
-    id: app?.id ?? bundleId,
+    bundleId: app.mac.bundleId,
+    id: app?.id ?? app.mac.bundleId,
     isBrowser: app?.isBrowser ?? false,
     isDefaultEnabled: app?.isDefaultEnabled ?? false,
     isElectronApp: app?.isElectronApp ?? false,
