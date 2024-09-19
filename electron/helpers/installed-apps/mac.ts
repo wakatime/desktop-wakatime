@@ -1,16 +1,24 @@
 import { exec, spawnSync } from "child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { AppData } from "electron/utils/validators";
+import { allApps } from "electron/watchers/apps";
 import iconutil from "iconutil";
 import plist from "plist";
 
-export async function getInstalledApps(directory = "/Applications") {
+export async function getInstalledApps(
+  directory = "/Applications",
+): Promise<AppData[]> {
   const directoryContents = await getDirectoryContents(directory);
-  const appsFileInfo = await getAppsFileInfo(directoryContents);
-  return appsFileInfo.map((appFileInfo) => getAppData(appFileInfo));
+  const appsFileInfo = getAppsFileInfo(directoryContents);
+  return (
+    await Promise.all(
+      appsFileInfo.map((appFileInfo) => getAppData(appFileInfo)),
+    )
+  ).filter(Boolean) as AppData[];
 }
 
-export function getDirectoryContents(directory: string) {
+function getDirectoryContents(directory: string) {
   return new Promise<string[]>((resolve, reject) => {
     exec(`ls ${directory}`, (error, stdout) => {
       if (error) {
@@ -26,10 +34,7 @@ export function getDirectoryContents(directory: string) {
   });
 }
 
-export function getAppsSubDirectory(
-  stdout: string,
-  directory: string,
-): string[] {
+function getAppsSubDirectory(stdout: string, directory: string): string[] {
   let stdoutArr = stdout.split(/[(\r\n)\r\n]+/);
   stdoutArr = stdoutArr
     .filter((o) => o.endsWith(".app"))
@@ -39,7 +44,7 @@ export function getAppsSubDirectory(
   return stdoutArr;
 }
 
-export function getAppsFileInfo(appsFile: readonly string[]) {
+function getAppsFileInfo(appsFile: readonly string[]) {
   const runMdlsShell = spawnSync("mdls", appsFile, {
     encoding: "utf8",
   });
@@ -61,7 +66,7 @@ export function getAppsFileInfo(appsFile: readonly string[]) {
   return allAppsFileInfoList;
 }
 
-export function getAppData(singleAppFileInfo: string[]) {
+async function getAppData(singleAppFileInfo: string[]) {
   const getKeyVal = (lineData: string) => {
     const lineDataArr = lineData.split("=");
     return {
@@ -70,39 +75,58 @@ export function getAppData(singleAppFileInfo: string[]) {
     };
   };
 
-  const getAppInfoData = (appArr: string[]) => {
-    const appData: Record<string, string> = {};
-
-    appArr.filter(Boolean).forEach((o) => {
-      const appKeyVal = getKeyVal(o);
-      if (appKeyVal.value) {
-        appData[appKeyVal.key] = appKeyVal.value;
+  const record = singleAppFileInfo.filter(Boolean).reduce(
+    (acc, curr) => {
+      const val = getKeyVal(curr);
+      if (val.value) {
+        acc[val.key] = val.value;
       }
-      // if (appKeyVal.key === "kMDItemDisplayName") {
-      //   appData.appName = appKeyVal.value.replace(".app", "");
-      // }
-      // if (appKeyVal.key === "kMDItemVersion") {
-      //   appData.appVersion = appKeyVal.value;
-      // }
-      // if (appKeyVal.key === "kMDItemDateAdded") {
-      //   appData.appInstallDate = appKeyVal.value;
-      // }
-      // if (appKeyVal.key === "kMDItemCFBundleIdentifier") {
-      //   appData.appIdentifier = appKeyVal.value;
-      // }
-      // if (appKeyVal.key === "kMDItemAppStoreCategory") {
-      //   appData.appCategory = appKeyVal.value;
-      // }
-      // if (appKeyVal.key === "kMDItemAppStoreCategoryType") {
-      //   appData.appCategoryType = appKeyVal.value;
-      // }
-    });
-    return appData;
-  };
-  return getAppInfoData(singleAppFileInfo);
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+
+  const app = allApps.find((app) => {
+    return (
+      app.mac?.bundleId &&
+      record["kMDItemCFBundleIdentifier"] === app.mac.bundleId
+    );
+  });
+
+  const bundleId = app?.mac?.bundleId ?? record["kMDItemCFBundleIdentifier"];
+  if (!bundleId) {
+    return;
+  }
+
+  const execName = record["kMDItemDisplayName"];
+  const name = execName?.replace(".app", "");
+  if (!name) {
+    return;
+  }
+
+  const filePath = record["_FILE_PATH"];
+  if (!filePath) {
+    return;
+  }
+
+  const icon = await getAppIcon(filePath);
+  const version = record["kMDItemVersion"] || null;
+
+  return {
+    path: filePath,
+    icon,
+    name,
+    bundleId,
+    id: app?.id ?? bundleId,
+    isBrowser: app?.isBrowser ?? false,
+    isDefaultEnabled: app?.isDefaultEnabled ?? false,
+    isElectronApp: app?.isElectronApp ?? false,
+    version,
+    execName: path.parse(filePath).base,
+  } satisfies AppData;
 }
 
-export async function getAppIconMac(appPath: string) {
+async function getAppIcon(appPath: string) {
   let icnsPath: string | null = null;
 
   const getFirstIcnsFileFromResourcesDir = () => {
@@ -165,7 +189,7 @@ export async function getAppIconMac(appPath: string) {
   return parseIconFromIcnsFile(icnsPath);
 }
 
-export async function parseIconFromIcnsFile(path: string) {
+async function parseIconFromIcnsFile(path: string) {
   function getSize(filename: string) {
     const match = filename.match(/(\d+)x(\d+)/);
     if (match) {
