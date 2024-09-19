@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.633.0",
+    "@bitdisaster/exe-icon-extractor": "github:alanhamlett/exe-icon-extractor",
     "@miniben90/x-win": "^1.10.2",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
@@ -76,9 +77,6 @@
     "vite-plugin-electron": "^0.28.7",
     "vite-plugin-electron-renderer": "^0.14.5",
     "vite-plugin-native": "^2.2.1"
-  },
-  "optionalDependencies": {
-    "exe-icon-extractor": "^1.0.8"
   },
   "main": "dist-electron/main.js"
 }
