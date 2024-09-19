@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { AppData } from "electron/utils/validators";
 import Winreg from "winreg";
 
 import { Store } from "../../store";
+import { AppData } from "../../utils/validators";
 import { allApps } from "../../watchers/apps";
 
 function getFilePath(appData: Record<string, string>, fileName?: string) {
