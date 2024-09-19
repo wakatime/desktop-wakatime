@@ -1,10 +1,11 @@
 import { exec, spawnSync } from "child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { AppData } from "electron/utils/validators";
-import { allApps } from "electron/watchers/apps";
 import iconutil from "iconutil";
 import plist from "plist";
+
+import { AppData } from "../../utils/validators";
+import { allApps } from "../../watchers/apps";
 
 export async function getInstalledApps(
   directory = "/Applications",
