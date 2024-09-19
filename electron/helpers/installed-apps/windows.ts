@@ -1,91 +1,137 @@
 import fs from "node:fs";
 import path from "node:path";
+import { AppData } from "electron/utils/validators";
 import Winreg from "winreg";
 
 import { Store } from "../../store";
+import { allApps } from "../../watchers/apps";
 
-export function getFilePathWindows(
-  appData: Record<string, string>,
-  fileName?: string,
-) {
-  let installLocation = appData["InstallLocation"];
-  if (!installLocation) {
-    return null;
-  }
-
-  let files = fs.readdirSync(installLocation);
-
-  // Some electron app has two exe file. One in the root install location and one in the app-{some-version-number} directory. eg.
-  // 1: [install-location]/{fileName}.exe
-  // 2: [install-location]/app-{some-version-number}/{fileName}.exe
-  // And in window info they use second location as path
-  const appFolder = files
-    // sorting it to get the folder which has the latest version if there are many folders with `app-` name.
-    .sort((a, b) => b.localeCompare(a))
-    .find((file) => file.startsWith("app-"));
-  if (appFolder) {
-    const newLocation = path.join(installLocation, appFolder);
-    const appFolderFiles = fs.readdirSync(newLocation);
-    if (appFolderFiles.find((file) => file.endsWith(".exe"))) {
-      installLocation = newLocation;
-      files = appFolderFiles;
+function getFilePath(appData: Record<string, string>, fileName?: string) {
+  try {
+    let installLocation = appData["InstallLocation"];
+    if (!installLocation) {
+      return null;
     }
-  }
 
-  if (!fileName) {
-    fileName = files.find((file) => file.endsWith(".exe"));
-  }
+    let files = fs.readdirSync(installLocation);
 
-  if (!fileName) {
+    // Some electron app has two exe file. One in the root install location and one in the app-{some-version-number} directory. eg.
+    // 1: [install-location]/{fileName}.exe
+    // 2: [install-location]/app-{some-version-number}/{fileName}.exe
+    // And in window info they use second location as path
+    const appFolder = files
+      // sorting it to get the folder which has the latest version if there are many folders with `app-` name.
+      .sort((a, b) => b.localeCompare(a))
+      .find((file) => file.startsWith("app-"));
+    if (appFolder) {
+      const newLocation = path.join(installLocation, appFolder);
+      const appFolderFiles = fs.readdirSync(newLocation);
+      if (appFolderFiles.find((file) => file.endsWith(".exe"))) {
+        installLocation = newLocation;
+        files = appFolderFiles;
+      }
+    }
+
+    if (!fileName) {
+      fileName = files.find((file) => file.endsWith(".exe"));
+    }
+
+    if (!fileName) {
+      return null;
+    }
+
+    const filePath = path.join(installLocation, fileName);
+    return filePath;
+  } catch (error) {
+    console.log(error);
     return null;
   }
-
-  const filePath = path.join(installLocation, fileName);
-  return filePath;
 }
 
-export async function getIconFromWindows(filePath: string) {
-  if (process.platform !== "win32") {
+async function getIcon(filePath: string) {
+  try {
+    if (process.platform !== "win32") {
+      return null;
+    }
+
+    const cachedIcon = Store.instance().get(`${filePath}-icon`);
+    if (typeof cachedIcon === "string") {
+      return cachedIcon;
+    }
+    const { extractIcon } = await import("exe-icon-extractor");
+
+    const buffer = extractIcon(filePath, "large");
+    const icon = "data:image/png;base64," + buffer.toString("base64");
+    Store.instance().set(`${filePath}-icon`, icon);
+    return icon;
+  } catch (error) {
+    console.log(error);
     return null;
   }
-
-  const cachedIcon = Store.instance().get(`${filePath}-icon`);
-  if (typeof cachedIcon === "string") {
-    return cachedIcon;
-  }
-  const { extractIcon } = await import("exe-icon-extractor");
-
-  const buffer = extractIcon(filePath, "large");
-  const icon = "data:image/png;base64," + buffer.toString("base64");
-  Store.instance().set(`${filePath}-icon`, icon);
-  return icon;
 }
 
-export async function getApp(reg: Winreg.Registry) {
-  const app = await new Promise<Record<string, string>>((res, rej) => {
+async function registryValues(reg: Winreg.Registry) {
+  return await new Promise<Record<string, string>>((res, rej) => {
     reg.values((err, items) => {
       if (err) {
         rej(err);
       } else {
-        const app: Record<string, string> = {};
+        const record: Record<string, string> = {};
         items.forEach((item) => {
-          app[item.name] = item.value;
+          record[item.name] = item.value;
         });
-        res(app);
+        res(record);
       }
     });
   });
+}
 
-  return app;
+export async function getApp(reg: Winreg.Registry) {
+  const record = await registryValues(reg);
+  const name = record["DisplayName"];
+  if (!name) {
+    return undefined;
+  }
+
+  const app = allApps.find((app) => {
+    return (
+      app.windows?.DisplayName &&
+      record["DisplayName"].startsWith(app.windows.DisplayName)
+    );
+  });
+
+  const filePath = getFilePath(record, app?.windows?.exePath);
+  if (!filePath) {
+    return undefined;
+  }
+
+  const icon = record["DisplayIcon"]
+    ? await getIcon(record["DisplayIcon"])
+    : await getIcon(filePath);
+
+  return {
+    id: app?.id ?? name,
+    icon,
+    name,
+    version: record["DisplayVersion"],
+    path: filePath,
+    bundleId: app?.mac?.bundleId ?? null,
+    isBrowser: app?.isBrowser ?? false,
+    isDefaultEnabled: app?.isDefaultEnabled ?? false,
+    isElectronApp: app?.isElectronApp ?? false,
+    execName: path.parse(filePath).base,
+  } satisfies AppData;
 }
 
 export async function getApps(regKey: Winreg.Registry) {
-  return new Promise<Record<string, string>[]>((resolve, reject) => {
+  return new Promise<AppData[]>((resolve, reject) => {
     regKey.keys(async (err, keys) => {
       if (err) {
         reject(err);
       } else {
-        const apps = await Promise.all(keys.map(async (reg) => getApp(reg)));
+        const apps = (
+          await Promise.all(keys.map(async (reg) => getApp(reg)))
+        ).filter(Boolean) as AppData[];
         resolve(apps);
       }
     });
@@ -115,13 +161,9 @@ export async function getInstalledApps() {
     }),
   ];
 
-  const apps: Record<string, string>[] = [];
-
-  // const apps = (await Promise.all(registries.map((reg) => getApps(reg))));
+  const apps: AppData[] = [];
   for (const registry of registries) {
-    const newApps = await getApps(registry);
-    apps.push(...newApps.filter((app) => app["DisplayName"]));
+    apps.push(...(await getApps(registry)));
   }
-
   return apps;
 }
