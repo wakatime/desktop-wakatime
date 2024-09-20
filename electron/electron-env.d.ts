@@ -61,7 +61,7 @@ declare module "iconutil" {
   ): void;
 }
 
-declare module "exe-icon-extractor" {
+declare module "@bitdisaster/exe-icon-extractor" {
   export function extractIcon(
     filePath: string,
     size: "large" | "small",
