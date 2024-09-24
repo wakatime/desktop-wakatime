@@ -1,5 +1,5 @@
 import path from "node:path";
-import { openWindowsAsync } from "@miniben90/x-win";
+import { openWindowsAsync, WindowInfo } from "@miniben90/x-win";
 import {
   app,
   BrowserWindow,
@@ -250,6 +250,33 @@ app.on("quit", () => {
   watcher?.stop();
 });
 
+async function windowsToApps(windows: WindowInfo[]) {
+  return Promise.all(
+    windows
+      .filter(
+        (win, i) =>
+          win.info.execName &&
+          windows.findIndex((win2) => win2.info.path === win.info.path) === i,
+      )
+      .sort((a, b) => a.info.name.localeCompare(b.info.name))
+      .map(async (window) => {
+        const icon = (await window.getIconAsync()).data;
+        return {
+          id: window.info.path,
+          name: window.info.name,
+          path: window.info.path,
+          icon,
+          isBrowser: false,
+          isDefaultEnabled: false,
+          isElectronApp: false,
+          bundleId: null,
+          version: null,
+          execName: path.parse(window.info.path).base,
+        } satisfies AppData;
+      }),
+  );
+}
+
 // IPC Events
 ipcMain.on(
   IpcKeys.getSetting,
@@ -271,8 +298,23 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(IpcKeys.getApps, (event) => {
-  event.returnValue = AppsManager.instance().apps;
+ipcMain.on(IpcKeys.getAllApps, (event) => {
+  event.returnValue = AppsManager.instance().getAllApps();
+});
+
+ipcMain.on(IpcKeys.getOpenApps, async (event) => {
+  const windows = await openWindowsAsync();
+  event.returnValue = await windowsToApps(windows);
+});
+
+ipcMain.on(IpcKeys.getAllAvailableApps, async (event) => {
+  const apps = AppsManager.instance().getAllApps();
+  const windows = await openWindowsAsync();
+  const openApps = await windowsToApps(windows);
+  event.returnValue = [
+    ...apps,
+    ...openApps.filter((app) => !AppsManager.instance().getApp(app.path)),
+  ];
 });
 
 ipcMain.on(IpcKeys.getAppVersion, (event) => {
@@ -283,8 +325,8 @@ ipcMain.on(IpcKeys.isMonitored, (event, path) => {
   event.returnValue = MonitoringManager.isMonitored(path);
 });
 
-ipcMain.on(IpcKeys.setMonitored, (_, path: string, monitor: boolean) => {
-  MonitoringManager.set(path, monitor);
+ipcMain.on(IpcKeys.setMonitored, (_, app: AppData, monitor: boolean) => {
+  MonitoringManager.set(app, monitor);
 });
 
 ipcMain.on(IpcKeys.autoUpdateEnabled, (event) => {
@@ -358,42 +400,4 @@ ipcMain.on(IpcKeys.setAllowlist, (_, value: string) => {
 
 ipcMain.on(IpcKeys.shellOpenExternal, (_, url: string) => {
   shell.openExternal(url);
-});
-
-ipcMain.on(IpcKeys.getOpenWindows, async (event) => {
-  const windows = await openWindowsAsync();
-  event.returnValue = (
-    await Promise.all(
-      windows
-        .filter(
-          (win, i) =>
-            win.info.execName &&
-            windows.findIndex((win2) => win2.info.path === win.info.path) === i,
-        )
-        .sort((a, b) => a.info.name.localeCompare(b.info.name))
-        .map(async (window) => {
-          const app = AppsManager.instance().apps.find(
-            (item) => item.path === window.info.path,
-          );
-
-          if (app) {
-            return null;
-          }
-
-          const icon = (await window.getIconAsync()).data;
-          return {
-            id: window.info.path,
-            name: window.info.name,
-            path: window.info.path,
-            icon,
-            isBrowser: false,
-            isDefaultEnabled: false,
-            isElectronApp: false,
-            bundleId: null,
-            version: null,
-            execName: path.parse(window.info.path).base,
-          } satisfies AppData;
-        }),
-    )
-  ).filter((item) => !!item);
 });

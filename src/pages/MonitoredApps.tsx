@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, ImageIcon, Loader2, RefreshCcw } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ExternalLink, ImageIcon, Loader2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -9,152 +9,83 @@ import { PLUGINS } from "~/utils/constants";
 import { AppData } from "../../electron/utils/validators";
 
 export function MonitoredAppsPage() {
-  const installedAppsQuery = useQuery({
-    queryKey: ["installed-apps"],
+  const appsQuery = useQuery({
+    queryKey: ["apps"],
     queryFn: async () => {
-      return window.ipcRenderer?.getInstalledApps() ?? [];
+      return window.ipcRenderer?.getAllAvailableApps() ?? [];
     },
   });
-  const openWindowsQuery = useQuery({
-    queryKey: ["open-windows"],
-    queryFn: async () => {
-      const openWindows = await window.ipcRenderer?.getOpenWindows();
-      return openWindows ?? [];
-    },
-  });
-
-  useEffect(() => {
-    window.document.title = "Monitored Apps";
-  }, []);
 
   return (
-    <div className="flex flex-col">
-      <section id="installed-apps">
-        <div className="sticky top-0 z-20 flex h-12 items-center border-b bg-background px-4">
-          <p className="flex-1 truncate font-medium text-muted-foreground">
-            Installed Apps
+    <div className="flex min-h-screen flex-col">
+      {appsQuery.isPending ? (
+        <div className="flex-1 items-center justify-center">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      ) : appsQuery.isError ? (
+        <div className="p-4">
+          <p className="text-muted-foreground">
+            Error: {appsQuery.error.message}
           </p>
+        </div>
+      ) : appsQuery.data.length === 0 ? (
+        <div className="p-4">
+          <p className="text-muted-foreground">No apps</p>
           <Button
-            size="icon"
-            variant="ghost"
-            className="h-9 w-9 text-muted-foreground"
-            title="Refresh"
-            disabled={installedAppsQuery.isRefetching}
-            onClick={() => installedAppsQuery.refetch()}
+            onClick={() => appsQuery.refetch()}
+            disabled={appsQuery.isRefetching}
           >
-            {installedAppsQuery.isRefetching ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <RefreshCcw className="h-5 w-5" />
-            )}
-            <div className="sr-only">Refresh</div>
+            Refresh
           </Button>
         </div>
-
-        {installedAppsQuery.isPending ? (
-          <div className="flex h-[200px] items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : installedAppsQuery.isError ? (
-          <div className="p-4">
-            <p className="text-muted-foreground">
-              Error: {installedAppsQuery.error.message}
-            </p>
-          </div>
-        ) : installedAppsQuery.data.length === 0 ? (
-          <div className="p-4">
-            <p className="text-muted-foreground">No open windows</p>
-          </div>
-        ) : (
-          installedAppsQuery.data.map((app, i) => {
-            return (
-              <Fragment key={app.path}>
-                <AppListItem app={app} />
-                {i < installedAppsQuery.data.length - 1 && (
-                  <div className="pl-[4rem]">
-                    <hr className="h-px bg-border" />
-                  </div>
-                )}
-              </Fragment>
-            );
-          })
-        )}
-      </section>
-
-      <section id="open-windows">
-        <div className="sticky top-0 z-20 flex h-12 items-center border-b bg-background px-4">
-          <p className="flex-1 truncate font-medium text-muted-foreground">
-            Open Windows
-          </p>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-9 w-9 text-muted-foreground"
-            title="Refresh"
-            disabled={openWindowsQuery.isRefetching}
-            onClick={() => openWindowsQuery.refetch()}
-          >
-            {openWindowsQuery.isRefetching ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <RefreshCcw className="h-5 w-5" />
-            )}
-            <div className="sr-only">Refresh</div>
-          </Button>
-        </div>
-        {openWindowsQuery.isPending ? (
-          <div className="flex h-[200px] items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : openWindowsQuery.isError ? (
-          <div className="p-4">
-            <p className="text-muted-foreground">
-              Error: {openWindowsQuery.error.message}
-            </p>
-          </div>
-        ) : openWindowsQuery.data.length === 0 ? (
-          <div className="p-4">
-            <p className="text-muted-foreground">No open windows</p>
-          </div>
-        ) : (
-          openWindowsQuery.data.map((app, i) => {
-            return (
-              <Fragment key={app.path}>
-                <AppListItem app={app} />
-                {i < openWindowsQuery.data.length - 1 && (
-                  <div className="pl-[4rem]">
-                    <hr className="h-px bg-border" />
-                  </div>
-                )}
-              </Fragment>
-            );
-          })
-        )}
-      </section>
+      ) : (
+        appsQuery.data.map((app, i) => {
+          return (
+            <Fragment key={app.path}>
+              <AppListItem app={app} />
+              {i < appsQuery.data.length - 1 && (
+                <div className="pl-[4rem]">
+                  <hr className="h-px bg-border" />
+                </div>
+              )}
+            </Fragment>
+          );
+        })
+      )}
     </div>
   );
 }
 
 const AppListItem = ({ app }: { app: AppData }) => {
-  const [isMonitored, setIsMonitored] = useState(() =>
-    window.ipcRenderer?.isMonitored(app.path),
+  const queryClient = useQueryClient();
+  const [isMonitored, setIsMonitored] = useState(false);
+
+  const plugin = useMemo(
+    () =>
+      PLUGINS.find((item) =>
+        app.execName
+          ? item.execNames.includes(app.execName)
+          : app.bundleId
+            ? item.bundleIds?.includes(app.bundleId)
+            : false,
+      ),
+    [app.execName, app.bundleId],
   );
 
-  const plugin = useMemo(() => {
-    const plugin = PLUGINS.find((plugin) =>
-      app.execName
-        ? plugin.execNames.includes(app.execName)
-        : app.bundleId
-          ? plugin.bundleIds?.includes(app.bundleId)
-          : false,
-    );
-    return plugin;
-  }, [app.execName]);
+  const onMonitoredChange = useCallback(
+    (monitor: boolean) => {
+      setIsMonitored(monitor);
+      window.ipcRenderer?.setMonitored(app, monitor);
+      queryClient.invalidateQueries({
+        queryKey: ["apps"],
+      });
+    },
+    [app],
+  );
 
-  const onMonitoredChange = useCallback((monitor: boolean) => {
-    setIsMonitored(monitor);
-    window.ipcRenderer?.setMonitored(app.path, monitor);
-  }, []);
+  useEffect(() => {
+    setIsMonitored(window.ipcRenderer?.isMonitored(app.path) ?? false);
+  }, [app.path]);
 
   return (
     <div className="flex h-14 items-center gap-4 px-4">

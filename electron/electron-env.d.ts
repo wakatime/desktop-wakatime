@@ -39,9 +39,14 @@ interface Window {
       openExternal: (url: string) => void;
     };
     isMonitored: (path: string) => boolean;
-    setMonitored: (path: string, monitor: boolean) => void;
+    setMonitored: (
+      app: import("./utils/validators").AppData,
+      monitor: boolean,
+    ) => void;
     getAppVersion: () => string;
-    getInstalledApps: () => import("./utils/validators").AppData[];
+    getAllApps: () => import("./utils/validators").AppData[];
+    getOpenApps: () => Promise<import("./utils/validators").AppData[]>;
+    getAllAvailableApps: () => Promise<import("./utils/validators").AppData[]>;
     shouldLaunchOnLogIn: () => boolean;
     setShouldLaunchOnLogIn: (shouldLaunchOnLogIn: boolean) => void;
     shouldLogToFile: () => boolean;
@@ -50,7 +55,6 @@ interface Window {
     setAutoUpdateEnabled: (autoUpdateEnabled: boolean) => void;
     codeTimeInStatusBar: () => boolean;
     setCodeTimeInStatusBar: (codeTimeInStatusBar: boolean) => void;
-    getOpenWindows: () => Promise<import("./utils/validators").AppData[]>;
   };
 }
 
