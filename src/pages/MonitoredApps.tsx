@@ -1,9 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, ImageIcon, Loader2 } from "lucide-react";
+import { ExternalLink, ImageIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { PLUGINS } from "~/utils/constants";
 import { AppData } from "../../electron/utils/validators";
@@ -19,9 +20,7 @@ export function MonitoredAppsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       {appsQuery.isPending ? (
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
+        <AppsListSckeleton />
       ) : appsQuery.isError ? (
         <div className="p-4">
           <p className="text-muted-foreground">
@@ -113,3 +112,20 @@ const AppListItem = ({ app }: { app: AppData }) => {
     </div>
   );
 };
+
+const AppsListSckeleton = ({ count = 20 }: { count?: number }) =>
+  new Array(count).fill(0).map((_, i) => (
+    <Fragment key={i}>
+      <div className="flex h-14 items-center gap-4 px-4">
+        <Skeleton className="h-8 w-8" />
+        <Skeleton className="h-5 w-32" />
+        <div className="flex-1"></div>
+        <Skeleton className="h-5 w-10 rounded-full" />
+      </div>
+      {i < count - 1 && (
+        <div className="pl-[4rem]">
+          <hr className="h-px bg-border" />
+        </div>
+      )}
+    </Fragment>
+  ));
