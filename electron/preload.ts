@@ -43,8 +43,14 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   setMonitored(path: string, monitor: boolean) {
     ipcRenderer.send(IpcKeys.setMonitored, path, monitor);
   },
-  getInstalledApps() {
-    return ipcRenderer.sendSync(IpcKeys.getApps);
+  getAllApps() {
+    return ipcRenderer.sendSync(IpcKeys.getAllApps);
+  },
+  getOpenApps() {
+    return ipcRenderer.sendSync(IpcKeys.getOpenApps);
+  },
+  getAllAvailableApps() {
+    return ipcRenderer.sendSync(IpcKeys.getAllAvailableApps);
   },
   getAppVersion() {
     return ipcRenderer.sendSync(IpcKeys.getAppVersion);
@@ -72,8 +78,5 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   setShouldLogToFile(shouldLogToFile: boolean) {
     ipcRenderer.send(IpcKeys.setShouldLogToFile, shouldLogToFile);
-  },
-  getOpenWindows() {
-    return ipcRenderer.sendSync(IpcKeys.getOpenWindows);
   },
 });

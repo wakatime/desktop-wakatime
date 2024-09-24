@@ -60,7 +60,7 @@ export class Wakatime {
         if (!PropertiesManager.hasLaunchedBefore) {
           for (const app of apps) {
             if (app.isDefaultEnabled) {
-              MonitoringManager.set(app.path, true);
+              MonitoringManager.set(app, true);
             }
           }
           PropertiesManager.hasLaunchedBefore = true;

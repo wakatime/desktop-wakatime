@@ -1,10 +1,11 @@
 import { getDesktopWakaTimeConfigFilePath } from "../utils";
+import { AppData } from "../utils/validators";
 import { AppsManager } from "./apps-manager";
 import { ConfigFileReader } from "./config-file-reader";
 
 export abstract class MonitoringManager {
   static isBrowserMonitored() {
-    const browserApps = AppsManager.instance().apps.filter(
+    const browserApps = AppsManager.instance().installedApps.filter(
       (app) => app.isBrowser,
     );
     return browserApps.findIndex((app) => this.isMonitored(app.path)) !== -1;
@@ -25,9 +26,17 @@ export abstract class MonitoringManager {
     return monitoring;
   }
 
-  static set(path: string, monitor: boolean) {
+  static set(app: AppData, monitor: boolean) {
+    if (AppsManager.isExcludedApp(app)) {
+      return;
+    }
+    const monitoringKey = this.monitoredKey(app.path);
+    if (monitor) {
+      AppsManager.instance().addExtraApp(app);
+    } else {
+      AppsManager.instance().removeExtraApp(app.path);
+    }
     const file = getDesktopWakaTimeConfigFilePath();
-    const monitoringKey = this.monitoredKey(path);
     ConfigFileReader.setBool(file, "monitoring", monitoringKey, monitor);
   }
 

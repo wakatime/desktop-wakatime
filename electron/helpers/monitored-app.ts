@@ -31,6 +31,7 @@ export class MonitoredApp {
       project,
     };
   }
+
   static category(app?: AppData): Category | null {
     if (!app) {
       return null;
@@ -80,6 +81,7 @@ export class MonitoredApp {
         return null;
     }
   }
+
   static language(app?: AppData) {
     if (!app) {
       return null;
@@ -95,6 +97,7 @@ export class MonitoredApp {
         return null;
     }
   }
+
   static project({ url }: WindowInfo) {
     if (!url) {
       return null;

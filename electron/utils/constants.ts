@@ -1,5 +1,6 @@
 export const IpcKeys = {
-  getApps: "get_apps",
+  getAllApps: "get_all_apps",
+  getAllAvailableApps: "get_all_available_apps",
   getAppVersion: "get_app_version",
   getSetting: "get_setting",
   setSetting: "set_setting",
@@ -23,7 +24,7 @@ export const IpcKeys = {
   setDenylist: "set_denylist",
   getAllowlist: "get_allowlist",
   setAllowlist: "set_allowlist",
-  getOpenWindows: "get_opened_windows",
+  getOpenApps: "get_opened_apps",
   shellOpenExternal: "shell_open_external",
 };
 

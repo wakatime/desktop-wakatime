@@ -275,3 +275,13 @@ export const allApps: MonitoredAppInfo[] = [
     isDefaultEnabled: true,
   },
 ];
+
+export const excludeAppsList: {
+  bundleId?: string;
+  execName?: string;
+  name?: RegExp | string;
+}[] = [
+  {
+    name: "Electron",
+  },
+];
