@@ -6,6 +6,7 @@ import type { AppData } from "../utils/validators";
 import { getWakatimeAppDataFolderPath } from "../utils";
 import { Logging, LogLevel } from "../utils/logging";
 import { appDataSchema } from "../utils/validators";
+import { excludeAppsList } from "../watchers/apps";
 import { getApps } from "./installed-apps";
 
 const wakatimeAppsSchema = z.object({
@@ -81,6 +82,9 @@ export class AppsManager {
   }
 
   addExtraApp(app: AppData) {
+    if (this.isExcludedApp(app)) {
+      return;
+    }
     if (!this.getApp(app.path)) {
       this.extraApps = [...this.extraApps, app];
       this.saveCache();
@@ -100,5 +104,24 @@ export class AppsManager {
   isExtraApp(path: string) {
     const app = this.extraApps.find((app) => app.path === path);
     return !!app;
+  }
+
+  isExcludedApp(app: AppData) {
+    return !!excludeAppsList.find((item) => {
+      if (item.bundleId && app.bundleId && item.bundleId === app.bundleId) {
+        return true;
+      }
+      if (item.execName && app.execName && item.execName === app.execName) {
+        return true;
+      }
+      if (item.name) {
+        if (typeof item.name === "string") {
+          return item.name === app.name;
+        } else {
+          return item.name.test(app.name);
+        }
+      }
+      return false;
+    });
   }
 }

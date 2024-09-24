@@ -19,7 +19,7 @@ export function MonitoredAppsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       {appsQuery.isPending ? (
-        <div className="flex-1 items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-5 w-5 animate-spin" />
         </div>
       ) : appsQuery.isError ? (

@@ -304,17 +304,20 @@ ipcMain.on(IpcKeys.getAllApps, (event) => {
 
 ipcMain.on(IpcKeys.getOpenApps, async (event) => {
   const windows = await openWindowsAsync();
-  event.returnValue = await windowsToApps(windows);
+  const apps = await windowsToApps(windows);
+  event.returnValue = apps.filter(
+    (app) => !AppsManager.instance().isExcludedApp(app),
+  );
 });
 
 ipcMain.on(IpcKeys.getAllAvailableApps, async (event) => {
   const apps = AppsManager.instance().getAllApps();
   const windows = await openWindowsAsync();
   const openApps = await windowsToApps(windows);
-  event.returnValue = [
-    ...apps,
-    ...openApps.filter((app) => !AppsManager.instance().getApp(app.path)),
-  ];
+  const uniqueOpenApps = openApps
+    .filter((app) => !AppsManager.instance().getApp(app.path))
+    .filter((app) => !AppsManager.instance().isExcludedApp(app));
+  event.returnValue = [...apps, ...uniqueOpenApps];
 });
 
 ipcMain.on(IpcKeys.getAppVersion, (event) => {

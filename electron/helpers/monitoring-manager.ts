@@ -27,6 +27,9 @@ export abstract class MonitoringManager {
   }
 
   static set(app: AppData, monitor: boolean) {
+    if (AppsManager.instance().isExcludedApp(app)) {
+      return;
+    }
     const monitoringKey = this.monitoredKey(app.path);
     if (monitor) {
       AppsManager.instance().addExtraApp(app);
