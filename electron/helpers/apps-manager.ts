@@ -82,13 +82,14 @@ export class AppsManager {
   }
 
   addExtraApp(app: AppData) {
-    if (this.isExcludedApp(app)) {
+    if (AppsManager.isExcludedApp(app)) {
       return;
     }
-    if (!this.getApp(app.path)) {
-      this.extraApps = [...this.extraApps, app];
-      this.saveCache();
+    if (this.getApp(app.path)) {
+      return;
     }
+    this.extraApps = [...this.extraApps, app];
+    this.saveCache();
   }
 
   removeExtraApp(path: string) {
@@ -106,7 +107,7 @@ export class AppsManager {
     return !!app;
   }
 
-  isExcludedApp(app: AppData) {
+  static isExcludedApp(app: AppData) {
     return !!excludeAppsList.find((item) => {
       if (item.bundleId && app.bundleId && item.bundleId === app.bundleId) {
         return true;
