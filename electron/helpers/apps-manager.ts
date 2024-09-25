@@ -14,6 +14,12 @@ const wakatimeAppsSchema = z.object({
   extraApps: z.array(appDataSchema),
 });
 
+const validateExtraApps = (apps: AppData[]) => {
+  return apps.filter((app) => {
+    return fs.existsSync(app.path);
+  });
+};
+
 export class AppsManager {
   cacheFilePath: string;
   installedApps: AppData[] = [];
@@ -67,7 +73,7 @@ export class AppsManager {
   async loadApps() {
     const { installedApps, extraApps } = this.getCachedApps();
     this.installedApps = installedApps;
-    this.extraApps = extraApps;
+    this.extraApps = validateExtraApps(extraApps);
     this.installedApps = await getApps();
     this.saveCache();
     return [...this.installedApps, ...this.extraApps];
