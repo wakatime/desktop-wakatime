@@ -30,12 +30,10 @@ export abstract class MonitoringManager {
     if (AppsManager.isExcludedApp(app)) {
       return;
     }
-    const monitoringKey = this.monitoredKey(app.path);
-    if (monitor) {
+    if (!AppsManager.instance().getApp(app.path)) {
       AppsManager.instance().addExtraApp(app);
-    } else {
-      AppsManager.instance().removeExtraApp(app.path);
     }
+    const monitoringKey = this.monitoredKey(app.path);
     const file = getDesktopWakaTimeConfigFilePath();
     ConfigFileReader.setBool(file, "monitoring", monitoringKey, monitor);
   }
