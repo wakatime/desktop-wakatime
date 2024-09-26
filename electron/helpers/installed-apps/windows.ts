@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import iconPromise from "icon-promise";
 import Winreg from "winreg";
 
 import { Store } from "../../store";
@@ -8,7 +9,6 @@ import { allApps } from "../../watchers/apps";
 
 function getFilePath(installLocation: string, execName: string) {
   try {
-
     let files = fs.readdirSync(installLocation);
 
     // Some electron app has two exe file. One in the root install location and one in the app-{some-version-number} directory. eg.
@@ -50,14 +50,14 @@ async function getIcon(filePath: string) {
     if (typeof cachedIcon === "string") {
       return cachedIcon;
     }
-    const { extractIcon } = await import("@bitdisaster/exe-icon-extractor");
 
-    const buffer = extractIcon(filePath, "large");
-    const icon = "data:image/png;base64," + buffer.toString("base64");
+    const output = await iconPromise.getIcon256(filePath, filePath);
+
+    const icon = "data:image/png;base64," + output.Base64ImageData;
     Store.instance().set(`${filePath}-icon`, icon);
     return icon;
   } catch (error) {
-    console.log('Failed to get icon for', filePath, error);
+    console.log("Failed to get icon for", filePath, error);
     return null;
   }
 }
@@ -86,18 +86,19 @@ export async function getApp(reg: Winreg.Registry) {
   }
 
   const app = allApps.find((app) => {
-    return (app.windows?.exePath &&
+    return (
+      app.windows?.exePath &&
       app.windows.DisplayName &&
       record["DisplayName"].startsWith(app.windows.DisplayName)
     );
   });
 
-  if(!app?.windows?.exePath) {
+  if (!app?.windows?.exePath) {
     return undefined;
   }
 
-  const installLocation = record['InstallLocation'];
-  if(!installLocation) {
+  const installLocation = record["InstallLocation"];
+  if (!installLocation) {
     return undefined;
   }
 

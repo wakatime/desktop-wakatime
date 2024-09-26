@@ -65,9 +65,67 @@ declare module "iconutil" {
   ): void;
 }
 
-declare module "@bitdisaster/exe-icon-extractor" {
-  export function extractIcon(
-    filePath: string,
-    size: "large" | "small",
-  ): Buffer;
+declare module "icon-promise" {
+  interface IconPromiseOptions {
+    path: string;
+    sizeArg?: string;
+    context?: string;
+  }
+
+  interface IconData {
+    Base64ImageData: string;
+    Path: string;
+    Context: string;
+  }
+
+  class IconPromise {
+    /**
+     * Extracts image data from a file's icon with an adjustable size.
+     * @param options - Options for extracting the icon.
+     * @returns A promise that resolves to an object containing the icon image data.
+     */
+    getIcon(options: IconPromiseOptions): Promise<IconData>;
+
+    /**
+     * Extracts image data from a file's icon with the size set as 16x16 pixels.
+     * @param path - The file path for the document to extract the icon from.
+     * @param context - Optional context string.
+     * @returns A promise that resolves to an object containing the icon image data.
+     */
+    getIcon16(path: string, context?: string): Promise<IconData>;
+
+    /**
+     * Extracts image data from a file's icon with the size set as 32x32 pixels.
+     * @param path - The file path for the document to extract the icon from.
+     * @param context - Optional context string.
+     * @returns A promise that resolves to an object containing the icon image data.
+     */
+    getIcon32(path: string, context?: string): Promise<IconData>;
+
+    /**
+     * Extracts image data from a file's icon with the size set as 48x48 pixels.
+     * @param path - The file path for the document to extract the icon from.
+     * @param context - Optional context string.
+     * @returns A promise that resolves to an object containing the icon image data.
+     */
+    getIcon48(path: string, context?: string): Promise<IconData>;
+
+    /**
+     * Extracts image data from a file's icon with the size set as 256x256 pixels.
+     * @param path - The file path for the document to extract the icon from.
+     * @param context - Optional context string.
+     * @returns A promise that resolves to an object containing the icon image data.
+     */
+    getIcon256(path: string, context?: string): Promise<IconData>;
+
+    /**
+     * Manually sets the path of the IconExtractor executable.
+     * @param extractorPath - The new folder path for the IconExtractor executable file.
+     * @param newName - Optional new name of the IconExtractor executable file (without extension).
+     */
+    overrideExtractorPath(extractorPath: string, newName?: string): void;
+  }
+
+  const iconPromise: IconPromise;
+  export default iconPromise;
 }
