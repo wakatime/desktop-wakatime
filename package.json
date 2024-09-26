@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.633.0",
-    "@bitdisaster/exe-icon-extractor": "github:alanhamlett/exe-icon-extractor",
     "@miniben90/x-win": "^1.10.2",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
@@ -33,6 +32,7 @@
     "date-fns": "^3.6.0",
     "electron-store": "^10.0.0",
     "globals": "^15.9.0",
+    "icon-promise": "^1.1.1",
     "iconutil": "^1.0.2",
     "lucide-react": "^0.428.0",
     "node-fetch": "^3.3.2",

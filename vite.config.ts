@@ -16,8 +16,9 @@ export default defineConfig({
             rollupOptions: {
               external: [
                 "@miniben90/x-win",
-                "@bitdisaster/exe-icon-extractor",
+                "@miniben90/x-win-win32-arm64-msvc",
                 "node-global-key-listener",
+                "icon-promise",
               ],
             },
             minify: false,
