@@ -36,8 +36,6 @@ export class Wakatime {
     this.tray = tray;
 
     if (PropertiesManager.autoUpdateEnabled) {
-      // https://github.com/electron/update-electron-app?tab=readme-ov-file#with-updateelectronjsorg
-      // app will check for updates at startup, then every ten minutes
       updateElectronApp({
         logger: {
           log: (message) => Logging.instance().log(message, LogLevel.DEBUG),
@@ -45,7 +43,7 @@ export class Wakatime {
           info: (message) => Logging.instance().log(message, LogLevel.INFO),
           warn: (message) => Logging.instance().log(message, LogLevel.WARN),
         },
-        updateInterval: "1 hour",
+        updateInterval: "10 minutes",
       });
     }
 
