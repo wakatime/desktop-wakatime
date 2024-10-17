@@ -1,16 +1,16 @@
-import type { IGlobalKeyListener } from "node-global-key-listener";
 import {
+  WindowInfo,
   activeWindow,
   subscribeActiveWindow,
   unsubscribeActiveWindow,
-  WindowInfo,
 } from "@miniben90/x-win";
-import { GlobalKeyboardListener } from "node-global-key-listener";
 
 import { AppsManager } from "../helpers/apps-manager";
+import { GlobalKeyboardListener } from "node-global-key-listener";
+import type { IGlobalKeyListener } from "node-global-key-listener";
+import { Logging } from "../utils/logging";
 import { MonitoredApp } from "../helpers/monitored-app";
 import { MonitoringManager } from "../helpers/monitoring-manager";
-import { Logging } from "../utils/logging";
 import { Wakatime } from "./wakatime";
 
 export class Watcher {
