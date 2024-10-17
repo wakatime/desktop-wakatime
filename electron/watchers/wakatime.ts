@@ -12,7 +12,7 @@ import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
 import { WindowInfo } from "@miniben90/x-win";
-import { updateElectronApp } from "update-electron-app";
+import { autoUpdater } from "electron-updater";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -36,15 +36,20 @@ export class Wakatime {
     this.tray = tray;
 
     if (PropertiesManager.autoUpdateEnabled) {
-      updateElectronApp({
-        logger: {
-          log: (message) => Logging.instance().log(message, LogLevel.DEBUG),
-          error: (message) => Logging.instance().log(message, LogLevel.ERROR),
-          info: (message) => Logging.instance().log(message, LogLevel.INFO),
-          warn: (message) => Logging.instance().log(message, LogLevel.WARN),
-        },
-        updateInterval: "10 minutes",
+      autoUpdater.checkForUpdatesAndNotify();
+      /*
+      autoUpdater.on("update-available", () => {
+        console.log("Update available");
       });
+
+      autoUpdater.on("update-downloaded", () => {
+        autoUpdater.quitAndInstall();
+      });
+
+      app.on("ready", () => {
+        autoUpdater.checkForUpdatesAndNotify();
+      });
+      */
     }
 
     if (PropertiesManager.shouldLogToFile) {
