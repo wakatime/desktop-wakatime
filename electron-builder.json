@@ -7,12 +7,19 @@
   "directories": {
     "output": "release"
   },
-  "files": ["dist", "dist-electron", "public"],
+  "files": [
+    "dist",
+    "dist-electron",
+    "public"
+  ],
   "win": {
     "target": [
       {
-        "target": "nsis",
-        "arch": ["x64", "arm64"]
+        "target": "squirrel",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
       }
     ],
     "artifactName": "wakatime-windows-${arch}.${ext}",
@@ -28,7 +35,10 @@
     "target": [
       {
         "target": "AppImage",
-        "arch": ["x64", "arm64"]
+        "arch": [
+          "x64",
+          "arm64"
+        ]
       }
     ],
     "artifactName": "wakatime-linux-${arch}.${ext}"
