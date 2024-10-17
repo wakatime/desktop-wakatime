@@ -284,4 +284,10 @@ export const excludeAppsList: {
   {
     name: "Electron",
   },
+  {
+    name: "WakaTime",
+  },
+  {
+    name: "Windows Explorer",
+  },
 ];

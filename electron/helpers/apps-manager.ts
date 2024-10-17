@@ -1,13 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
-import { z } from "zod";
+import { LogLevel, Logging } from "../utils/logging";
 
 import type { AppData } from "../utils/validators";
-import { getWakatimeAppDataFolderPath } from "../utils";
-import { Logging, LogLevel } from "../utils/logging";
 import { appDataSchema } from "../utils/validators";
 import { excludeAppsList } from "../watchers/apps";
+import fs from "node:fs";
 import { getApps } from "./installed-apps";
+import { getWakatimeAppDataFolderPath } from "../utils";
+import path from "node:path";
+import { z } from "zod";
 
 const wakatimeAppsSchema = z.object({
   installedApps: z.array(appDataSchema),
@@ -115,10 +115,10 @@ export class AppsManager {
 
   static isExcludedApp(app: AppData) {
     return !!excludeAppsList.find((item) => {
-      if (item.bundleId && app.bundleId && item.bundleId === app.bundleId) {
+      if (item.bundleId && item.bundleId === app.bundleId) {
         return true;
       }
-      if (item.execName && app.execName && item.execName === app.execName) {
+      if (item.execName && item.execName === app.execName) {
         return true;
       }
       if (item.name) {
