@@ -12,9 +12,6 @@ if [ "$(which zip)" = "" ]; then
     apt-get update && apt-get install -y zip
 fi
 
-mv ./release/wakatime-windows-x64.exe ./release/wakatime-win32-x64.exe
-mv ./release/wakatime-windows-arm64.exe ./release/wakatime-win32-arm64.exe
-
 # add execution permission
 chmod 750 ./release/wakatime-linux-x86_64.AppImage
 chmod 750 ./release/wakatime-linux-arm64.AppImage

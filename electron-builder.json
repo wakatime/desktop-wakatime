@@ -1,8 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.WakaTime.WakaTime",
-  "asar": true,
-  "publish": null,
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "wakatime",
+      "repo": "desktop-wakatime",
+      "releaseType": "release"
+    }
+  ],
   "productName": "WakaTime",
   "directories": {
     "output": "release"
@@ -15,20 +21,21 @@
   "win": {
     "target": [
       {
-        "target": "squirrel",
+        "target": "nsis",
         "arch": [
           "x64",
           "arm64"
         ]
       }
     ],
-    "artifactName": "wakatime-windows-${arch}.${ext}",
+    "artifactName": "wakatime-win32-${arch}.${ext}",
     "icon": "./public/app-icon.ico"
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
+    "createStartMenuShortcut": true,
     "deleteAppDataOnUninstall": false
   },
   "linux": {
