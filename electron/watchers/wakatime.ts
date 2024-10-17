@@ -1,18 +1,18 @@
-import { WindowInfo } from "@miniben90/x-win";
-import { app, Notification, shell, Tray } from "electron";
-import { updateElectronApp } from "update-electron-app";
-
 import type { Category, EntityType } from "../utils/types";
+import { LogLevel, Logging } from "../utils/logging";
+import { Notification, Tray, app, shell } from "electron";
+import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+
 import type { AppData } from "../utils/validators";
 import { AppsManager } from "../helpers/apps-manager";
 import { ConfigFile } from "../helpers/config-file";
+import { DeepLink } from "../utils/constants";
 import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
-import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
-import { DeepLink } from "../utils/constants";
-import { Logging, LogLevel } from "../utils/logging";
+import { WindowInfo } from "@miniben90/x-win";
+import { updateElectronApp } from "update-electron-app";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -24,7 +24,12 @@ export class Wakatime {
   private versionString: string;
 
   constructor() {
-    this.versionString = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
+    const version = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
+    this.versionString = version;
+    process.on("uncaughtException", function (error, origin) {
+      void Dependencies.reportError(error, origin, version);
+      console.log(error);
+    });
   }
 
   init(tray: Tray | null) {
@@ -40,6 +45,7 @@ export class Wakatime {
           info: (message) => Logging.instance().log(message, LogLevel.INFO),
           warn: (message) => Logging.instance().log(message, LogLevel.WARN),
         },
+        updateInterval: "1 hour",
       });
     }
 

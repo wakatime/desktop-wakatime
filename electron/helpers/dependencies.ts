@@ -1,7 +1,4 @@
-import fs, { createWriteStream } from "node:fs";
-import path from "node:path";
-import { pipeline } from "node:stream";
-import { promisify } from "node:util";
+import { LogLevel, Logging } from "../utils/logging";
 import {
   addHours,
   formatDistanceToNow,
@@ -10,10 +7,6 @@ import {
   intervalToDuration,
   isBefore,
 } from "date-fns";
-import fetch from "node-fetch";
-import unzpier from "unzipper";
-import { z } from "zod";
-
 import {
   exec,
   getArch,
@@ -22,8 +15,15 @@ import {
   getResourcesFolderPath,
   parseJSONObject,
 } from "../utils";
-import { Logging, LogLevel } from "../utils/logging";
+import fs, { createWriteStream } from "node:fs";
+
 import { ConfigFile } from "./config-file";
+import fetch from "node-fetch";
+import path from "node:path";
+import { pipeline } from "node:stream";
+import { promisify } from "node:util";
+import unzpier from "unzipper";
+import { z } from "zod";
 
 const streamPipeline = promisify(pipeline);
 
@@ -253,6 +253,37 @@ export abstract class Dependencies {
 
     if (!fs.existsSync(cli)) {
       throw new Error(`${cli} file not found!`);
+    }
+  }
+
+  static async reportError(
+    error: Error,
+    origin: string,
+    versionString: string,
+  ) {
+    const url = "https://api.wakatime.com/api/v1/errors/javascript";
+    const apiKey = ConfigFile.getSetting("settings", "api_key");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "User-Agent": `desktop-wakatime ${versionString}`,
+    };
+    if (apiKey) {
+      headers["Authorization"] = `Basic ${apiKey}`;
+    }
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        browser_url: `desktop-wakatime://${versionString}`,
+        script_url: origin,
+        message: error.message,
+        traceback: error.stack,
+        line: (error as unknown as { lineNumber: number }).lineNumber,
+        column: (error as unknown as { columnNumber: number }).columnNumber,
+      }),
+    });
+    if (!resp.ok) {
+      console.log(await resp.text());
     }
   }
 }
