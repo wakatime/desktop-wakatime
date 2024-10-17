@@ -31,6 +31,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "electron-store": "^10.0.0",
+    "electron-updater": "^6.3.9",
     "globals": "^15.9.0",
     "icon-promise": "^1.1.1",
     "iconutil": "^1.0.2",
@@ -43,7 +44,6 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "unzipper": "^0.12.3",
-    "update-electron-app": "^3.0.0",
     "usehooks-ts": "^3.1.0",
     "winreg": "^1.2.5",
     "zod": "^3.23.8"
