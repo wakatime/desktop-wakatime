@@ -37,19 +37,9 @@ export class Wakatime {
 
     if (PropertiesManager.autoUpdateEnabled) {
       autoUpdater.checkForUpdatesAndNotify();
-      /*
       autoUpdater.on("update-available", () => {
         console.log("Update available");
       });
-
-      autoUpdater.on("update-downloaded", () => {
-        autoUpdater.quitAndInstall();
-      });
-
-      app.on("ready", () => {
-        autoUpdater.checkForUpdatesAndNotify();
-      });
-      */
     }
 
     if (PropertiesManager.shouldLogToFile) {
