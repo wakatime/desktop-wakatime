@@ -56,7 +56,7 @@ jobs:
           branching_model: "trunk-based"
           prefix: v
           main_branch_name: main
-      - 
+      -
         name: Create tag
         uses: actions/github-script@v7
         with:
@@ -85,7 +85,7 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v4
-      - 
+      -
         name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -132,7 +132,7 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v4
-      - 
+      -
         name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows
-          path: release/wakatime-windows-*.exe
+          path: release/wakatime-win32-*.exe
       -
         name: Remove tag if failure
         if: ${{ failure() }}
