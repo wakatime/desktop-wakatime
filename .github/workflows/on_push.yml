@@ -110,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-linux
-          path: release/wakatime-linux-*.AppImage
+          path: release/*
       -
         name: Remove tag if failure
         if: ${{ failure() }}
@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows
-          path: release/wakatime-win32-*.exe
+          path: release/*
       -
         name: Remove tag if failure
         if: ${{ failure() }}
