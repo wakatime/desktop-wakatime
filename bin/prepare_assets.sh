@@ -7,28 +7,9 @@ if ! [ -d "./release" ]; then
     mkdir ./release
 fi
 
-# ensure zip is installed
-if [ "$(which zip)" = "" ]; then
-    apt-get update && apt-get install -y zip
-fi
-
 # add execution permission
-chmod 750 ./release/wakatime-linux-x86_64.AppImage
-chmod 750 ./release/wakatime-linux-arm64.AppImage
-chmod 750 ./release/wakatime-win32-x64.exe
-chmod 750 ./release/wakatime-win32-arm64.exe
-
-# create archives
-zip -j ./release/wakatime-linux-x86_64.zip ./release/wakatime-linux-x86_64.AppImage
-zip -j ./release/wakatime-linux-arm64.zip ./release/wakatime-linux-arm64.AppImage
-zip -j ./release/wakatime-win32-x64.zip ./release/wakatime-win32-x64.exe
-zip -j ./release/wakatime-win32-arm64.zip ./release/wakatime-win32-arm64.exe
-
-# remove executables
-rm ./release/wakatime-linux-x86_64.AppImage
-rm ./release/wakatime-linux-arm64.AppImage
-rm ./release/wakatime-win32-x64.exe
-rm ./release/wakatime-win32-arm64.exe
+chmod 750 ./release/*.AppImage
+chmod 750 ./release/*.exe
 
 # calculate checksums
 for file in  ./release/*; do
