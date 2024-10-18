@@ -1,13 +1,13 @@
-import { LogLevel, Logging } from "../utils/logging";
-
-import type { AppData } from "../utils/validators";
-import { appDataSchema } from "../utils/validators";
-import { excludeAppsList } from "../watchers/apps";
 import fs from "node:fs";
-import { getApps } from "./installed-apps";
-import { getWakatimeAppDataFolderPath } from "../utils";
 import path from "node:path";
 import { z } from "zod";
+
+import type { AppData } from "../utils/validators";
+import { getWakatimeAppDataFolderPath } from "../utils";
+import { Logging, LogLevel } from "../utils/logging";
+import { appDataSchema } from "../utils/validators";
+import { excludeAppsList } from "../watchers/apps";
+import { getApps } from "./installed-apps";
 
 const wakatimeAppsSchema = z.object({
   installedApps: z.array(appDataSchema),
@@ -72,8 +72,12 @@ export class AppsManager {
 
   async loadApps() {
     const { installedApps, extraApps } = this.getCachedApps();
-    this.installedApps = installedApps;
-    this.extraApps = validateExtraApps(extraApps);
+    this.installedApps = installedApps.filter(
+      (app) => !AppsManager.isExcludedApp(app),
+    );
+    this.extraApps = validateExtraApps(extraApps).filter(
+      (app) => !AppsManager.isExcludedApp(app),
+    );
     this.installedApps = await getApps();
     this.saveCache();
     return [...this.installedApps, ...this.extraApps];

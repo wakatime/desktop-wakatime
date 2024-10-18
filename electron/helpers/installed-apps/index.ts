@@ -1,4 +1,5 @@
 import { AppData } from "../../utils/validators";
+import { AppsManager } from "../apps-manager";
 import { getInstalledApps as getInstalledAppsMac } from "./mac";
 import { getInstalledApps as getInstalledAppsWindows } from "./windows";
 
@@ -11,5 +12,5 @@ export async function getApps(): Promise<AppData[]> {
     apps = await getInstalledAppsMac();
   }
 
-  return apps;
+  return apps.filter((app) => !AppsManager.isExcludedApp(app));
 }

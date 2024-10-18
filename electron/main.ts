@@ -48,14 +48,18 @@ autoUpdater.autoInstallOnAppQuit = true;
 autoUpdater.autoRunAppAfterInstall = false;
 
 autoUpdater.on("checking-for-update", () => {
-  "Checking for update";
+  Logging.instance().log("Checking for update");
 });
-autoUpdater.on("update-available", async () => {
-  Logging.instance().log("Update available");
+autoUpdater.on("update-available", async (res) => {
+  Logging.instance().log(
+    `Update available. Version: ${res.version}, Files: ${res.files.map((file) => file.url).join(", ")}`,
+  );
   await autoUpdater.downloadUpdate();
 });
-autoUpdater.on("update-downloaded", () => {
-  Logging.instance().log("Update Downloaded");
+autoUpdater.on("update-downloaded", (res) => {
+  Logging.instance().log(
+    `Update Downloaded. Downloaded file: ${res.downloadedFile}, Version: ${res.version}, `,
+  );
 });
 autoUpdater.on("update-not-available", () => {
   Logging.instance().log("Update not available");
