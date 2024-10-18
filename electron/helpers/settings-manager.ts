@@ -1,4 +1,5 @@
 import { app } from "electron";
+import isDev from "electron-is-dev";
 
 import { Logging, LogLevel } from "../utils/logging";
 import { PropertiesManager } from "./properties-manager";
@@ -19,6 +20,9 @@ export abstract class SettingsManager {
 
   static registerAsLogInItem() {
     PropertiesManager.shouldLaunchOnLogin = true;
+    if (isDev) {
+      return;
+    }
     try {
       app.setLoginItemSettings({ openAtLogin: true });
       Logging.instance().log("Registered as login item");
@@ -32,6 +36,9 @@ export abstract class SettingsManager {
 
   static unregisterAsLogInItem() {
     PropertiesManager.shouldLaunchOnLogin = false;
+    if (isDev) {
+      return;
+    }
     try {
       app.setLoginItemSettings({ openAtLogin: false });
       Logging.instance().log("Unregistered as login item");

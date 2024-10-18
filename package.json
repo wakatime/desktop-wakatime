@@ -30,6 +30,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "electron-is-dev": "^3.0.1",
     "electron-store": "^10.0.0",
     "electron-updater": "^6.3.9",
     "globals": "^15.9.0",

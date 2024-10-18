@@ -9,6 +9,7 @@ import {
   shell,
   Tray,
 } from "electron";
+import { autoUpdater } from "electron-updater";
 
 import type { DomainPreferenceType, FilterType } from "./utils/constants";
 import { AppsManager } from "./helpers/apps-manager";
@@ -41,6 +42,30 @@ process.env.ELECTRON_DIR = app.isPackaged
   : path.join(__dirname, "../electron");
 
 const isMacOS = process.platform === "darwin";
+
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.autoRunAppAfterInstall = false;
+
+autoUpdater.on("checking-for-update", () => {
+  "Checking for update";
+});
+autoUpdater.on("update-available", async () => {
+  Logging.instance().log("Update available");
+  await autoUpdater.downloadUpdate();
+});
+autoUpdater.on("update-downloaded", () => {
+  Logging.instance().log("Update Downloaded");
+});
+autoUpdater.on("update-not-available", () => {
+  Logging.instance().log("Update not available");
+});
+autoUpdater.on("update-cancelled", () => {
+  Logging.instance().log("Update cancelled");
+});
+autoUpdater.on("error", (err) => {
+  Logging.instance().log(`electron-updater error. Error: ${err.message}`);
+});
 
 let settingsWindow: BrowserWindow | null = null;
 let monitoredAppsWindow: BrowserWindow | null = null;
@@ -335,6 +360,9 @@ ipcMain.on(IpcKeys.autoUpdateEnabled, (event) => {
 });
 ipcMain.on(IpcKeys.setAutoUpdateEnabled, (_, value) => {
   PropertiesManager.autoUpdateEnabled = value;
+  if (value) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 });
 
 ipcMain.on(IpcKeys.shouldLogToFile, (event) => {

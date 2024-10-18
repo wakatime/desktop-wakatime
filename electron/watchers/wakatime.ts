@@ -1,18 +1,19 @@
-import type { Category, EntityType } from "../utils/types";
-import { LogLevel, Logging } from "../utils/logging";
-import { Notification, Tray, app, shell } from "electron";
-import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { WindowInfo } from "@miniben90/x-win";
+import { app, Notification, shell, Tray } from "electron";
+import isDev from "electron-is-dev";
+import { autoUpdater } from "electron-updater";
 
+import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
 import { AppsManager } from "../helpers/apps-manager";
 import { ConfigFile } from "../helpers/config-file";
-import { DeepLink } from "../utils/constants";
 import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
-import { WindowInfo } from "@miniben90/x-win";
-import { autoUpdater } from "electron-updater";
+import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { DeepLink } from "../utils/constants";
+import { Logging, LogLevel } from "../utils/logging";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -35,24 +36,23 @@ export class Wakatime {
   init(tray: Tray | null) {
     this.tray = tray;
 
-    if (PropertiesManager.autoUpdateEnabled) {
-      autoUpdater.checkForUpdatesAndNotify();
-      autoUpdater.on("update-available", () => {
-        console.log("Update available");
-      });
-    }
-
     if (PropertiesManager.shouldLogToFile) {
       Logging.instance().activateLoggingToFile();
     }
 
     Logging.instance().log("Starting WakaTime");
 
+    if (PropertiesManager.autoUpdateEnabled && !isDev) {
+      Logging.instance().log("Auto Update Enabled");
+      autoUpdater.checkForUpdatesAndNotify();
+    }
+
     if (SettingsManager.shouldRegisterAsLogInItem()) {
       SettingsManager.registerAsLogInItem();
     }
 
     Dependencies.installDependencies();
+
     AppsManager.instance()
       .loadApps()
       .then((apps) => {
