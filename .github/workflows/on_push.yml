@@ -159,7 +159,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows
-          path: release/*
           path: |
             release/*.exe
             release/latest*.yml
