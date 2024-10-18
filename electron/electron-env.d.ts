@@ -44,6 +44,7 @@ interface Window {
       monitor: boolean,
     ) => void;
     getAppVersion: () => string;
+    getPlatform: () => NodeJS.Platform;
     getAllApps: () => import("./utils/validators").AppData[];
     getOpenApps: () => Promise<import("./utils/validators").AppData[]>;
     getAllAvailableApps: () => Promise<import("./utils/validators").AppData[]>;

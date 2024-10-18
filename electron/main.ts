@@ -351,6 +351,10 @@ ipcMain.on(IpcKeys.getAppVersion, (event) => {
   event.returnValue = app.getVersion();
 });
 
+ipcMain.on(IpcKeys.getPlatform, (event) => {
+  event.returnValue = process.platform;
+});
+
 ipcMain.on(IpcKeys.isMonitored, (event, path) => {
   event.returnValue = MonitoringManager.isMonitored(path);
 });

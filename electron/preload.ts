@@ -55,6 +55,9 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   getAppVersion() {
     return ipcRenderer.sendSync(IpcKeys.getAppVersion);
   },
+  getPlatform() {
+    return ipcRenderer.sendSync(IpcKeys.getPlatform);
+  },
   autoUpdateEnabled() {
     return ipcRenderer.sendSync(IpcKeys.autoUpdateEnabled);
   },
