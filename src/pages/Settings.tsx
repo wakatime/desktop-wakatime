@@ -50,6 +50,7 @@ export function SettingsPage() {
     () => window.ipcRenderer?.sendSync(IpcKeys.getAllowlist) as string,
   );
   const [appVersion] = useState(() => window.ipcRenderer?.getAppVersion());
+  const [platform] = useState(() => window.ipcRenderer?.getPlatform());
 
   const debouncedSetApiKey = useDebounceCallback((apiKey: string) => {
     window.ipcRenderer?.setSetting("settings", "api_key", apiKey);
@@ -139,7 +140,8 @@ export function SettingsPage() {
             className="mt-1"
           />
           <Label htmlFor="code-time-in-status-bar" className="my-0.5 leading-5">
-            Show code time in status bar
+            Show code time in{" "}
+            {platform === "darwin" ? "status bar" : "system tray icon hover"}
           </Label>
         </fieldset>
 

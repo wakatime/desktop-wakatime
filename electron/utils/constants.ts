@@ -2,6 +2,7 @@ export const IpcKeys = {
   getAllApps: "get_all_apps",
   getAllAvailableApps: "get_all_available_apps",
   getAppVersion: "get_app_version",
+  getPlatform: "get_platform",
   getSetting: "get_setting",
   setSetting: "set_setting",
   isMonitored: "is_monitored",

@@ -198,13 +198,16 @@ export class Wakatime {
 
   public async fetchToday() {
     if (!PropertiesManager.showCodeTimeInStatusBar) {
+      // tray.setTitle is only available on darwin/macOS
       this.tray?.setTitle("");
+      this.tray?.setToolTip("Wakatime");
       return;
     }
 
     const time = Date.now() / 1000;
     if (this.lastCodeTimeFetched + 120 > time) {
       this.tray?.setTitle(` ${this.lastCodeTimeText}`);
+      this.tray?.setToolTip(` ${this.lastCodeTimeText}`);
       return;
     }
 
@@ -232,6 +235,7 @@ export class Wakatime {
       }
       this.lastCodeTimeText = output;
       this.tray?.setTitle(` ${output}`);
+      this.tray?.setToolTip(` ${output}`);
     } catch (error) {
       Logging.instance().log(
         `Failed to fetch code time: ${error}`,

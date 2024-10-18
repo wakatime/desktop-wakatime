@@ -17,6 +17,10 @@ export function MonitoredAppsPage() {
     },
   });
 
+  useEffect(() => {
+    window.document.title = "Monitored Apps";
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col">
       {appsQuery.isPending ? (
