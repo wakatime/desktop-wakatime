@@ -61,7 +61,6 @@ autoUpdater.on("update-downloaded", (res) => {
     `Update Downloaded. Downloaded file: ${res.downloadedFile}, Version: ${res.version}, `,
   );
   autoUpdater.quitAndInstall();
-  app.relaunch();
 });
 autoUpdater.on("update-not-available", () => {
   Logging.instance().log("Update not available");
