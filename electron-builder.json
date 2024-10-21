@@ -23,18 +23,7 @@
       {
         "target": "nsis",
         "arch": [
-          "x64"
-        ]
-      },
-      {
-        "target": "nsis",
-        "arch": [
-          "ia32"
-        ]
-      },
-      {
-        "target": "nsis",
-        "arch": [
+          "x64",
           "arm64"
         ]
       }
@@ -44,9 +33,8 @@
   },
   "nsis": {
     "oneClick": false,
-    "perMachine": false,
+    "perMachine": true,
     "allowToChangeInstallationDirectory": true,
-    "createStartMenuShortcut": true,
     "deleteAppDataOnUninstall": false
   },
   "linux": {
