@@ -43,9 +43,9 @@ process.env.ELECTRON_DIR = app.isPackaged
 
 const isMacOS = process.platform === "darwin";
 
-autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
-autoUpdater.autoRunAppAfterInstall = false;
+autoUpdater.autoRunAppAfterInstall = true;
 
 autoUpdater.on("checking-for-update", () => {
   Logging.instance().log("Checking for update");
@@ -60,6 +60,7 @@ autoUpdater.on("update-downloaded", (res) => {
   Logging.instance().log(
     `Update Downloaded. Downloaded file: ${res.downloadedFile}, Version: ${res.version}, `,
   );
+  autoUpdater.quitAndInstall();
 });
 autoUpdater.on("update-not-available", () => {
   Logging.instance().log("Update not available");
