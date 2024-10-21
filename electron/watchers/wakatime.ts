@@ -23,6 +23,7 @@ export class Wakatime {
   private lastCategory: Category = "coding";
   private tray?: Tray | null;
   private versionString: string;
+  private lastCheckedForUpdates: number = 0;
 
   constructor() {
     const version = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
@@ -40,16 +41,13 @@ export class Wakatime {
       Logging.instance().activateLoggingToFile();
     }
 
-    Logging.instance().log("Starting WakaTime");
-
-    if (PropertiesManager.autoUpdateEnabled && !isDev) {
-      Logging.instance().log("Auto Update Enabled");
-      autoUpdater.checkForUpdatesAndNotify();
-    }
+    Logging.instance().log(`Starting WakaTime v${app.getVersion()}`);
 
     if (SettingsManager.shouldRegisterAsLogInItem()) {
       SettingsManager.registerAsLogInItem();
     }
+
+    this.checkForUpdates();
 
     Dependencies.installDependencies();
 
@@ -194,6 +192,7 @@ export class Wakatime {
     }
 
     await this.fetchToday();
+    this.checkForUpdates();
   }
 
   public async fetchToday() {
@@ -242,6 +241,13 @@ export class Wakatime {
         LogLevel.ERROR,
       );
     }
+  }
+
+  public async checkForUpdates() {
+    if (!PropertiesManager.autoUpdateEnabled || isDev) return;
+    if (this.lastCheckedForUpdates + 600 * 1000 > Date.now()) return;
+
+    autoUpdater.checkForUpdatesAndNotify();
   }
 
   pluginString(appData?: AppData, windowInfo?: WindowInfo) {
