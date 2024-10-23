@@ -56,7 +56,7 @@ jobs:
           branching_model: "trunk-based"
           prefix: v
           main_branch_name: main
-          major_regex: "^major/.+"
+          major_pattern: "(?i)^(.+:)?(major/.+)"
       -
         name: Create tag
         uses: actions/github-script@v7
