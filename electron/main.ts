@@ -43,6 +43,11 @@ process.env.ELECTRON_DIR = app.isPackaged
 
 const isMacOS = process.platform === "darwin";
 
+autoUpdater.setFeedURL({
+  provider: "github",
+  owner: "wakatime",
+  repo: "desktop-wakatime",
+});
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 autoUpdater.autoRunAppAfterInstall = true;
