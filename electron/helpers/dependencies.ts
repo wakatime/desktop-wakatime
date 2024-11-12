@@ -261,29 +261,37 @@ export abstract class Dependencies {
     origin: string,
     versionString: string,
   ) {
-    const url = "https://api.wakatime.com/api/v1/errors/javascript";
-    const apiKey = ConfigFile.getSetting("settings", "api_key");
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "User-Agent": `desktop-wakatime ${versionString}`,
-    };
-    if (apiKey) {
-      headers["Authorization"] = `Basic ${apiKey}`;
-    }
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({
-        browser_url: `desktop-wakatime://${versionString}`,
-        script_url: origin,
-        message: error.message,
-        traceback: error.stack,
-        line: (error as unknown as { lineNumber: number }).lineNumber,
-        column: (error as unknown as { columnNumber: number }).columnNumber,
-      }),
-    });
-    if (!resp.ok) {
-      Logging.instance().log(await resp.text(), LogLevel.WARN);
+    try {
+      const url = "https://api.wakatime.com/api/v1/errors/javascript";
+      const apiKey = ConfigFile.getSetting("settings", "api_key");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "User-Agent": `desktop-wakatime ${versionString}`,
+      };
+      if (apiKey) {
+        headers["Authorization"] = `Basic ${apiKey}`;
+      }
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+          browser_url: `desktop-wakatime://${versionString}`,
+          script_url: origin,
+          message: error.message,
+          traceback: error.stack,
+          line: (error as unknown as { lineNumber: number }).lineNumber,
+          column: (error as unknown as { columnNumber: number }).columnNumber,
+        }),
+      });
+      if (!resp.ok) {
+        Logging.instance().log(await resp.text(), LogLevel.WARN);
+      }
+    } catch (err) {
+      Logging.instance().log(
+        `reportError failed: ${err}`,
+        LogLevel.ERROR,
+        true,
+      );
     }
   }
 }
