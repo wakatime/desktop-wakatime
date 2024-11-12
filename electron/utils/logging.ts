@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { format } from "date-fns";
 import { app } from "electron";
-import { Dependencies } from "electron/helpers/dependencies";
 
 import { getResourcesFolderPath } from ".";
+import { Dependencies } from "../../electron/helpers/dependencies";
 
 export enum LogLevel {
   DEBUG = 0,
