@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { format } from "date-fns";
+import { app } from "electron";
+import { Dependencies } from "electron/helpers/dependencies";
 
 import { getResourcesFolderPath } from ".";
 
@@ -44,7 +46,7 @@ export class Logging {
     this.filePath = null;
   }
 
-  public log(msg: string, level = LogLevel.DEBUG) {
+  public log(msg: string, level = LogLevel.DEBUG, skipDiagnostics = false) {
     if (level < this.level) {
       return;
     }
@@ -65,6 +67,18 @@ export class Logging {
         });
       } else {
         fs.writeFileSync(this.filePath, logMessage, { encoding: "utf-8" });
+      }
+    }
+
+    if (!skipDiagnostics && level == LogLevel.ERROR) {
+      try {
+        throw new Error(msg);
+      } catch (e) {
+        void Dependencies.reportError(
+          e as Error,
+          "console.error",
+          app.getVersion(),
+        );
       }
     }
   }

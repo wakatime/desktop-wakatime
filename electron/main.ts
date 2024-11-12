@@ -19,7 +19,7 @@ import { PropertiesManager } from "./helpers/properties-manager";
 import { SettingsManager } from "./helpers/settings-manager";
 import { getLogFilePath } from "./utils";
 import { DeepLink, IpcKeys, WAKATIME_PROTOCALL } from "./utils/constants";
-import { Logging } from "./utils/logging";
+import { Logging, LogLevel } from "./utils/logging";
 import { AppData } from "./utils/validators";
 import { Wakatime } from "./watchers/wakatime";
 import { Watcher } from "./watchers/watcher";
@@ -226,10 +226,22 @@ function createTray() {
   ]);
   tray.setToolTip("WakaTime");
   tray.setContextMenu(contextMenu);
-  tray.addListener("click", () => {
-    tray?.popUpContextMenu();
-    wakatime?.fetchToday();
-  });
+
+  const handleClick = () => {
+    if (!tray) {
+      Logging.instance().log("Tray is not initialized", LogLevel.ERROR);
+      return;
+    }
+    try {
+      tray.popUpContextMenu();
+      wakatime?.fetchToday();
+    } catch (error) {
+      Logging.instance().log(`Tray click error: ${error}`);
+    }
+  };
+  tray.addListener("click", handleClick);
+  tray.addListener("right-click", handleClick);
+  tray.addListener("double-click", handleClick);
 }
 
 // Hide app from macOS doc
