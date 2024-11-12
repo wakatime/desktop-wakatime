@@ -28,9 +28,9 @@ export class Wakatime {
   constructor() {
     const version = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
     this.versionString = version;
-    process.on("uncaughtException", function (error, origin) {
-      void Dependencies.reportError(error, origin, version);
-      console.log(error);
+    process.on("uncaughtException", async function (error, origin) {
+      await Dependencies.reportError(error, origin, version);
+      Logging.instance().log(error.toString(), LogLevel.ERROR, true);
     });
   }
 
