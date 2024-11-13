@@ -1,13 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
-import { z } from "zod";
+import { LogLevel, Logging } from "../utils/logging";
 
 import type { AppData } from "../utils/validators";
-import { getWakatimeAppDataFolderPath } from "../utils";
-import { Logging, LogLevel } from "../utils/logging";
 import { appDataSchema } from "../utils/validators";
 import { excludeAppsList } from "../watchers/apps";
+import fs from "node:fs";
 import { getApps } from "./installed-apps";
+import { getWakatimeAppDataFolderPath } from "../utils";
+import path from "node:path";
+import { z } from "zod";
 
 const wakatimeAppsSchema = z.object({
   installedApps: z.array(appDataSchema),

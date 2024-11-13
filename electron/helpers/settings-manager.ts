@@ -1,8 +1,8 @@
+import { LogLevel, Logging } from "../utils/logging";
+
+import { PropertiesManager } from "./properties-manager";
 import { app } from "electron";
 import isDev from "electron-is-dev";
-
-import { Logging, LogLevel } from "../utils/logging";
-import { PropertiesManager } from "./properties-manager";
 
 export abstract class SettingsManager {
   static logInItemRegistered() {
@@ -30,6 +30,7 @@ export abstract class SettingsManager {
       Logging.instance().log(
         `Failed to register as login item. Error: ${error}`,
         LogLevel.ERROR,
+        true,
       );
     }
   }
@@ -46,6 +47,7 @@ export abstract class SettingsManager {
       Logging.instance().log(
         `Failed to unregister as login item. Error: ${error}`,
         LogLevel.ERROR,
+        true,
       );
     }
   }

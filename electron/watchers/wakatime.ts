@@ -1,19 +1,19 @@
-import { WindowInfo } from "@miniben90/x-win";
-import { app, Notification, shell, Tray } from "electron";
-import isDev from "electron-is-dev";
-import { autoUpdater } from "electron-updater";
-
 import type { Category, EntityType } from "../utils/types";
+import { LogLevel, Logging } from "../utils/logging";
+import { Notification, Tray, app, shell } from "electron";
+import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+
 import type { AppData } from "../utils/validators";
 import { AppsManager } from "../helpers/apps-manager";
 import { ConfigFile } from "../helpers/config-file";
+import { DeepLink } from "../utils/constants";
 import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
-import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
-import { DeepLink } from "../utils/constants";
-import { Logging, LogLevel } from "../utils/logging";
+import { WindowInfo } from "@miniben90/x-win";
+import { autoUpdater } from "electron-updater";
+import isDev from "electron-is-dev";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -30,7 +30,7 @@ export class Wakatime {
     this.versionString = version;
     process.on("uncaughtException", async function (error, origin) {
       await Dependencies.reportError(error, origin, version);
-      Logging.instance().log(error.toString(), LogLevel.ERROR, true);
+      Logging.instance().log(error.toString(), LogLevel.ERROR);
     });
   }
 
@@ -188,7 +188,10 @@ export class Wakatime {
         );
       }
     } catch (error) {
-      Logging.instance().log(`Failed to send heartbeat: ${error}`);
+      Logging.instance().log(
+        `Failed to send heartbeat: ${error}`,
+        LogLevel.ERROR,
+      );
     }
 
     await this.fetchToday();

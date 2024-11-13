@@ -1,7 +1,4 @@
-import fs, { createWriteStream } from "node:fs";
-import path from "node:path";
-import { pipeline } from "node:stream";
-import { promisify } from "node:util";
+import { LogLevel, Logging } from "../utils/logging";
 import {
   addHours,
   formatDistanceToNow,
@@ -10,10 +7,6 @@ import {
   intervalToDuration,
   isBefore,
 } from "date-fns";
-import fetch from "node-fetch";
-import unzpier from "unzipper";
-import { z } from "zod";
-
 import {
   exec,
   getArch,
@@ -22,8 +15,15 @@ import {
   getResourcesFolderPath,
   parseJSONObject,
 } from "../utils";
-import { Logging, LogLevel } from "../utils/logging";
+import fs, { createWriteStream } from "node:fs";
+
 import { ConfigFile } from "./config-file";
+import fetch from "node-fetch";
+import path from "node:path";
+import { pipeline } from "node:stream";
+import { promisify } from "node:util";
+import unzpier from "unzipper";
+import { z } from "zod";
 
 const streamPipeline = promisify(pipeline);
 
@@ -45,6 +45,7 @@ export abstract class Dependencies {
         Logging.instance().log(
           `Failed to install dependencies: ${error}`,
           LogLevel.ERROR,
+          true,
         );
       }
     })();
@@ -129,6 +130,7 @@ export abstract class Dependencies {
         Logging.instance().log(
           `Failed to parse latest release: ${release.error}`,
           LogLevel.ERROR,
+          true,
         );
         return null;
       }
@@ -215,6 +217,7 @@ export abstract class Dependencies {
         Logging.instance().log(
           `Failed to remove file: ${zipFile}. Error: ${error}`,
           LogLevel.ERROR,
+          true,
         );
       }
     }
@@ -287,11 +290,7 @@ export abstract class Dependencies {
         Logging.instance().log(await resp.text(), LogLevel.WARN);
       }
     } catch (err) {
-      Logging.instance().log(
-        `reportError failed: ${err}`,
-        LogLevel.ERROR,
-        true,
-      );
+      Logging.instance().log(`reportError failed: ${err}`, LogLevel.ERROR);
     }
   }
 }

@@ -1,10 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import { format } from "date-fns";
-import { app } from "electron";
-
-import { getResourcesFolderPath } from ".";
 import { Dependencies } from "../../electron/helpers/dependencies";
+import { app } from "electron";
+import { format } from "date-fns";
+import fs from "node:fs";
+import { getResourcesFolderPath } from ".";
+import path from "node:path";
 
 export enum LogLevel {
   DEBUG = 0,
@@ -46,7 +45,7 @@ export class Logging {
     this.filePath = null;
   }
 
-  public log(msg: string, level = LogLevel.DEBUG, skipDiagnostics = false) {
+  public log(msg: string, level = LogLevel.DEBUG, sendDiagnostics = false) {
     if (level < this.level) {
       return;
     }
@@ -70,7 +69,7 @@ export class Logging {
       }
     }
 
-    if (!skipDiagnostics && level == LogLevel.ERROR) {
+    if (sendDiagnostics && level == LogLevel.ERROR) {
       try {
         throw new Error(msg);
       } catch (e) {
