@@ -229,7 +229,7 @@ function createTray() {
 
   const handleClick = () => {
     if (!tray) {
-      Logging.instance().log("Tray is not initialized", LogLevel.ERROR);
+      Logging.instance().log("Tray is not initialized", LogLevel.ERROR, true);
       return;
     }
     try {
