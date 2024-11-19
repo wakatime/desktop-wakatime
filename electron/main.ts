@@ -9,7 +9,6 @@ import {
   shell,
   Tray,
 } from "electron";
-import { autoUpdater } from "electron-updater";
 
 import type { DomainPreferenceType, FilterType } from "./utils/constants";
 import { AppsManager } from "./helpers/apps-manager";
@@ -42,40 +41,6 @@ process.env.ELECTRON_DIR = app.isPackaged
   : path.join(__dirname, "../electron");
 
 const isMacOS = process.platform === "darwin";
-
-autoUpdater.setFeedURL({
-  provider: "github",
-  owner: "wakatime",
-  repo: "desktop-wakatime",
-});
-autoUpdater.autoDownload = true;
-autoUpdater.autoInstallOnAppQuit = true;
-autoUpdater.autoRunAppAfterInstall = true;
-
-autoUpdater.on("checking-for-update", () => {
-  Logging.instance().log("Checking for update");
-});
-autoUpdater.on("update-available", async (res) => {
-  Logging.instance().log(
-    `Update available. Version: ${res.version}, Files: ${res.files.map((file) => file.url).join(", ")}`,
-  );
-  await autoUpdater.downloadUpdate();
-});
-autoUpdater.on("update-downloaded", (res) => {
-  Logging.instance().log(
-    `Update Downloaded. Downloaded file: ${res.downloadedFile}, Version: ${res.version}, `,
-  );
-  autoUpdater.quitAndInstall();
-});
-autoUpdater.on("update-not-available", () => {
-  Logging.instance().log("Update not available");
-});
-autoUpdater.on("update-cancelled", () => {
-  Logging.instance().log("Update cancelled");
-});
-autoUpdater.on("error", (err) => {
-  Logging.instance().log(`electron-updater error. Error: ${err.message}`);
-});
 
 let settingsWindow: BrowserWindow | null = null;
 let monitoredAppsWindow: BrowserWindow | null = null;
@@ -387,7 +352,7 @@ ipcMain.on(IpcKeys.autoUpdateEnabled, (event) => {
 ipcMain.on(IpcKeys.setAutoUpdateEnabled, (_, value) => {
   PropertiesManager.autoUpdateEnabled = value;
   if (value) {
-    autoUpdater.checkForUpdatesAndNotify();
+    wakatime?.checkForUpdates();
   }
 });
 

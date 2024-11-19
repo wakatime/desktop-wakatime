@@ -1,19 +1,19 @@
-import type { Category, EntityType } from "../utils/types";
-import { LogLevel, Logging } from "../utils/logging";
-import { Notification, Tray, app, shell } from "electron";
-import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { WindowInfo } from "@miniben90/x-win";
+import { app, Notification, shell, Tray } from "electron";
+import isDev from "electron-is-dev";
+import { autoUpdater } from "electron-updater";
 
+import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
 import { AppsManager } from "../helpers/apps-manager";
 import { ConfigFile } from "../helpers/config-file";
-import { DeepLink } from "../utils/constants";
 import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
 import { PropertiesManager } from "../helpers/properties-manager";
 import { SettingsManager } from "../helpers/settings-manager";
-import { WindowInfo } from "@miniben90/x-win";
-import { autoUpdater } from "electron-updater";
-import isDev from "electron-is-dev";
+import { exec, getCLIPath, getDeepLinkUrl, getPlatfrom } from "../utils";
+import { DeepLink } from "../utils/constants";
+import { Logging, LogLevel } from "../utils/logging";
 
 export class Wakatime {
   private lastEntitiy = "";
@@ -24,6 +24,8 @@ export class Wakatime {
   private tray?: Tray | null;
   private versionString: string;
   private lastCheckedForUpdates: number = 0;
+  private lastPromptedToUpdateAt: number = 0;
+  private lastPromptedToUpdateVersion: string = "";
 
   constructor() {
     const version = `${getPlatfrom()}-wakatime/${app.getVersion()}`;
@@ -47,6 +49,7 @@ export class Wakatime {
       SettingsManager.registerAsLogInItem();
     }
 
+    this.setupAutoUpdater();
     this.checkForUpdates();
 
     Dependencies.installDependencies();
@@ -246,11 +249,69 @@ export class Wakatime {
     }
   }
 
+  public setupAutoUpdater() {
+    autoUpdater.setFeedURL({
+      provider: "github",
+      owner: "wakatime",
+      repo: "desktop-wakatime",
+    });
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoRunAppAfterInstall = true;
+
+    autoUpdater.on("checking-for-update", () => {
+      Logging.instance().log("Checking for update");
+    });
+    autoUpdater.on("update-available", async (res) => {
+      Logging.instance().log(
+        `Update available. Version: ${res.version}, Files: ${res.files.map((file) => file.url).join(", ")}`,
+      );
+      if (!this.canPromptToUpdate(res.version)) {
+        Logging.instance().log(
+          "Already prompted to update this version recently, will download again in a week.",
+        );
+        return;
+      }
+      await autoUpdater.downloadUpdate();
+    });
+    autoUpdater.on("update-downloaded", (res) => {
+      Logging.instance().log(
+        `Update Downloaded. Downloaded file: ${res.downloadedFile}, Version: ${res.version}, `,
+      );
+      if (!this.canPromptToUpdate(res.version)) {
+        Logging.instance().log(
+          "Already prompted to update this version recently, will ask again in a week.",
+        );
+        return;
+      }
+
+      this.lastPromptedToUpdateVersion = res.version;
+      this.lastPromptedToUpdateAt = Date.now();
+      autoUpdater.quitAndInstall();
+    });
+    autoUpdater.on("update-not-available", () => {
+      Logging.instance().log("Update not available");
+    });
+    autoUpdater.on("update-cancelled", () => {
+      Logging.instance().log("Update cancelled");
+    });
+    autoUpdater.on("error", (err) => {
+      Logging.instance().log(`electron-updater error. Error: ${err.message}`);
+    });
+  }
+
+  // Only prompt for same version once per week, or if app is restarted
+  private canPromptToUpdate(newVersion: string) {
+    if (this.lastPromptedToUpdateAt + 604800 * 1000 < Date.now()) return true;
+    if (this.lastPromptedToUpdateVersion !== newVersion) return true;
+    return false;
+  }
+
   public async checkForUpdates() {
     if (!PropertiesManager.autoUpdateEnabled || isDev) return;
     if (this.lastCheckedForUpdates + 600 * 1000 > Date.now()) return;
 
-    autoUpdater.checkForUpdatesAndNotify();
+    await autoUpdater.checkForUpdatesAndNotify();
   }
 
   pluginString(appData?: AppData, windowInfo?: WindowInfo) {
