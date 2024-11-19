@@ -33,9 +33,8 @@
     "icon": "./public/app-icon.ico"
   },
   "nsis": {
-    "oneClick": false,
-    "perMachine": true,
-    "allowToChangeInstallationDirectory": true,
+    "oneClick": true,
+    "perMachine": false,
     "deleteAppDataOnUninstall": false
   },
   "linux": {
