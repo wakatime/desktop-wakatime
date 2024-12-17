@@ -180,15 +180,18 @@ export class Wakatime {
     }
 
     const cli = getCLIPath();
-    Logging.instance().log(`Sending heartbeat: ${cli} ${args}`);
+    Logging.instance().log(`Sending heartbeat: ${cli} ${args}`, LogLevel.DEBUG);
 
     try {
-      const [, err] = await exec(cli, ...args);
+      const [output, err] = await exec(cli, ...args);
       if (err) {
         Logging.instance().log(
           `Error sending heartbeat: ${err}`,
           LogLevel.ERROR,
         );
+      }
+      if (output) {
+        Logging.instance().log(output);
       }
     } catch (error) {
       Logging.instance().log(
