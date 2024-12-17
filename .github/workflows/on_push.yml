@@ -217,7 +217,7 @@ jobs:
         run: ./bin/prepare_assets.sh
       -
         name: "Create release"
-        uses: softprops/action-gh-release@master
+        uses: softprops/action-gh-release@v2.1.0
         with:
           name: ${{ needs.version.outputs.semver_tag }}
           tag_name: ${{ needs.version.outputs.semver_tag }}
