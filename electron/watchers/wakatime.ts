@@ -195,6 +195,10 @@ export class Wakatime {
           LogLevel.ERROR,
           true,
         );
+        this.tray?.displayBalloon({
+          title: "WakaTime Error",
+          content: `Error when running wakatime-cli: ${err}`,
+        });
       }
       if (output) {
         Logging.instance().log(
@@ -251,13 +255,6 @@ export class Wakatime {
           LogLevel.ERROR,
         );
         return;
-      }
-      if (output) {
-        Logging.instance().log(
-          `Output from wakatime-cli when fetching code time: ${output}`,
-          LogLevel.ERROR,
-          true,
-        );
       }
       this.lastCodeTimeText = output;
       this.tray?.setTitle(` ${output}`);
