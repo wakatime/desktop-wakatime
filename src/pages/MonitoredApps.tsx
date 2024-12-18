@@ -46,9 +46,16 @@ export function MonitoredAppsPage() {
           return (
             <Fragment key={app.path}>
               <AppListItem app={app} />
-              {i < appsQuery.data.length - 1 && (
+              <div className="pl-[4rem]">
+                <hr className="h-px bg-border" />
+              </div>
+              {i === appsQuery.data.length - 1 && (
                 <div className="pl-[4rem]">
-                  <hr className="h-px bg-border" />
+                  <div className="mr-12 py-4 text-sm">
+                    Missing an app? Only running apps are detected.
+                    <br />
+                    Make sure your app is running before opening this window.
+                  </div>
                 </div>
               )}
             </Fragment>
