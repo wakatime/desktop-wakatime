@@ -356,6 +356,14 @@ ipcMain.on(IpcKeys.setAutoUpdateEnabled, (_, value) => {
   }
 });
 
+ipcMain.on(IpcKeys.setDebugMode, (_, value) => {
+  if (value) {
+    Logging.instance().enableDebugLogging();
+  } else {
+    Logging.instance().disableDebugLogging();
+  }
+});
+
 ipcMain.on(IpcKeys.shouldLogToFile, (event) => {
   event.returnValue = PropertiesManager.shouldLogToFile;
 });

@@ -13,6 +13,7 @@ export const IpcKeys = {
   setCodeTimeInStatusBar: "set_code_time_in_status_bar",
   shouldLogToFile: "should_log_to_file",
   setShouldLogToFile: "set_should_log_to_file",
+  setDebugMode: "set_debug_mode",
   shouldLaunchOnLogin: "should_launch_on_login",
   setShouldLaunchOnLogin: "set_should_launch_on_login",
   logFilePath: "log_file_path",

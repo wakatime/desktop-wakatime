@@ -1,9 +1,10 @@
-import { Dependencies } from "../../electron/helpers/dependencies";
-import { app } from "electron";
-import { format } from "date-fns";
 import fs from "node:fs";
-import { getResourcesFolderPath } from ".";
 import path from "node:path";
+import { format } from "date-fns";
+import { app } from "electron";
+
+import { getResourcesFolderPath } from ".";
+import { Dependencies } from "../../electron/helpers/dependencies";
 
 export enum LogLevel {
   DEBUG = 0,
@@ -14,7 +15,7 @@ export enum LogLevel {
 
 export class Logging {
   static _instacneCache?: Logging;
-  level = LogLevel.DEBUG;
+  level = LogLevel.INFO;
   filePath: string | null = null;
 
   static instance(): Logging {
@@ -31,6 +32,14 @@ export class Logging {
     if (level !== undefined) {
       this.level = level;
     }
+  }
+
+  enableDebugLogging(): void {
+    this.level = LogLevel.DEBUG;
+  }
+
+  disableDebugLogging(): void {
+    this.level = LogLevel.INFO;
   }
 
   activateLoggingToFile() {
