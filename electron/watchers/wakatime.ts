@@ -1,5 +1,6 @@
+import path from "path";
 import { WindowInfo } from "@miniben90/x-win";
-import { app, Notification, shell, Tray } from "electron";
+import { app, nativeImage, Notification, shell, Tray } from "electron";
 import isDev from "electron-is-dev";
 import { autoUpdater } from "electron-updater";
 
@@ -196,6 +197,9 @@ export class Wakatime {
           true,
         );
         this.tray?.displayBalloon({
+          icon: nativeImage.createFromPath(
+            path.join(process.env.VITE_PUBLIC!, "trayIconTemplate.png"),
+          ),
           title: "WakaTime Error",
           content: `Error when running wakatime-cli: ${err}`,
         });
