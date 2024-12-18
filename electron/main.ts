@@ -161,7 +161,7 @@ function openMonitoredApps() {
 
 function createTray() {
   const trayIcon = nativeImage.createFromPath(
-    path.join(process.env.VITE_PUBLIC!, "trayIconTemplate.png"),
+    path.join(process.env.VITE_PUBLIC!, "trayIcon.png"),
   );
   tray = new Tray(trayIcon);
   const contextMenu = Menu.buildFromTemplate([

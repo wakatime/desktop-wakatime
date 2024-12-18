@@ -198,11 +198,50 @@ export class Wakatime {
         );
         this.tray?.displayBalloon({
           icon: nativeImage.createFromPath(
-            path.join(process.env.VITE_PUBLIC!, "trayIconTemplate.png"),
+            path.join(process.env.VITE_PUBLIC!, "trayIcon.png"),
           ),
           title: "WakaTime Error",
           content: `Error when running wakatime-cli: ${err}`,
         });
+        if (`${err}`.includes("ENOENT")) {
+          this.tray?.setImage(
+            nativeImage.createFromPath(
+              path.join(process.env.VITE_PUBLIC!, "trayIconRed.png"),
+            ),
+          );
+          if (Notification.isSupported()) {
+            const notification = new Notification({
+              title: "WakaTime Error",
+              body: "Unable to execute WakaTime cli. Please make sure WakaTime is not being blocked by AV software.",
+              icon: nativeImage.createFromPath(
+                path.join(process.env.VITE_PUBLIC!, "trayIconRed.png"),
+              ),
+            });
+            notification.show();
+          }
+        } else if (`${err}`.includes("EPERM")) {
+          this.tray?.setImage(
+            nativeImage.createFromPath(
+              path.join(process.env.VITE_PUBLIC!, "trayIconRed.png"),
+            ),
+          );
+          if (Notification.isSupported()) {
+            const notification = new Notification({
+              title: "WakaTime Error",
+              body: "Microsoft Defender is blocking WakaTime. Please allow WakaTime to run so it can upload code stats to your dashboard.",
+              icon: nativeImage.createFromPath(
+                path.join(process.env.VITE_PUBLIC!, "trayIconRed.png"),
+              ),
+            });
+            notification.show();
+          }
+        }
+      } else {
+        this.tray?.setImage(
+          nativeImage.createFromPath(
+            path.join(process.env.VITE_PUBLIC!, "trayIcon.png"),
+          ),
+        );
       }
       if (output) {
         Logging.instance().log(
