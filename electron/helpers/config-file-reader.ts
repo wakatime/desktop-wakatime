@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-import { Logging } from "../utils/logging";
+import { Logging, LogLevel } from "../utils/logging";
 
 export abstract class ConfigFileReader {
   static get(file: string, section: string, key: string) {
@@ -9,7 +9,10 @@ export abstract class ConfigFileReader {
     try {
       contents = fs.readFileSync(file, { encoding: "utf-8" });
     } catch (error) {
-      Logging.instance().log(`Failed to read file: ${file}. Error: ${error}`);
+      Logging.instance().log(
+        `Failed to read file: ${file}. Error: ${error}`,
+        LogLevel.ERROR,
+      );
       return null;
     }
 
