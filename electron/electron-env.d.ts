@@ -51,6 +51,8 @@ interface Window {
     shouldLaunchOnLogIn: () => boolean;
     setShouldLaunchOnLogIn: (shouldLaunchOnLogIn: boolean) => void;
     shouldLogToFile: () => boolean;
+    debugMode: () => boolean;
+    setDebugMode: (debugModeEnabled: boolean) => void;
     setShouldLogToFile: (shouldLogToFile: boolean) => void;
     autoUpdateEnabled: () => boolean;
     setAutoUpdateEnabled: (autoUpdateEnabled: boolean) => void;

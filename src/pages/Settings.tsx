@@ -22,6 +22,9 @@ export function SettingsPage() {
   const [shouldLogToFile, setShouldLogToFile] = useState(() =>
     window.ipcRenderer?.shouldLogToFile(),
   );
+  const [debugMode, setDebugMode] = useState(
+    () => window.ipcRenderer?.getSetting("settings", "debug") === "true",
+  );
   const [shouldLaunchOnLogIn, setShouldLaunchOnLogIn] = useState(() =>
     window.ipcRenderer?.shouldLaunchOnLogIn(),
   );
@@ -64,6 +67,16 @@ export function SettingsPage() {
     window.ipcRenderer?.send(IpcKeys.setAllowlist, value);
     setAllowlist(value);
   }, 200);
+
+  const handleDebugModeChange = useCallback((value: boolean) => {
+    window.ipcRenderer?.setSetting(
+      "settings",
+      "debug",
+      value ? "true" : "false",
+    );
+    window.ipcRenderer?.setDebugMode(value);
+    setDebugMode(value);
+  }, []);
 
   const handleShouldLogToFileChange = useCallback((value: boolean) => {
     window.ipcRenderer?.setShouldLogToFile(value);
@@ -156,6 +169,20 @@ export function SettingsPage() {
           />
           <Label htmlFor="enable-logging" className="my-0.5 leading-5">
             Enable logging to <code>{logFilePath}</code>
+          </Label>
+        </fieldset>
+
+        <fieldset className="flex gap-2">
+          <Checkbox
+            id="debug-mode"
+            className="mt-1"
+            checked={debugMode}
+            onCheckedChange={(checked) => {
+              handleDebugModeChange(checked === true);
+            }}
+          />
+          <Label htmlFor="debug-mode" className="my-0.5 leading-5">
+            Enable debug mode
           </Label>
         </fieldset>
 

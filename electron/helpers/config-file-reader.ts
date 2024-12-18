@@ -43,7 +43,7 @@ export abstract class ConfigFileReader {
       }
     }
     const lines = contents
-      ? contents.split("\n").map((line) => line.trim())
+      ? contents.split("\n").map((line) => line.trimEnd())
       : [];
     let output: string[] = [];
     let currentSection = "";

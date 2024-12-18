@@ -82,4 +82,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   setShouldLogToFile(shouldLogToFile: boolean) {
     ipcRenderer.send(IpcKeys.setShouldLogToFile, shouldLogToFile);
   },
+  setDebugMode(debugMode: boolean) {
+    ipcRenderer.send(IpcKeys.setDebugMode, debugMode);
+  },
 });

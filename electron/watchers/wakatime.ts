@@ -43,6 +43,11 @@ export class Wakatime {
       Logging.instance().activateLoggingToFile();
     }
 
+    const debugMode = ConfigFile.getSetting("settings", "debug") === "true";
+    if (debugMode) {
+      Logging.instance().enableDebugLogging();
+    }
+
     Logging.instance().log(`Starting WakaTime v${app.getVersion()}`);
 
     if (SettingsManager.shouldRegisterAsLogInItem()) {
@@ -230,7 +235,7 @@ export class Wakatime {
     ];
 
     const cli = getCLIPath();
-    Logging.instance().log(`Fetching code time: ${cli} ${args}`);
+    Logging.instance().log(`Fetching code time: ${cli} ${args.join(" ")}`);
 
     try {
       const [output, err] = await exec(cli, ...args);
