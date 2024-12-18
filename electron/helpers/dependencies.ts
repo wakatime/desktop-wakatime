@@ -1,4 +1,7 @@
-import { LogLevel, Logging } from "../utils/logging";
+import fs, { createWriteStream } from "node:fs";
+import path from "node:path";
+import { pipeline } from "node:stream";
+import { promisify } from "node:util";
 import {
   addHours,
   formatDistanceToNow,
@@ -7,6 +10,10 @@ import {
   intervalToDuration,
   isBefore,
 } from "date-fns";
+import fetch from "node-fetch";
+import unzpier from "unzipper";
+import { z } from "zod";
+
 import {
   exec,
   getArch,
@@ -15,15 +22,8 @@ import {
   getResourcesFolderPath,
   parseJSONObject,
 } from "../utils";
-import fs, { createWriteStream } from "node:fs";
-
+import { Logging, LogLevel } from "../utils/logging";
 import { ConfigFile } from "./config-file";
-import fetch from "node-fetch";
-import path from "node:path";
-import { pipeline } from "node:stream";
-import { promisify } from "node:util";
-import unzpier from "unzipper";
-import { z } from "zod";
 
 const streamPipeline = promisify(pipeline);
 
@@ -164,7 +164,7 @@ export abstract class Dependencies {
 
     const [output, err] = await exec(cli, "--version");
     if (err) {
-      Logging.instance().log(`Error 1: ${err}`, LogLevel.ERROR);
+      Logging.instance().log(`Error: ${err}`, LogLevel.ERROR, true);
     }
 
     // disable updating wakatime-cli when it was built from source
@@ -240,6 +240,7 @@ export abstract class Dependencies {
         Logging.instance().log(
           `Failed to remove file: ${cli}. Error: ${error}`,
           LogLevel.ERROR,
+          true,
         );
       }
     }

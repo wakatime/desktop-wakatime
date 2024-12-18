@@ -185,7 +185,7 @@ export class Wakatime {
     }
 
     const cli = getCLIPath();
-    Logging.instance().log(`Sending heartbeat: ${cli} ${args}`, LogLevel.DEBUG);
+    Logging.instance().log(`Sending heartbeat: ${cli} ${args}`);
 
     try {
       const [output, err] = await exec(cli, ...args);
@@ -193,15 +193,21 @@ export class Wakatime {
         Logging.instance().log(
           `Error sending heartbeat: ${err}`,
           LogLevel.ERROR,
+          true,
         );
       }
       if (output) {
-        Logging.instance().log(output);
+        Logging.instance().log(
+          `Output from wakatime-cli when sending heartbeat: ${output}`,
+          LogLevel.ERROR,
+          true,
+        );
       }
     } catch (error) {
       Logging.instance().log(
-        `Failed to send heartbeat: ${error}`,
+        `Exception when sending heartbeat: ${error}`,
         LogLevel.ERROR,
+        true,
       );
     }
 
@@ -246,6 +252,13 @@ export class Wakatime {
         );
         return;
       }
+      if (output) {
+        Logging.instance().log(
+          `Output from wakatime-cli when fetching code time: ${output}`,
+          LogLevel.ERROR,
+          true,
+        );
+      }
       this.lastCodeTimeText = output;
       this.tray?.setTitle(` ${output}`);
       this.tray?.setToolTip(` ${output}`);
@@ -268,11 +281,11 @@ export class Wakatime {
     autoUpdater.autoRunAppAfterInstall = true;
 
     autoUpdater.on("checking-for-update", () => {
-      Logging.instance().log("Checking for update");
+      Logging.instance().log("Checking for updates");
     });
     autoUpdater.on("update-available", async (res) => {
       Logging.instance().log(
-        `Update available. Version: ${res.version}, Files: ${res.files.map((file) => file.url).join(", ")}`,
+        `New version available. Version: ${res.version}, Files: ${res.files.map((file) => file.url).join(", ")}`,
       );
       if (!this.canPromptToUpdate(res.version)) {
         Logging.instance().log(
@@ -304,7 +317,10 @@ export class Wakatime {
       Logging.instance().log("Update cancelled");
     });
     autoUpdater.on("error", (err) => {
-      Logging.instance().log(`electron-updater error. Error: ${err.message}`);
+      Logging.instance().log(
+        `electron-updater error. Error: ${err.message}`,
+        LogLevel.ERROR,
+      );
     });
   }
 

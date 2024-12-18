@@ -51,7 +51,7 @@ export class Watcher {
         isWrite: false,
       });
     } catch (error) {
-      Logging.instance().log((error as Error).message);
+      Logging.instance().log((error as Error).message, LogLevel.ERROR, true);
     }
   };
 
@@ -79,7 +79,6 @@ export class Watcher {
 
         Logging.instance().log(
           `App changed from ${this.activeWindow?.info.name || "nil"} to ${windowInfo.info.name}`,
-          LogLevel.DEBUG,
         );
 
         this.activeWindow = windowInfo;
@@ -91,13 +90,11 @@ export class Watcher {
           if (isMonitored) {
             Logging.instance().log(
               `Monitoring ${windowInfo.info.name}: ${this.activeWindow.info.path}`,
-              LogLevel.DEBUG,
             );
             this.watchKeyboardEvents();
           } else {
             Logging.instance().log(
               `Not monitoring ${windowInfo.info.name}: ${this.activeWindow.info.path}`,
-              LogLevel.DEBUG,
             );
           }
         }

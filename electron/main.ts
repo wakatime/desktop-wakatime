@@ -201,7 +201,11 @@ function createTray() {
       tray.popUpContextMenu();
       wakatime?.fetchToday();
     } catch (error) {
-      Logging.instance().log(`Tray click error: ${error}`);
+      Logging.instance().log(
+        `Tray click error: ${error}`,
+        LogLevel.ERROR,
+        true,
+      );
     }
   };
   tray.addListener("click", handleClick);
