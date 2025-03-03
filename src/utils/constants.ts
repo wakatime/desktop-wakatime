@@ -87,4 +87,10 @@ export const PLUGINS: {
     url: "https://addons.mozilla.org/en-US/firefox/addon/wakatimes/",
     type: "extension",
   },
+  {
+    execNames: ["RobloxStudioBeta.exe", "RobloxStudio.app"],
+    bundleIds: ["com.roblox.RobloxStudio"],
+    url: "https://wakatime.com/roblox-studio",
+    type: "plugin",
+  },
 ];
