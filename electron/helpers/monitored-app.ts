@@ -103,22 +103,30 @@ export class MonitoredApp {
       return null;
     }
     const patterns = [
-      /github\.com\/([^/]+\/[^/]+)\/?.*$/,
-      /bitbucket\.org\/([^/]+\/[^/]+)\/?.*$/,
-      /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
-      /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
-      /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/([^/]+\/[^/]+)\/?.*$/,
+      { expression: /github\.com\/[^/]+\/([^/]+)\/?.*$/, group: 1 },
+      { expression: /gitlab\.com\/[^/]+\/([^/]+)\/?.*$/, group: 1 },
+      { expression: /bitbucket\.org\/[^/]+\/([^/]+)\/?.*$/, group: 1 },
+      {
+        expression:
+          /app\.circleci\.com\/.*\/?(github|bitbucket|gitlab)\/[^/]+\/([^/]+)\/?.*$/,
+        group: 2,
+      },
+      {
+        expression:
+          /app\.travis-ci\.com\/(github|bitbucket|gitlab)\/[^/]+\/([^/]+)\/?.*$/,
+        group: 2,
+      },
+      {
+        expression:
+          /app\.travis-ci\.org\/(github|bitbucket|gitlab)\/[^/]+\/([^/]+)\/?.*$/,
+        group: 2,
+      },
     ];
 
     for (const pattern of patterns) {
-      const match = url.match(pattern);
+      const match = url.match(pattern.expression);
       if (match) {
-        // Adjusted to capture the right group based on the pattern.
-        // The group index might be 2 if the pattern includes a platform prefix before the project name.
-        const groupIndex = pattern.source.includes("(github|bitbucket|gitlab)")
-          ? 2
-          : 1;
-        return match[groupIndex];
+        return match[pattern.group];
       }
     }
 
