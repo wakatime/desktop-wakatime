@@ -194,7 +194,6 @@ export class Wakatime {
         Logging.instance().log(
           `Error sending heartbeat: ${err}`,
           LogLevel.ERROR,
-          true,
         );
         this.tray?.displayBalloon({
           icon: nativeImage.createFromPath(
