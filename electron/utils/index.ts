@@ -2,11 +2,17 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
+import process from "node:process";
 
 import { WAKATIME_PROTOCALL } from "./constants";
 
+export function getWakatimeHome(): string {
+  const envHome = process.env["WAKATIME_HOME"] || app.getPath("home");
+  return envHome.trim();
+}
+
 export function getResourcesFolderPath() {
-  const userHome = app.getPath("home");
+  const userHome = getWakatimeHome();
 
   const resourcesFolder = path.join(userHome, ".wakatime");
 
