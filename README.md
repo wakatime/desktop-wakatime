@@ -4,7 +4,7 @@ Desktop system tray app for automatic time tracking and metrics generated from y
 
 ## Install
 
-Coming Soon...
+https://wakatime.com/desktop
 
 ## Usage
 
