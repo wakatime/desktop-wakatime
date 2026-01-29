@@ -1,11 +1,10 @@
-import type { IGlobalKeyListener } from "node-global-key-listener";
 import {
   activeWindow,
   subscribeActiveWindow,
   unsubscribeActiveWindow,
   WindowInfo,
 } from "@miniben90/x-win";
-import { GlobalKeyboardListener } from "node-global-key-listener";
+import { powerMonitor } from "electron";
 
 import { AppsManager } from "../helpers/apps-manager";
 import { MonitoredApp } from "../helpers/monitored-app";
@@ -17,23 +16,21 @@ export class Watcher {
   wakatime: Wakatime;
   activeWindow?: WindowInfo;
   private activeWindowSubscription: number | null;
-  private gkl: GlobalKeyboardListener;
-  private isWatchingForKeyboardEvents = false;
+  private interval: NodeJS.Timeout | null;
 
   constructor(wakatime: Wakatime) {
     this.wakatime = wakatime;
     this.activeWindowSubscription = null;
-    this.gkl = new GlobalKeyboardListener();
+    this.interval = null;
   }
 
-  private globalKeyListener: IGlobalKeyListener = (event) => {
-    if (event.state !== "DOWN") {
-      return;
-    }
-
+  private handleActivity() {
     try {
-      // To ensure we always retrieve the most current window information, including the updated URL and title, we use the activeWindow function instead of relying on the previously stored this.activeApp. This approach addresses the issue where switching tabs in your browser does not trigger a window change event, leading to activeApp retaining outdated URL and title information.
       const window = activeWindow();
+      if (!MonitoringManager.isMonitored(window.info.path)) {
+        return;
+      }
+
       const app = AppsManager.instance().getApp(window.info.path);
       const heartbeatData = MonitoredApp.heartbeatData(window, app);
       if (!heartbeatData) {
@@ -53,19 +50,10 @@ export class Watcher {
     } catch (error) {
       Logging.instance().log((error as Error).message, LogLevel.ERROR, true);
     }
-  };
-
-  private watchKeyboardEvents() {
-    this.isWatchingForKeyboardEvents = true;
-    this.gkl.addListener(this.globalKeyListener);
-  }
-
-  private unwatchKeyboardEvents() {
-    this.isWatchingForKeyboardEvents = false;
-    this.gkl.removeListener(this.globalKeyListener);
   }
 
   start() {
+    this.stop();
     this.activeWindowSubscription = subscribeActiveWindow(
       (windowInfo: WindowInfo) => {
         if (!windowInfo.info.processId) return;
@@ -73,38 +61,28 @@ export class Watcher {
           return;
         }
 
-        if (this.isWatchingForKeyboardEvents) {
-          this.unwatchKeyboardEvents();
-        }
-
         Logging.instance().log(
           `App changed from ${this.activeWindow?.info.name || "nil"} to ${windowInfo.info.name}`,
         );
-
         this.activeWindow = windowInfo;
-        if (this.activeWindow.info.path) {
-          const isMonitored = MonitoringManager.isMonitored(
-            this.activeWindow.info.path,
-          );
 
-          if (isMonitored) {
-            Logging.instance().log(
-              `Monitoring ${windowInfo.info.name}: ${this.activeWindow.info.path}`,
-            );
-            this.watchKeyboardEvents();
-          } else {
-            Logging.instance().log(
-              `Not monitoring ${windowInfo.info.name}: ${this.activeWindow.info.path}`,
-            );
-          }
-        }
+        this.handleActivity();
       },
     );
+    this.interval = setInterval(() => {
+      const idleState = powerMonitor.getSystemIdleState(10);
+      if (idleState === "active") {
+        this.handleActivity();
+      }
+    }, 5000);
   }
 
   stop() {
     if (this.activeWindowSubscription !== null) {
       unsubscribeActiveWindow(this.activeWindowSubscription);
+    }
+    if (this.interval !== null) {
+      clearInterval(this.interval);
     }
   }
 }

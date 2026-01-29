@@ -14,11 +14,7 @@ export default defineConfig({
         vite: {
           build: {
             rollupOptions: {
-              external: [
-                "@miniben90/x-win",
-                "node-global-key-listener",
-                "icon-promise",
-              ],
+              external: ["@miniben90/x-win", "icon-promise"],
             },
             minify: false,
           },
