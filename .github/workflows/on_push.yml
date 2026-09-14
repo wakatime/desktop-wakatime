@@ -150,6 +150,16 @@ jobs:
         shell: bash
         run: npm i
       -
+        # npm only installs the x-win binding for the runner's own arch (x64),
+        # but electron-builder also packages ia32 and arm64 installers.
+        name: Install x-win bindings for all Windows archs
+        shell: bash
+        run: |
+          XWIN_VERSION=$(node -p "require('@miniben90/x-win/package.json').version")
+          npm i --no-save --force \
+            "@miniben90/x-win-win32-ia32-msvc@${XWIN_VERSION}" \
+            "@miniben90/x-win-win32-arm64-msvc@${XWIN_VERSION}"
+      -
         name: Build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
