@@ -250,6 +250,14 @@ export abstract class Dependencies {
       await directory.extract({ path: getResourcesFolderPath() });
     } else if (process.platform === "darwin") {
       await exec("/usr/bin/unzip", zipFile, "-d", getResourcesFolderPath());
+    } else {
+      // unzip is not guaranteed to be installed on Linux, and unzipper
+      // does not preserve the executable bit, so restore it afterwards.
+      const directory = await unzpier.Open.file(zipFile);
+      await directory.extract({ path: getResourcesFolderPath() });
+      if (fs.existsSync(cli)) {
+        fs.chmodSync(cli, 0o755);
+      }
     }
 
     // remove the downloaded zip file
