@@ -7,6 +7,7 @@ import { autoUpdater } from "electron-updater";
 import type { Category, EntityType } from "../utils/types";
 import type { AppData } from "../utils/validators";
 import { AppsManager } from "../helpers/apps-manager";
+import { codexProjectFolder, isCodexWindow } from "../helpers/codex-context";
 import { ConfigFile } from "../helpers/config-file";
 import { Dependencies } from "../helpers/dependencies";
 import { MonitoringManager } from "../helpers/monitoring-manager";
@@ -18,6 +19,7 @@ import { Logging, LogLevel } from "../utils/logging";
 
 export class Wakatime {
   private lastEntitiy = "";
+  private lastProject: string | null = null;
   private lastTime: number = 0;
   private lastCodeTimeFetched: number = 0;
   private lastCodeTimeText = "";
@@ -111,11 +113,15 @@ export class Wakatime {
     time: number,
     isWrite: boolean,
     category: Category,
+    project: string | null,
   ) {
     if (isWrite) {
       return true;
     }
     if (category !== this.lastCategory) {
+      return true;
+    }
+    if (project !== this.lastProject) {
       return true;
     }
     if (entity && this.lastEntitiy !== entity) {
@@ -148,9 +154,6 @@ export class Wakatime {
     const category = props.category ?? "coding";
     const time = Date.now() / 1000;
 
-    if (!this.shouldSendHeartbeat(entity, time, isWrite, category)) {
-      return;
-    }
     if (!MonitoringManager.isMonitored(windowInfo.info.path)) {
       return;
     }
@@ -160,7 +163,26 @@ export class Wakatime {
       return;
     }
 
+    const codexContextEnabled =
+      ConfigFile.getSetting("settings", "codex_context_enabled") === "true" &&
+      isCodexWindow(windowInfo);
+    const heartbeatProjectFolder = codexContextEnabled
+      ? codexProjectFolder(windowInfo)
+      : null;
+    if (
+      !this.shouldSendHeartbeat(
+        entity,
+        time,
+        isWrite,
+        category,
+        heartbeatProjectFolder ?? project,
+      )
+    ) {
+      return;
+    }
+
     this.lastEntitiy = entity;
+    this.lastProject = heartbeatProjectFolder ?? project;
     this.lastCategory = category;
     this.lastTime = time;
 
@@ -177,6 +199,11 @@ export class Wakatime {
 
     if (project) {
       args.push("--project", project);
+    }
+    if (heartbeatProjectFolder) {
+      // Let wakatime-cli apply .wakatime-project, project maps and Git rules.
+      args.push("--project-folder", heartbeatProjectFolder);
+      args.push("--hide-project-folder", "--hide-branch-names", "true");
     }
     if (isWrite) {
       args.push("--write");

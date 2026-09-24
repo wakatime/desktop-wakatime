@@ -10,6 +10,29 @@ https://wakatime.com/desktop
 
 Keep the app running in your system tray, and your app usage will show on your [WakaTime dashboard][dashboard].
 
+### Codex desktop project attribution on Windows
+
+The Codex window title does not identify its active project. To opt into reading
+the active task ID from Codex's local desktop log and its workspace path from
+the task's session metadata, add this to `~/.wakatime.cfg`:
+
+```ini
+[settings]
+codex_context_enabled = true
+```
+
+When the Codex window is active, WakaTime passes that workspace path to
+`wakatime-cli` for normal project detection. Codex window time has no inferred
+language; file activity from AI transcripts keeps its detected programming
+language. If the task ID or workspace cannot be resolved, window tracking
+continues without a project label. This feature reads only local log and
+session metadata; it does not send task titles or transcript text.
+The workspace path is passed locally to `wakatime-cli`, with its folder and
+branch names hidden from Codex window heartbeats. The detected project name
+is still sent to WakaTime.
+Only new activity is labelled. This currently supports the packaged Windows
+Codex app and depends on an internal Codex log format that may change.
+
 ## Local Development Setup
 
 ```shell

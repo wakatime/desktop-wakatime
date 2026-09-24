@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "test:codex-context": "node --test tests/codex-context.test.mjs tests/wakatime-codex-heartbeat.test.mjs",
     "preview": "vite preview",
     "format": "prettier . --write"
   },

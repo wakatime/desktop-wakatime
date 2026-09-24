@@ -18,7 +18,8 @@ export abstract class ConfigFileReader {
 
     const lines = contents.split("\n");
     let currentSection = "";
-    for (const line of lines) {
+    for (const rawLine of lines) {
+      const line = rawLine.replace(/\r$/, "");
       if (line.startsWith("[") && line.endsWith("]")) {
         currentSection = line.slice(1, line.length - 1);
       } else if (currentSection === section) {
