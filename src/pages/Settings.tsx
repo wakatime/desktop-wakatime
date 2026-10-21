@@ -121,6 +121,9 @@ export function SettingsPage() {
           <Label htmlFor="wakatime-api-key">Wakatime API Key:</Label>
           <Input
             id="wakatime-api-key"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
             defaultValue={apiKey}
             onChange={(e) => {
               debouncedSetApiKey(e.target.value);
